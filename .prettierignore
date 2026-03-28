@@ -1,0 +1,11 @@
+node_modules
+dist
+.next
+out
+build
+.turbo
+storybook-static
+coverage
+pnpm-lock.yaml
+*.min.js
+next-env.d.ts

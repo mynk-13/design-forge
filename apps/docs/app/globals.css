@@ -1,0 +1,44 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* DesignForge design tokens — full definitions added in Phase 2 */
+    --df-primary: 245 58% 60%;
+    --df-background: 0 0% 100%;
+    --df-foreground: 222 47% 11%;
+    --df-muted: 210 40% 96%;
+    --df-muted-foreground: 215 16% 47%;
+    --df-accent: 210 40% 96%;
+    --df-accent-foreground: 222 47% 11%;
+    --df-destructive: 0 84% 60%;
+    --df-border: 214 32% 91%;
+    --df-ring: 245 58% 60%;
+    --df-radius: 0.5rem;
+    --df-radius-sm: 0.25rem;
+    --df-radius-lg: 0.75rem;
+    --df-font-sans: "Inter", system-ui, sans-serif;
+    --df-font-mono: "JetBrains Mono", "Fira Code", monospace;
+  }
+
+  .dark {
+    --df-primary: 245 58% 65%;
+    --df-background: 222 47% 11%;
+    --df-foreground: 210 40% 98%;
+    --df-muted: 217 33% 17%;
+    --df-muted-foreground: 215 20% 65%;
+    --df-accent: 217 33% 17%;
+    --df-accent-foreground: 210 40% 98%;
+    --df-border: 217 33% 17%;
+  }
+
+  * {
+    border-color: hsl(var(--df-border));
+  }
+
+  body {
+    background-color: hsl(var(--df-background));
+    color: hsl(var(--df-foreground));
+  }
+}

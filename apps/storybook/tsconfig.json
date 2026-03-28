@@ -1,0 +1,8 @@
+{
+  "extends": "@designforge/tsconfig/react.json",
+  "compilerOptions": {
+    "baseUrl": "."
+  },
+  "include": [".storybook/**/*.ts", ".storybook/**/*.tsx", "stories/**/*.ts", "stories/**/*.tsx"],
+  "exclude": ["node_modules", "storybook-static"]
+}
