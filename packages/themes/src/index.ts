@@ -1,2 +1,9 @@
-// @designforge/themes — token definitions and Tailwind plugin added in Phase 2
-export {};
+export { tailwindPlugin } from "./tailwind-plugin";
+export * from "./tokens/index";
+export type {
+  DesignForgeTokens,
+  ColorTokens,
+  TypographyTokens,
+  AnimationTokens,
+  ThemeMode,
+} from "./types";

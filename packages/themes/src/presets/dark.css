@@ -1,0 +1,51 @@
+/**
+ * DesignForge — Dark theme preset
+ * Only overrides tokens that differ from the light preset.
+ * Apply by adding class="dark" to <html>.
+ * System-preference auto-detection: :root:not(.light) within prefers-color-scheme media query.
+ */
+
+.dark {
+  --df-primary: 245 58% 65%;
+  --df-secondary: 245 20% 20%;
+  --df-secondary-foreground: 245 30% 80%;
+  --df-background: 222 47% 11%;
+  --df-foreground: 210 40% 98%;
+  --df-card: 222 47% 14%;
+  --df-card-foreground: 210 40% 98%;
+  --df-popover: 222 47% 14%;
+  --df-popover-foreground: 210 40% 98%;
+  --df-muted: 217 33% 17%;
+  --df-muted-foreground: 215 20% 65%;
+  --df-accent: 245 20% 20%;
+  --df-accent-foreground: 245 30% 80%;
+  --df-destructive: 0 72% 51%;
+  --df-success: 142 69% 58%;
+  --df-border: 217 33% 17%;
+  --df-input: 217 33% 17%;
+  --df-ring: 245 58% 65%;
+}
+
+/* Respect OS-level dark mode when no explicit class is set */
+@media (prefers-color-scheme: dark) {
+  :root:not(.light) {
+    --df-primary: 245 58% 65%;
+    --df-secondary: 245 20% 20%;
+    --df-secondary-foreground: 245 30% 80%;
+    --df-background: 222 47% 11%;
+    --df-foreground: 210 40% 98%;
+    --df-card: 222 47% 14%;
+    --df-card-foreground: 210 40% 98%;
+    --df-popover: 222 47% 14%;
+    --df-popover-foreground: 210 40% 98%;
+    --df-muted: 217 33% 17%;
+    --df-muted-foreground: 215 20% 65%;
+    --df-accent: 245 20% 20%;
+    --df-accent-foreground: 245 30% 80%;
+    --df-destructive: 0 72% 51%;
+    --df-success: 142 69% 58%;
+    --df-border: 217 33% 17%;
+    --df-input: 217 33% 17%;
+    --df-ring: 245 58% 65%;
+  }
+}

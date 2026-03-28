@@ -1,0 +1,48 @@
+/**
+ * DesignForge — Global stylesheet
+ *
+ * Import this ONCE in your app root to enable all design tokens and base styles.
+ *
+ *   // In your root layout or _app.tsx:
+ *   import "@designforge/themes/styles.css";
+ *
+ * NOTE: The published dist/styles.css is a fully-inlined concatenation of
+ * light.css + dark.css + base reset (no @import dependencies). This source
+ * file is the developer reference; see tsup.config.ts onSuccess for the build step.
+ */
+
+@import "./presets/light.css";
+@import "./presets/dark.css";
+
+/* ── Base reset ───────────────────────────────────────── */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  border-color: hsl(var(--df-border));
+}
+
+body {
+  background-color: hsl(var(--df-background));
+  color: hsl(var(--df-foreground));
+  font-family: var(--df-font-sans);
+  line-height: var(--df-line-height-normal, 1.5);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Respect reduced-motion preference for all transitions */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
