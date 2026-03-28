@@ -889,4 +889,196 @@ Commit `1664bbf` pushed to `main` — `feat: Phase 2 theme system (@designforge/
 
 ---
 
+---
+
+## Phase 3 — Component Library Foundation
+
+---
+
+### Task 3.0: Create directory structure
+
+Created all component and lib subdirectories in a single `mkdir` call:
+```
+packages/ui/src/lib/
+packages/ui/src/components/{Box,Flex,Grid,Container,Stack,Separator,AspectRatio}/
+```
+
+---
+
+### Task 3.1: Install dependencies
+
+Updated `packages/ui/package.json` with all Phase 3 runtime and dev dependencies.
+
+**Runtime dependencies added:**
+| Package | Version | Purpose |
+|---|---|---|
+| `@radix-ui/react-aspect-ratio` | `^1.1.0` | AspectRatio primitive |
+| `@radix-ui/react-separator` | `^1.1.0` | Separator primitive |
+| `@radix-ui/react-slot` | `^1.1.0` | `asChild` polymorphic rendering (Phase 4+) |
+| `class-variance-authority` | `^0.7.1` | CVA — variant management for all components |
+| `clsx` | `^2.1.1` | Class merging utility |
+| `tailwind-merge` | `^3.0.0` | Tailwind class conflict resolution |
+
+**Test/dev dependencies added:**
+| Package | Purpose |
+|---|---|
+| `vitest ^3.0.0` | Test runner |
+| `@testing-library/react ^16.3.0` | React 19 compatible RTL |
+| `@testing-library/jest-dom ^6.6.3` | DOM matchers |
+| `@testing-library/user-event ^14.5.2` | User interaction simulation |
+| `jsdom ^25.0.1` | DOM environment for tests |
+| `vitest-axe ^0.1.0` | axe-core integration for Vitest |
+| `axe-core ^4.10.0` | Accessibility testing engine |
+
+**Issue fixed:** `vitest-axe@^1.0.0` didn't exist — latest is `0.1.0`. Updated version range.
+
+---
+
+### Task 3.2: Shared utilities (`packages/ui/src/lib/`)
+
+**`utils.ts`:**
+```typescript
+export function cn(...inputs: ClassValue[]): string {
+  return twMerge(clsx(inputs));
+}
+```
+The foundation of every component. `tailwind-merge` resolves class conflicts (later value wins), `clsx` handles conditional classes. Consumer `className` always overrides internal defaults.
+
+**`types.ts`:**
+- `AsChildProps` — `{ asChild?: boolean }` for Radix Slot polymorphism (used by Phase 4 Button)
+- `VariantPropsOf<T>` — convenience wrapper around CVA's `VariantProps`
+- `PropsWithoutRef<T>` — utility for the React 19 ref-as-prop pattern
+
+---
+
+### Task 3.3: Vitest infrastructure
+
+**`vitest.config.ts`:**
+- Environment: `jsdom` (browser-like DOM)
+- Globals: `true` — no need to import `describe/it/expect` in every test file
+- Setup files: `./src/test-setup.ts`
+- JSX transform: esbuild `jsx: "automatic"` + `jsxImportSource: "react"` — no Vite plugin needed
+- Coverage: v8 provider, includes `src/**` except tests/stories
+
+**`src/test-setup.ts`:**
+- Imports `@testing-library/jest-dom` (adds `toHaveClass`, `toBeInTheDocument`, etc.)
+- Explicitly calls `expect.extend(axeMatchers)` to register `toHaveNoViolations`
+
+**`src/vitest-axe.d.ts`:**
+- Custom declaration file to extend Vitest's `Assertion<R>` interface with `toHaveNoViolations`
+- Required because `vitest-axe@0.1.0` doesn't auto-augment Vitest types
+
+**`tsconfig.json` updates:**
+- Added `"types": ["vitest/globals", "@testing-library/jest-dom", "vitest-axe/matchers"]`
+- Added `"exclude": ["**/*.stories.tsx"]` — stories import `@storybook/react` which isn't in `packages/ui` deps; excluded from main type-check (Storybook app handles them)
+
+---
+
+### Task 3.4: 7 layout components
+
+All components follow the pattern from ANALYSIS_LOG.md Section 14 (React 19) + Section 17.1 (LLD template):
+
+```
+Layer 1: CVA variant definition (declarative, no side effects)
+Layer 2: Radix primitive (optional — Separator, AspectRatio only in Phase 3)
+Layer 3: Plain function component with ref as prop (React 19 pattern)
+Layer 4: Named export + displayName assignment
+```
+
+#### Box
+- **Pattern:** Polymorphic base primitive — renders `div` by default, `as` prop changes element
+- **No CVA** — no variants, just `cn(className)` passthrough
+- **Ref:** `React.Ref<HTMLElement>` — requires type cast for polymorphic `Comp` assignment
+- **9 tests:** nodeName, `as` prop, className merge, Tailwind conflict resolution, ref forwarding, attr spreading, children, axe
+
+#### Flex
+- **CVA variants:** `direction` (4), `align` (5), `justify` (6), `wrap` (3), `gap` (10), `inline` (bool)
+- **Defaults:** `direction: "row"`
+- **11 tests:** flex class, all variants, inline-flex, className merge, ref, axe
+
+#### Grid
+- **CVA variants:** `cols` (1–12), `rows` (1–6), `gap` (10), `gapX` (7), `gapY` (7), `align` (4), `justify` (4), `flow` (5)
+- **11 tests:** grid class, cols/rows/gap, gapX+Y, align, flow, merge, ref, axe
+
+#### Container
+- **CVA variants:** `size` (sm/md/lg/xl/2xl/full) → Tailwind `max-w-screen-*`
+- **Default:** `size: "xl"`
+- **Always includes:** `mx-auto w-full px-4 sm:px-6 lg:px-8`
+- **10 tests:** centering classes, all sizes, padding, merge, ref, axe
+
+#### Stack
+- **CVA variants:** `direction` (vertical/horizontal), `gap` (10 steps), `align` (4), `justify` (4), `wrap` (bool)
+- **Defaults:** `direction: "vertical"`, `gap: "4"` — sensible defaults for most use cases
+- **11 tests:** flex class, direction, gap default, all variants, wrap, merge, ref, axe
+
+#### Separator
+- **Radix-backed:** `@radix-ui/react-separator`
+- **CVA variant:** `orientation` (horizontal/vertical)
+- **ARIA note:** Radix correctly omits `aria-orientation` for horizontal (it's implicit per WAI-ARIA spec for `role=separator`). Test updated to verify this behavior.
+- **TypeScript issue fixed:** `SeparatorProps` was extending both Radix props and `VariantProps<typeof separatorVariants>` — both had `orientation` with slightly different types (CVA adds `null`). Fixed by removing `VariantProps` extension; `orientation` flows from Radix props directly into CVA.
+- **11 tests:** role=separator, decorative (role=none), horizontal/vertical classes, bg-border, merge, aria-orientation behavior, ref, axe (both decorative and non-decorative)
+
+#### AspectRatio
+- **Radix-backed:** `@radix-ui/react-aspect-ratio`
+- **No CVA** — single `ratio` prop, no variants
+- **DOM structure note:** Radix renders `outer div (ratio wrapper) → inner div (ref + className)`. Test updated to check `container.firstChild.firstChild` for className assertion.
+- **7 tests:** renders, overflow-hidden, className on inner div, children, ref, axe with image, axe with decorative
+
+---
+
+### Task 3.5: Barrel export update
+
+`packages/ui/src/index.ts` updated from empty placeholder to full export:
+```typescript
+export { cn } from "./lib/utils";
+export type { AsChildProps, VariantPropsOf, PropsWithoutRef } from "./lib/types";
+export { Box } from "./components/Box/Box";
+// ... all 7 components with their types
+export { Separator, separatorVariants } from "./components/Separator/Separator";
+export { AspectRatio } from "./components/AspectRatio/AspectRatio";
+```
+
+CVA variant functions (`flexVariants`, `gridVariants`, etc.) exported separately — consumers can compose them.
+
+---
+
+### Task 3.6: Storybook preview update
+
+`apps/storybook/.storybook/preview.ts` updated to import `@designforge/themes/styles.css` so all `--df-*` CSS variables are active in every story. Added `@designforge/themes: workspace:*` to storybook devDependencies.
+
+---
+
+### Task 3.7: Issues encountered and fixed
+
+| # | Issue | Root Cause | Fix |
+|---|---|---|---|
+| 1 | `vitest-axe@^1.0.0` install fails | Latest is `0.1.0` not `1.0.0` | Changed to `^0.1.0` |
+| 2 | `SeparatorProps` TS2320 conflict | Both Radix props and CVA VariantProps have `orientation` — types not identical | Removed `VariantProps` extension; use Radix's orientation type directly |
+| 3 | `toHaveNoViolations` not registered | `vitest-axe/extend-expect` import pattern doesn't work in Vitest 3.x | Use `expect.extend(axeMatchers)` explicitly in setup file |
+| 4 | `toHaveNoViolations` TypeScript error | `vitest-axe@0.1.0` doesn't auto-augment Vitest types | Created `src/vitest-axe.d.ts` with `declare module "vitest"` augmentation |
+| 5 | AspectRatio className test failed | Radix puts className on inner div, not outer wrapper | Test checks `container.firstChild?.firstChild` |
+| 6 | Separator `aria-orientation` test failed | ARIA spec: horizontal is implicit for `role=separator` — Radix correctly omits the attribute | Updated test to assert the attribute is NOT present for horizontal |
+| 7 | `type-check` fails on `vitest.config.ts` | File is outside `rootDir: "src"` | Removed from tsconfig `include` |
+| 8 | `@storybook/react` not found in `packages/ui` | Story files import it but Storybook deps are in `apps/storybook` | Excluded `*.stories.tsx` from `packages/ui/tsconfig.json` |
+| 9 | `jsx-a11y/img-redundant-alt` lint error | alt text contained "image" / "photo" keywords | Updated alt text in tests to avoid redundant words |
+| 10 | `jsx-a11y/anchor-is-valid` lint error | `href="#"` in Separator story's navigation demo | Changed to real hrefs: `href="/home"`, `href="/docs"`, `href="/blog"` |
+
+---
+
+### Phase 3 Exit Gate — PASSED ✅
+
+| Criterion | Result |
+|---|---|
+| 70 tests (all 7 components) | ✅ 70/70 passing |
+| TypeScript strict (`tsc --noEmit`) | ✅ Zero errors |
+| ESLint (all packages) | ✅ Zero warnings/errors |
+| Full workspace build | ✅ 21/21 tasks successful |
+| `@designforge/ui` bundle size | ✅ ESM 6.51 KB · CJS 7.63 KB (target ≤ 100 KB) |
+| Storybook build with component stories | ✅ All 7 story sets rendered |
+| axe-core zero violations | ✅ Verified in all component axe tests |
+
+Commit `f45bfbf` pushed to `main` — `feat: Phase 3 component library foundation (7 layout components + Vitest)`
+
+---
+
 *Log maintained by AI agent. Last updated: 2026-03-28.*
