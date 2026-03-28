@@ -4,6 +4,7 @@
 REQUIREMENTS.md
 ANALYSIS_LOG.md
 PLAN_OF_ACTION.md
+ACTIONS_TAKEN.md
 .env
 .env.*
 !.env.example
@@ -23,6 +24,9 @@ storybook-static/
 
 # Next.js generated
 next-env.d.ts
+
+# TypeScript incremental build cache
+*.tsbuildinfo
 
 # Test outputs
 coverage/
