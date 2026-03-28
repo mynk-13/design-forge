@@ -120,6 +120,12 @@ importers:
       '@types/react-dom':
         specifier: ^19.1.0
         version: 19.2.3(@types/react@19.2.14)
+      autoprefixer:
+        specifier: ^10.4.21
+        version: 10.4.27(postcss@8.5.8)
+      postcss:
+        specifier: ^8.5.3
+        version: 8.5.8
       react:
         specifier: ^19.0.0
         version: 19.2.4
@@ -132,6 +138,9 @@ importers:
       storybook:
         specifier: ^8.6.12
         version: 8.6.18(prettier@3.8.1)
+      tailwindcss:
+        specifier: ^3.4.17
+        version: 3.4.19
       typescript:
         specifier: ^5.8.2
         version: 5.9.3

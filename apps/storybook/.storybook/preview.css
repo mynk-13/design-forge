@@ -1,0 +1,6 @@
+/* Theme tokens + reset, then Tailwind (same layering as apps/docs). */
+@import "@designforge/themes/styles.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
