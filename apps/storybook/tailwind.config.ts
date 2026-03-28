@@ -1,5 +1,9 @@
-import { tailwindPlugin } from "@designforge/themes";
 import type { Config } from "tailwindcss";
+/**
+ * Import the plugin from package source so Vercel builds work without a
+ * pre-built @designforge/themes dist (PostCSS loads this config via jiti).
+ */
+import { tailwindPlugin } from "../../packages/themes/src/tailwind-plugin";
 
 /**
  * Tailwind for Storybook canvas iframe.
