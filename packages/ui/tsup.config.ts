@@ -9,4 +9,6 @@ export default defineConfig({
   clean: true,
   external: ["react", "react-dom"],
   sourcemap: true,
+  // Exclude test and story files from the published bundle
+  ignoreWatch: ["**/*.test.tsx", "**/*.stories.tsx"],
 });

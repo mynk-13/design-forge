@@ -1,3 +1,4 @@
+import "@designforge/themes/styles.css";
 import type { Preview } from "@storybook/react";
 
 const preview: Preview = {
@@ -9,7 +10,6 @@ const preview: Preview = {
       },
     },
     a11y: {
-      // axe-core options — Phase 9 will configure per-story overrides
       config: {},
       options: {
         runOnly: {

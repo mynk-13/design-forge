@@ -837,18 +837,55 @@ pnpm turbo run type-check
 
 ---
 
-## Pending After Session Restart
+### Phase 2 Exit Gate — PASSED ✅
 
-Run these commands in your terminal to verify Phase 2 exit gate:
+After Cursor restart, all three commands were run and passed:
 
-```bash
-cd e:\design-forge
-pnpm turbo run build
-pnpm turbo run lint
-pnpm turbo run type-check
-```
+| Command | Result |
+|---|---|
+| `pnpm turbo run build` | 7/7 tasks successful |
+| `pnpm turbo run lint` | 7/7 tasks successful |
+| `pnpm turbo run type-check` | 9/9 tasks successful |
 
-Expected: All tasks successful. `dist/styles.css` present. `import '@designforge/themes/styles.css'` resolves. `apps/docs` builds with Tailwind classes mapped to `--df-*` tokens.
+Commit `1664bbf` pushed to `main` — `feat: Phase 2 theme system (@designforge/themes)`
+
+---
+
+## Vercel — Project Creation & Deployment (Phase 0 backfill)
+
+**Done after Phase 1 monorepo was scaffolded, as required by Phase 0 checklist.**
+
+### What was done
+
+1. **`designforge-docs` Vercel project created**
+   - Connected to `github.com/mynk-13/design-forge`
+   - Root directory: `apps/docs`
+   - Framework: Next.js (auto-detected)
+   - Auto-deploy enabled on push to `main`
+   - Initial deployment triggered and live
+
+2. **`designforge-storybook` Vercel project created**
+   - Connected to same GitHub repo
+   - Root directory: `apps/storybook`
+   - Framework: Other (Storybook static build)
+   - Auto-deploy enabled on push to `main`
+   - Initial deployment triggered and live
+
+### What was updated in .md files
+
+| File | Change |
+|---|---|
+| `PLAN_OF_ACTION.md` | Added Phase 0 section `0.5 Vercel Projects Created & Deployed` with 5 checkboxes — 4 checked ✅ |
+| `PLAN_OF_ACTION.md` | Added note to Phase 0.3 GitHub Secrets — 4 Vercel secrets deferred to Phase 11 |
+| `PLAN_OF_ACTION.md` | Phase 2 exit gate `⏳` changed to `✅` (all commands confirmed passing) |
+| `REQUIREMENTS.md` | Vercel section filled in (account email, both projects marked ✅) |
+| `REQUIREMENTS.md` | GitHub Actions secrets — 4 core secrets marked `[x]`, 4 Vercel secrets noted as Phase 11 |
+| `REQUIREMENTS.md` | Vercel env vars checklist — noted as Phase 6 task (needed for AI Generator) |
+
+### Deferred items (tracked in plan)
+
+- **VERCEL_TOKEN / VERCEL_ORG_ID / VERCEL_PROJECT_IDs** → Add to GitHub Actions secrets in Phase 11 when building the full CI/CD release pipeline
+- **Vercel environment variables** (API keys for LLM providers) → Add in Phase 6 when AI Generator API routes are built and need real keys in production
 
 ---
 

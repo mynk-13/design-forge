@@ -10,6 +10,7 @@
     "clean": "rimraf storybook-static"
   },
   "devDependencies": {
+    "@designforge/themes": "workspace:*",
     "@designforge/tsconfig": "workspace:*",
     "@designforge/ui": "workspace:*",
     "@storybook/addon-a11y": "^8.6.12",

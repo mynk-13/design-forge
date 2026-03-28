@@ -2,8 +2,14 @@
   "extends": "@designforge/tsconfig/react.json",
   "compilerOptions": {
     "rootDir": "src",
-    "outDir": "dist"
+    "outDir": "dist",
+    "types": ["vitest/globals", "@testing-library/jest-dom", "vitest-axe/matchers"]
   },
   "include": ["src/**/*.ts", "src/**/*.tsx"],
-  "exclude": ["node_modules", "dist"]
+  "exclude": [
+    "node_modules",
+    "dist",
+    "src/**/*.stories.tsx",
+    "src/**/*.stories.ts"
+  ]
 }
