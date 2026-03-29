@@ -273,12 +273,26 @@
 
         let transformed = result.code;
 
-        // Remove all import statements — they are resolved via the preamble below
+        // Strip import statements — resolved via the preamble stubs below
         transformed = transformed.replace(/^\s*import\s[^;]+;?\s*$/gm, '');
+
+        // Strip export keywords — new Function() is NOT a module context;
+        // 'export' is a syntax error there. Babel doesn't remove these without
+        // a module transform plugin, so we strip them manually.
+        //
+        // 1) "export default function Foo" → "function Foo" (keeps function in scope)
+        transformed = transformed.replace(/\bexport\s+default\s+(?=function|class)/g, '');
+        // 2) Standalone "export default ComponentName;" (sometimes emitted)
+        transformed = transformed.replace(/^\s*export\s+default\s+[\w$]+\s*;?\s*$/gm, '');
+        // 3) Named export blocks: "export { Foo, Bar };" or "export { Foo } from '...'"
+        transformed = transformed.replace(/^\s*export\s*\{[^}]*\}[^;]*;?\s*$/gm, '');
+        // 4) Named declarations: "export const", "export function", "export let" → remove "export"
+        transformed = transformed.replace(/^export\s+(?!default)/gm, '');
+
         // Remove "use client" directive
         transformed = transformed.replace(/["']use client["'];?\s*/g, '');
 
-        // Find the component name
+        // Find the component name from the ORIGINAL source (before transform)
         const nameMatch = code.match(/export\s+default\s+function\s+([A-Z][A-Za-z0-9_]*)/);
         const componentName = nameMatch?.[1] || 'GeneratedComponent';
 
