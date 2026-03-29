@@ -1042,9 +1042,11 @@ CVA variant functions (`flexVariants`, `gridVariants`, etc.) exported separately
 
 ---
 
-### Task 3.6: Storybook preview update
+### Task 3.6: Storybook preview update (themes only — superseded later)
 
-`apps/storybook/.storybook/preview.ts` updated to import `@designforge/themes/styles.css` so all `--df-*` CSS variables are active in every story. Added `@designforge/themes: workspace:*` to storybook devDependencies.
+`apps/storybook/.storybook/preview.ts` was updated to import `@designforge/themes/styles.css` so all `--df-*` CSS variables are active in every story. Added `@designforge/themes: workspace:*` to storybook devDependencies.
+
+**Follow-up (post–Phase 4):** Theme CSS alone does not generate Tailwind utilities. See **Storybook — Tailwind in preview + Vercel** below — preview now uses `preview.css` (`@tailwind` layers) and a Storybook-local `tailwind.config.ts`.
 
 ---
 
@@ -1081,4 +1083,111 @@ Commit `f45bfbf` pushed to `main` — `feat: Phase 3 component library foundatio
 
 ---
 
-*Log maintained by AI agent. Last updated: 2026-03-28.*
+## Phase 4 — Core Components (summary)
+
+**Scope:** 26 additional components (forms, overlays, data display, feedback) plus existing 7 layout primitives → **33 components** total in `@designforge/ui`. Each: React 19 ref-as-prop, CVA/Radix where applicable, Vitest + RTL + `vitest-axe`, co-located Storybook stories.
+
+**Verification:** `pnpm turbo run build lint type-check` (21/21 tasks); `pnpm test` (217/217 tests). Barrel `packages/ui/src/index.ts` exports all components and shared utilities.
+
+**Plan reference:** `PLAN_OF_ACTION.md` Phase 4 checklists and exit gate — all marked complete.
+
+---
+
+## Storybook — Tailwind in preview + Vercel
+
+### Problem
+
+1. **Unstyled canvas:** Preview imported only `@designforge/themes/styles.css` (CSS variables + light reset). Tailwind utility classes from components never entered the Storybook bundle → native browser chrome on buttons/tables in the iframe.
+2. **Vercel build failure:** After adding Tailwind, `tailwind.config.ts` used `import { tailwindPlugin } from "@designforge/themes"`. PostCSS loads the config via jiti; that resolves the package to `dist/index.cjs`. The `designforge-storybook` project runs `pnpm build` from `apps/storybook` only — **`@designforge/themes` is not pre-built** → `Cannot find module './node_modules/@designforge/themes/dist/index.cjs'`.
+
+### Changes
+
+| Area | File(s) | Notes |
+|---|---|---|
+| Tailwind + PostCSS | `apps/storybook/tailwind.config.ts`, `postcss.config.mjs` | `content` globs: `stories/`, `.storybook/`, `packages/ui/src/**` |
+| Preview CSS | `apps/storybook/.storybook/preview.css` | `@import "@designforge/themes/styles.css"` then `@tailwind base/components/utilities` |
+| Preview entry | `apps/storybook/.storybook/preview.ts` | `import "./preview.css"` (replaces direct theme-only import) |
+| Deps | `apps/storybook/package.json` | `tailwindcss`, `postcss`, `autoprefixer` |
+| Vercel-safe plugin import | `apps/storybook/tailwind.config.ts` | `import { tailwindPlugin } from "../../packages/themes/src/tailwind-plugin"` — no `themes/dist` required |
+| TS include | `apps/storybook/tsconfig.json` | `tailwind.config.ts` in `include` |
+
+**Commits:** `41120f6` (Tailwind in Storybook preview), `3aed2aa` (themes source import for CI).
+
+**Local verification:** Delete `packages/themes/dist`, run `pnpm run build` from `apps/storybook` only — build succeeds; preview CSS ~37 KB gzipped subset includes utilities.
+
+---
+
+*Log maintained by AI agent. Last updated: 2026-03-29.*
+
+---
+
+---
+
+## Phase 5 — Hooks + Icons Packages
+
+---
+
+### Task 5.0: `@designforge/hooks` — hook implementations
+
+**What was done:**
+Created 5 production-quality React hooks under `packages/hooks/src/`, each with full JSDoc and comprehensive unit tests.
+
+| Hook | File | Tests | Key design notes |
+|---|---|---|---|
+| `useDebounce` | `useDebounce.ts` | 8 | Generic `<T>`, clears timer on unmount |
+| `useMediaQuery` | `useMediaQuery.ts` | 8 | SSR-safe (`typeof window`), `addEventListener` on MediaQueryList |
+| `useClipboard` | `useClipboard.ts` | 10 | Clipboard API + `execCommand` fallback, timer restart on repeat copy |
+| `useLocalStorage` | `useLocalStorage.ts` | 12 | SSR-safe, cross-tab sync via `storage` event, functional updater support |
+| `useControllable` | `useControllable.ts` | 11 | Stable setter via `useRef`, works in both controlled and uncontrolled modes |
+
+**Bug caught and fixed:** Initial implementation used `[readValue]` in the key-sync `useEffect` dep array. Since `readValue = useCallback([key, initialValue])`, any object passed as `initialValue` would be a new reference each render → `readValue` recreated → effect re-runs → `setStoredValue` → re-render → infinite loop → OOM. Fixed to `[key]` with `/* eslint-disable react-hooks/exhaustive-deps */` block comment.
+
+**Infrastructure added:**
+- `vitest.config.ts` — jsdom environment, globals, setupFiles, v8 coverage
+- `src/test-setup.ts` — `@testing-library/jest-dom` import
+- Updated `package.json` — added all test devDeps + `cross-env NODE_OPTIONS=--max-old-space-size=4096` in test scripts
+
+**Test results:** 49/49 passing across 5 test files
+
+---
+
+### Task 5.1: `@designforge/icons` — lucide-react wrapper
+
+**What was done:**
+Implemented `packages/icons/src/index.ts` as a thin wrapper around `lucide-react` using a `withDefaults` HOF that applies DesignForge defaults:
+
+| Default | Value | Rationale |
+|---|---|---|
+| `size` | `16` | Tighter inline usage (vs Lucide default 24) |
+| `strokeWidth` | `1.5` | Matches DesignForge's lighter visual language |
+| `color` | `"currentColor"` | Inherits parent CSS `color` automatically |
+
+**52 icons exported** across 9 categories: General UI, Navigation, Actions, Status/Feedback, Layout, Media/Content, Theme, Communication, Misc.
+
+**`IconProps` interface** exported from `src/types.ts` — extends `LucideProps` with documented defaults.
+
+**`lucide-react`** promoted from devDependency to `dependencies` in `package.json` (bundled into the package output, consumers don't need to install it separately).
+
+**Build results:**
+- `@designforge/hooks` — ESM 4.81 KB, CJS 5.00 KB, DTS 4.14 KB ✅
+- `@designforge/icons` — ESM 4.95 KB, CJS 6.36 KB, DTS 13.24 KB ✅
+- lint: 0 errors, 0 warnings ✅
+- type-check: clean ✅
+
+---
+
+## Phase 5 Exit Gate — PASSED ✅
+
+| Criterion | Result |
+|---|---|
+| `@designforge/hooks` builds (ESM + CJS + DTS) | ✅ |
+| `@designforge/icons` builds (ESM + CJS + DTS) | ✅ |
+| 49/49 hook tests passing | ✅ |
+| lint: 0 errors, 0 warnings (both packages) | ✅ |
+| type-check: clean (both packages) | ✅ |
+| Both packages tree-shakeable | ✅ |
+| `cross-env` added for heap safety in CI | ✅ |
+
+---
+
+*Log maintained by AI agent. Last updated: 2026-03-29.*
