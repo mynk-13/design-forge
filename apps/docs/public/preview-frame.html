@@ -36,21 +36,25 @@
             xl: "1rem",
             "2xl": "1.5rem",
           },
+          fontFamily: {
+            sans: ["Inter", "system-ui", "sans-serif"],
+          },
         }
       }
     };
   </script>
 
-  <!-- Sucrase — transpiles TSX → JS in the browser -->
-  <script src="https://unpkg.com/sucrase@3.35.0/dist/sucrase.js"></script>
+  <!-- Babel Standalone — transpiles TSX + TypeScript entirely in the browser -->
+  <!-- Much more reliable than Sucrase for CDN usage; includes all presets -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-  <!-- React + ReactDOM — same version as the monorepo -->
+  <!-- React 19 + ReactDOM UMD — same major version as the monorepo -->
   <script crossorigin src="https://unpkg.com/react@19/umd/react.development.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@19/umd/react-dom.development.js"></script>
 
   <style>
     *, *::before, *::after { box-sizing: border-box; }
-    body { margin: 0; padding: 16px; font-family: system-ui, sans-serif; background: white; }
+    body { margin: 0; padding: 20px; font-family: Inter, system-ui, sans-serif; background: white; }
     #root { width: 100%; }
     #error-panel {
       display: none;
@@ -63,12 +67,13 @@
       font-family: monospace;
       white-space: pre-wrap;
       word-break: break-all;
+      margin-bottom: 12px;
     }
   </style>
 </head>
 <body>
-  <div id="root"></div>
   <div id="error-panel" role="alert" aria-label="Preview error"></div>
+  <div id="root"></div>
 
   <script>
     const root = document.getElementById('root');
@@ -77,7 +82,7 @@
 
     function showError(msg) {
       errorPanel.style.display = 'block';
-      errorPanel.textContent = msg;
+      errorPanel.textContent = '⚠ Preview Error\n\n' + msg;
       if (reactRoot) { reactRoot.unmount(); reactRoot = null; }
     }
 
@@ -86,153 +91,239 @@
       errorPanel.textContent = '';
     }
 
+    // ─── DesignForge component stubs ───────────────────────────────────────────
+    // Passthrough components so generated code doesn't crash in the sandbox.
+    // These approximate the real components' DOM structure and Tailwind classes.
+    const React = window.React;
+    const ReactDOM = window.ReactDOM;
+
+    const mkEl = (tag, baseClass) =>
+      ({ children, className, ...p }) =>
+        React.createElement(tag, {
+          className: [baseClass, className].filter(Boolean).join(' '),
+          ...p,
+        }, children);
+
+    const DF = {
+      // Layout
+      Box: mkEl('div', ''),
+      Flex: mkEl('div', 'flex'),
+      Grid: mkEl('div', 'grid'),
+      Stack: mkEl('div', 'flex flex-col'),
+      Container: mkEl('div', 'container mx-auto px-4'),
+      Separator: () => React.createElement('hr', { className: 'border-border my-2' }),
+      // Card family
+      Card: mkEl('div', 'rounded-lg border border-border bg-card shadow-sm'),
+      CardHeader: mkEl('div', 'flex flex-col space-y-1.5 p-6 pb-2'),
+      CardTitle: ({ children, className, ...p }) =>
+        React.createElement('h3', { className: ['font-semibold leading-none', className].filter(Boolean).join(' '), ...p }, children),
+      CardDescription: ({ children, className, ...p }) =>
+        React.createElement('p', { className: ['text-sm text-muted-foreground', className].filter(Boolean).join(' '), ...p }, children),
+      CardContent: mkEl('div', 'p-6 pt-0'),
+      CardFooter: mkEl('div', 'flex items-center p-6 pt-0'),
+      // Form elements
+      Button: ({ children, className, variant = 'default', size = 'md', ...p }) => {
+        const base = 'inline-flex items-center justify-center rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50';
+        const variants = {
+          default: 'bg-primary text-primary-foreground hover:bg-primary/90',
+          outline: 'border border-input bg-background hover:bg-accent hover:text-accent-foreground',
+          ghost: 'hover:bg-accent hover:text-accent-foreground',
+          destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
+          link: 'text-primary underline-offset-4 hover:underline',
+          secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
+        };
+        const sizes = { sm: 'h-8 px-3 text-xs', md: 'h-9 px-4 py-2 text-sm', lg: 'h-10 px-8 text-sm', icon: 'h-9 w-9' };
+        return React.createElement('button', {
+          className: [base, variants[variant] || variants.default, sizes[size] || sizes.md, className].filter(Boolean).join(' '),
+          ...p,
+        }, children);
+      },
+      Input: ({ className, ...p }) =>
+        React.createElement('input', {
+          className: ['flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:opacity-50', className].filter(Boolean).join(' '),
+          ...p,
+        }),
+      Textarea: ({ className, ...p }) =>
+        React.createElement('textarea', {
+          className: ['flex min-h-[80px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:opacity-50', className].filter(Boolean).join(' '),
+          ...p,
+        }),
+      Label: mkEl('label', 'text-sm font-medium leading-none'),
+      Badge: ({ children, className, variant = 'default', ...p }) => {
+        const variants = {
+          default: 'bg-primary text-primary-foreground',
+          secondary: 'bg-secondary text-secondary-foreground',
+          outline: 'border border-border',
+          destructive: 'bg-destructive text-destructive-foreground',
+        };
+        return React.createElement('span', {
+          className: ['inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold', variants[variant] || variants.default, className].filter(Boolean).join(' '),
+          ...p,
+        }, children);
+      },
+      Avatar: mkEl('div', 'relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full'),
+      AvatarImage: ({ src, alt, className, ...p }) =>
+        React.createElement('img', { src, alt, className: ['h-full w-full object-cover', className].filter(Boolean).join(' '), ...p }),
+      AvatarFallback: mkEl('div', 'flex h-full w-full items-center justify-center rounded-full bg-muted text-muted-foreground text-sm font-medium'),
+      Skeleton: mkEl('div', 'animate-pulse rounded-md bg-muted'),
+      Progress: ({ value = 0, className, ...p }) =>
+        React.createElement('div', {
+          className: ['relative h-2 w-full overflow-hidden rounded-full bg-muted', className].filter(Boolean).join(' '),
+          role: 'progressbar', 'aria-valuenow': value, 'aria-valuemin': 0, 'aria-valuemax': 100, ...p,
+        }, React.createElement('div', { className: 'h-full bg-primary transition-all', style: { width: `${value}%` } })),
+      Switch: ({ checked, onChange, className, ...p }) =>
+        React.createElement('button', {
+          role: 'switch', 'aria-checked': checked,
+          className: ['inline-flex h-5 w-9 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors', checked ? 'bg-primary' : 'bg-input', className].filter(Boolean).join(' '),
+          onClick: () => onChange?.(!checked), ...p,
+        }, React.createElement('span', { className: ['pointer-events-none block h-4 w-4 rounded-full bg-background shadow-lg transition-transform', checked ? 'translate-x-4' : 'translate-x-0'].join(' ') })),
+      // Tabs (simple state-based stubs)
+      Tabs: ({ children, defaultValue, value, onValueChange, className, ...p }) => {
+        const [active, setActive] = React.useState(value || defaultValue || '');
+        return React.createElement('div', {
+          className, 'data-active': active,
+          ...p,
+          onClick: (e) => {
+            const tab = e.target.closest('[role="tab"]');
+            if (tab) { const v = tab.getAttribute('data-value'); setActive(v); onValueChange?.(v); }
+          },
+        }, React.Children.map(children, c => c && React.cloneElement(c, { _activeTab: active })));
+      },
+      TabsList: mkEl('div', 'inline-flex h-9 items-center justify-center rounded-lg bg-muted p-1'),
+      TabsTrigger: ({ children, value, _activeTab, className, ...p }) =>
+        React.createElement('button', {
+          role: 'tab', 'data-value': value, 'aria-selected': _activeTab === value,
+          className: ['inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium transition-all', _activeTab === value ? 'bg-background text-foreground shadow' : 'text-muted-foreground hover:text-foreground', className].filter(Boolean).join(' '),
+          ...p,
+        }, children),
+      TabsContent: ({ children, value, _activeTab, className, ...p }) =>
+        _activeTab === value ? React.createElement('div', { className, ...p }, children) : null,
+      // Misc
+      Separator: () => React.createElement('div', { className: 'shrink-0 bg-border h-[1px] w-full my-2' }),
+      Alert: ({ children, className, variant = 'default', ...p }) =>
+        React.createElement('div', {
+          role: 'alert',
+          className: ['relative w-full rounded-lg border p-4', variant === 'destructive' ? 'border-destructive/50 text-destructive' : 'bg-background text-foreground', className].filter(Boolean).join(' '),
+          ...p,
+        }, children),
+      AlertTitle: mkEl('h5', 'mb-1 font-medium leading-none'),
+      AlertDescription: mkEl('p', 'text-sm text-muted-foreground'),
+    };
+
+    // ─── Icon stubs ────────────────────────────────────────────────────────────
+    const mkIcon = () => ({ size = 16, color = 'currentColor', className, strokeWidth = 1.5 }) =>
+      React.createElement('svg', {
+        width: size, height: size, viewBox: '0 0 24 24', fill: 'none',
+        stroke: color, strokeWidth, strokeLinecap: 'round', strokeLinejoin: 'round',
+        className, 'aria-hidden': 'true',
+      }, React.createElement('circle', { cx: 12, cy: 12, r: 8, opacity: 0.3 }),
+         React.createElement('line', { x1: 8, y1: 12, x2: 16, y2: 12, opacity: 0.3 }));
+
+    const ICONS = {};
+    [
+      'Check','X','ChevronDown','ChevronUp','ChevronRight','ChevronLeft',
+      'Search','Plus','Minus','Menu','XCircle','AlertCircle','Info',
+      'CheckCircle2','Star','Heart','Bookmark','Share','ExternalLink',
+      'ArrowRight','ArrowLeft','ArrowUp','ArrowDown','Home','User',
+      'Settings','Bell','Copy','ClipboardCheck','Trash','Pencil','Edit',
+      'Download','Upload','Filter','SortAsc','SortDesc','Grid','List',
+      'Layout','Sidebar','Sun','Moon','Mail','MessageSquare','Phone',
+      'Globe','Lock','Unlock','Eye','EyeOff','Sparkles',
+    ].forEach(name => { ICONS[name + 'Icon'] = mkIcon(); });
+
+    // Loader2 gets a spinning border style
+    ICONS['Loader2Icon'] = ({ size = 16, className }) =>
+      React.createElement('span', {
+        className: ['inline-block animate-spin rounded-full border-2 border-current border-t-transparent', className].filter(Boolean).join(' '),
+        style: { width: size, height: size }, 'aria-hidden': 'true',
+      });
+
+    // ─── Hook stubs ────────────────────────────────────────────────────────────
+    const useDebounce = (v) => v;
+    const useMediaQuery = () => false;
+    const useClipboard = () => ({ copied: false, copy: async (t) => { try { await navigator.clipboard?.writeText(t); } catch {} }, reset: () => {} });
+    const useLocalStorage = (key, init) => {
+      const [v, sv] = React.useState(() => { try { const s = localStorage.getItem(key); return s ? JSON.parse(s) : init; } catch { return init; } });
+      return [v, (nv) => { sv(nv); try { localStorage.setItem(key, JSON.stringify(nv)); } catch {} }, () => sv(init)];
+    };
+    const useControllable = ({ value, defaultValue, onChange }) => {
+      const [u, su] = React.useState(defaultValue);
+      return [value !== undefined ? value : u, (n) => { if (value === undefined) su(n); onChange?.(n); }];
+    };
+    const cn = (...args) => args.filter(Boolean).join(' ');
+
+    // ─── Render function ───────────────────────────────────────────────────────
     function renderCode(code) {
       if (!code) return;
       clearError();
 
       try {
-        // Transpile TSX → JS using Sucrase
-        const transformed = Sucrase.transform(code, {
-          transforms: ['typescript', 'jsx'],
-          jsxRuntime: 'classic',
-          production: false,
-        }).code;
+        // Transpile TSX + TypeScript → plain JS using Babel standalone
+        const result = Babel.transform(code, {
+          presets: [
+            ['react', { runtime: 'classic', pragma: 'React.createElement', pragmaFrag: 'React.Fragment' }],
+            ['typescript', { isTSX: true, allExtensions: true }],
+          ],
+          filename: 'component.tsx',
+          configFile: false,
+          babelrc: false,
+        });
 
-        // Shim DesignForge imports with stub passthrough components
-        const shimmedCode = transformed
-          // Replace all @designforge/* imports with empty shims
-          .replace(/require\(["']@designforge\/[^"']+["']\)/g, '({})')
-          // React is global
-          .replace(/const React = require\(["']react["']\);?/g, '')
-          .replace(/const { .+ } = require\(["']react["']\);?/g, '');
+        if (!result || !result.code) throw new Error('Babel produced no output.');
 
-        // Provide stubs for DesignForge components so the component doesn't crash
-        const preamble = `
-          const React = window.React;
-          const ReactDOM = window.ReactDOM;
-          const useState = React.useState;
-          const useEffect = React.useEffect;
-          const useRef = React.useRef;
-          const useCallback = React.useCallback;
-          const useMemo = React.useMemo;
+        let transformed = result.code;
 
-          // DesignForge UI stubs (layout passthrough)
-          const mkDiv = (cls) => ({ children, className, ...p }) =>
-            React.createElement('div', { className: [cls, className].filter(Boolean).join(' '), ...p }, children);
-          const mkBtn = ({ children, className, variant, size, ...p }) =>
-            React.createElement('button', { className: ['df-btn', className].filter(Boolean).join(' '), ...p }, children);
-          const mkInput = ({ className, ...p }) =>
-            React.createElement('input', { className: ['df-input', className].filter(Boolean).join(' '), ...p });
-          const mkLabel = ({ children, className, ...p }) =>
-            React.createElement('label', { className, ...p }, children);
-          const mkSpan = ({ children, className, ...p }) =>
-            React.createElement('span', { className, ...p }, children);
+        // Remove all import statements — they are resolved via the preamble below
+        transformed = transformed.replace(/^\s*import\s[^;]+;?\s*$/gm, '');
+        // Remove "use client" directive
+        transformed = transformed.replace(/["']use client["'];?\s*/g, '');
 
-          const Box = mkDiv('');
-          const Flex = mkDiv('flex');
-          const Grid = mkDiv('grid');
-          const Stack = mkDiv('flex flex-col');
-          const Container = mkDiv('container mx-auto');
-          const Separator = () => React.createElement('hr', { className: 'border-border my-2' });
-          const Card = mkDiv('rounded-lg border border-border bg-card p-0 shadow-sm');
-          const CardHeader = mkDiv('flex flex-col p-6 pb-0');
-          const CardTitle = ({ children, className, ...p }) => React.createElement('h3', { className: ['font-semibold text-foreground', className].filter(Boolean).join(' '), ...p }, children);
-          const CardDescription = ({ children, className, ...p }) => React.createElement('p', { className: ['text-sm text-muted-foreground', className].filter(Boolean).join(' '), ...p }, children);
-          const CardContent = mkDiv('p-6');
-          const CardFooter = mkDiv('flex items-center p-6 pt-0');
-          const Button = mkBtn;
-          const Input = mkInput;
-          const Label = mkLabel;
-          const Badge = mkSpan;
-          const Avatar = mkDiv('relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full bg-muted');
-          const AvatarImage = ({ src, alt }) => React.createElement('img', { src, alt, className: 'h-full w-full object-cover' });
-          const AvatarFallback = mkDiv('flex h-full w-full items-center justify-center bg-muted text-muted-foreground text-sm font-medium');
-          const Textarea = ({ className, ...p }) => React.createElement('textarea', { className: ['df-textarea', className].filter(Boolean).join(' '), ...p });
-          const Progress = ({ value = 0, className, ...p }) => React.createElement('div', { className: ['relative h-2 w-full overflow-hidden rounded-full bg-muted', className].filter(Boolean).join(' '), role: 'progressbar', 'aria-valuenow': value, ...p }, React.createElement('div', { className: 'h-full bg-primary transition-all', style: { width: \`\${value}%\` } }));
-          const Skeleton = ({ className, ...p }) => React.createElement('div', { className: ['animate-pulse rounded bg-muted', className].filter(Boolean).join(' '), ...p });
+        // Find the component name
+        const nameMatch = code.match(/export\s+default\s+function\s+([A-Z][A-Za-z0-9_]*)/);
+        const componentName = nameMatch?.[1] || 'GeneratedComponent';
 
-          // Icon stubs (render as SVG placeholder spans)
-          const mkIcon = (name) => ({ size = 16, className, color = 'currentColor' }) =>
-            React.createElement('span', {
-              'aria-hidden': 'true',
-              className,
-              style: { display: 'inline-flex', width: size, height: size, color, verticalAlign: 'middle', background: 'currentColor', borderRadius: 2, opacity: 0.3 }
-            });
-          const CheckIcon = mkIcon('Check');
-          const XIcon = mkIcon('X');
-          const SearchIcon = mkIcon('Search');
-          const ChevronDownIcon = mkIcon('ChevronDown');
-          const ChevronRightIcon = mkIcon('ChevronRight');
-          const SparklesIcon = mkIcon('Sparkles');
-          const Loader2Icon = ({ size = 16, className } ) => React.createElement('span', { className: ['animate-spin', className].filter(Boolean).join(' '), 'aria-hidden': 'true', style: { display: 'inline-block', width: size, height: size, border: '2px solid currentColor', borderTopColor: 'transparent', borderRadius: '50%' } });
-          const UserIcon = mkIcon('User');
-          const SettingsIcon = mkIcon('Settings');
-          const BellIcon = mkIcon('Bell');
-          const StarIcon = mkIcon('Star');
-          const HeartIcon = mkIcon('Heart');
-          const ArrowRightIcon = mkIcon('ArrowRight');
-          const ArrowLeftIcon = mkIcon('ArrowLeft');
-          const PlusIcon = mkIcon('Plus');
-          const MinusIcon = mkIcon('Minus');
-          const CopyIcon = mkIcon('Copy');
-          const TrashIcon = mkIcon('Trash');
-          const PencilIcon = mkIcon('Pencil');
-          const AlertCircleIcon = mkIcon('AlertCircle');
-          const InfoIcon = mkIcon('Info');
-          const CheckCircle2Icon = mkIcon('CheckCircle2');
-          const LockIcon = mkIcon('Lock');
-          const MailIcon = mkIcon('Mail');
-          const EyeIcon = mkIcon('Eye');
-          const EyeOffIcon = mkIcon('EyeOff');
-          const FilterIcon = mkIcon('Filter');
-          const SunIcon = mkIcon('Sun');
-          const MoonIcon = mkIcon('Moon');
-          const MenuIcon = mkIcon('Menu');
-          const ExternalLinkIcon = mkIcon('ExternalLink');
-          const DownloadIcon = mkIcon('Download');
+        // Wrap in a factory function with all stubs available as locals
+        const factory = new Function(
+          'React', 'ReactDOM',
+          // DesignForge UI
+          ...Object.keys(DF),
+          // Icons
+          ...Object.keys(ICONS),
+          // Hooks
+          'useDebounce', 'useMediaQuery', 'useClipboard', 'useLocalStorage', 'useControllable', 'cn',
+          // React hooks (convenience destructuring)
+          'useState', 'useEffect', 'useRef', 'useCallback', 'useMemo', 'useReducer', 'useContext',
+          // Body: the transpiled code + return the component
+          transformed + '\n\nreturn ' + componentName + ';'
+        );
 
-          // Hook stubs
-          const useDebounce = (v) => v;
-          const useMediaQuery = () => false;
-          const useClipboard = () => ({ copied: false, copy: async(t) => { await navigator.clipboard?.writeText?.(t); }, reset: () => {} });
-          const useLocalStorage = (key, init) => { const [v, sv] = React.useState(init); return [v, sv, () => sv(init)]; };
-          const useControllable = ({ value, defaultValue, onChange }) => {
-            const [u, su] = React.useState(defaultValue);
-            const set = (n) => { if (value === undefined) su(n); onChange?.(n); };
-            return [value !== undefined ? value : u, set];
-          };
-          const cn = (...args) => args.filter(Boolean).join(' ');
-        `;
+        const Component = factory(
+          React, ReactDOM,
+          ...Object.values(DF),
+          ...Object.values(ICONS),
+          useDebounce, useMediaQuery, useClipboard, useLocalStorage, useControllable, cn,
+          React.useState, React.useEffect, React.useRef, React.useCallback,
+          React.useMemo, React.useReducer, React.useContext,
+        );
 
-        // Evaluate the shimmed code
-        // eslint-disable-next-line no-new-func
-        const fn = new Function(preamble + '\n' + shimmedCode + '\n return typeof GeneratedComponent !== "undefined" ? GeneratedComponent : module?.exports?.default;');
-        let Component = fn();
-
-        // fallback — try to find a default export via last-defined function
-        if (!Component) {
-          const match = code.match(/export\s+default\s+function\s+([A-Z][A-Za-z0-9_]*)/);
-          if (match) {
-            // eslint-disable-next-line no-new-func
-            Component = new Function(preamble + '\n' + shimmedCode + '\n return ' + match[1] + ';')();
-          }
-        }
-
-        if (!Component) {
-          showError('No default export found. Make sure your component uses:\n  export default function MyComponent() { ... }');
-          return;
+        if (typeof Component !== 'function') {
+          throw new Error(`Default export is not a function (got ${typeof Component}). Make sure to use:\n  export default function ${componentName}() { ... }`);
         }
 
         if (!reactRoot) {
           reactRoot = ReactDOM.createRoot(root);
         }
-        reactRoot.render(React.createElement(React.StrictMode, null, React.createElement(Component)));
+        reactRoot.render(
+          React.createElement(React.StrictMode, null,
+            React.createElement(Component)
+          )
+        );
       } catch (err) {
         showError(err instanceof Error ? err.message : String(err));
       }
     }
 
-    // Listen for RENDER_CODE messages from the parent
+    // ─── postMessage protocol ──────────────────────────────────────────────────
     window.addEventListener('message', (e) => {
       if (e.data?.type === 'RENDER_CODE') {
         renderCode(e.data.code);

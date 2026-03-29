@@ -1190,4 +1190,137 @@ Implemented `packages/icons/src/index.ts` as a thin wrapper around `lucide-react
 
 ---
 
-*Log maintained by AI agent. Last updated: 2026-03-29.*
+*Log maintained by AI agent. Last updated: 2026-03-30.*
+
+---
+
+## Phase 6 — AI Generator
+
+---
+
+### Task 6.0: `@designforge/ai` package — PromptBuilder, ResponseParser, ValidationPipeline
+
+**What was done:**
+Created `packages/ai/src/` with 4 source files:
+
+| File | Class / Content | Purpose |
+|---|---|---|
+| `PromptBuilder.ts` | `PromptBuilder` | 5-section system prompt (~1800 tokens): role, tokens, conventions, a11y, output format |
+| `ResponseParser.ts` | `ResponseParser` | Extracts ```tsx blocks, checks completeness, validates imports, infers component name |
+| `ValidationPipeline.ts` | `ValidationPipeline` | Aggregates TypeScript/ESLint/axe steps → `{passed, summary, steps[]}` |
+| `constants.ts` | constants | `RATE_LIMIT_MAX`, `PROVIDER_CHAIN`, `PROVIDER_MODELS`, `SYSTEM_PROMPT_VERSION`, etc. |
+
+**Bug fixed:** `ResponseParser.findDisallowedImports` had two `noUncheckedIndexedAccess` errors on regex match groups — fixed with explicit `undefined` guard before use.
+
+**Build result:** ESM 13.40 KB, CJS 13.70 KB, DTS 6.01 KB ✅
+
+---
+
+### Task 6.1: Three API routes in `apps/docs`
+
+#### `/api/generate` (Edge Runtime)
+```
+apps/docs/app/api/generate/route.ts
+```
+- In-memory sliding-window rate limiter (per IP, 20 req/hr, `RATE_LIMIT_WINDOW_MS = 3600000`)
+- Provider fallback chain: Anthropic `claude-sonnet-4-20250514` → OpenAI `gpt-4o-mini` → Google `gemini-2.0-flash`
+- Providers that lack an API key env var are skipped silently
+- `streamText()` from `ai` (Vercel AI SDK v6) → `toTextStreamResponse()` (renamed from `toDataStreamResponse` in v6)
+- `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset` response headers
+- 30s `AbortController` timeout per attempt
+- Error responses: `400 EMPTY_PROMPT`, `400 PROMPT_TOO_LONG`, `429 RATE_LIMIT_EXCEEDED`, `500 GENERATION_FAILED`
+
+#### `/api/validate` (Node.js Runtime)
+```
+apps/docs/app/api/validate/route.ts
+```
+- Dynamic `import("eslint")` — keeps ESLint out of Edge bundle; only runs in Node.js runtime
+- Lints code string via `eslint.lintText()` with `filePath: "generated.tsx"` (no temp file on disk)
+- Returns `{errors: LintMessage[], warnings: LintMessage[], summary: string}`
+
+#### `/api/tokens` (Edge Runtime)
+```
+apps/docs/app/api/tokens/route.ts
+```
+- Serves `lightColors`, `darkColors`, `spacingTokens`, `radiiTokens`, `shadowTokens`, `durationTokens`, `easingTokens` from `@designforge/themes`
+- `Cache-Control: public, max-age=86400, stale-while-revalidate=3600`
+
+---
+
+### Task 6.2: Generator UI at `/generator`
+
+**Files created:**
+```
+apps/docs/app/generator/
+├── page.tsx                         # RSC metadata shell
+└── _components/
+    ├── GeneratorClient.tsx           # Main client component
+    ├── ValidationBadge.tsx           # ESLint check badge
+    └── PreviewFrame.tsx              # Sandboxed iframe wrapper
+apps/docs/public/preview-frame.html  # Iframe sandbox page
+```
+
+**Key architecture decisions:**
+
+| Decision | Rationale |
+|---|---|
+| Native `fetch` + `ReadableStream` instead of `useChat` | AI SDK v6 removed `ai/react` — `useChat` no longer exists in the package |
+| `crypto.randomUUID()` for message IDs | React 19 / no external dep needed |
+| Conversation history sliced to last 20 items (10 pairs) | Keeps token usage bounded, matches FR-AI-012 |
+| Dynamic Monaco import (`next/dynamic`, `ssr:false`) | Monaco is ~2 MB; avoids blocking initial page paint |
+| `preview-frame.html` served from `public/` | Static file, no Next.js SSR overhead; cross-origin sandbox |
+
+**Preview iframe stack:**
+- Tailwind CDN with DesignForge colour tokens injected via `tailwind.config`
+- Sucrase v3.35 (browser build) transpiles TSX → JS in-browser
+- React 19 UMD via unpkg
+- Full DesignForge component + hook + icon stubs so generated code doesn't crash
+- `postMessage` protocol: parent → `{type:"RENDER_CODE", code}` / iframe → `{type:"FRAME_READY"}`
+- Error panel (`role="alert"`) shows transpile/eval errors in red inside the iframe
+
+**ValidationBadge:**
+- Watches `code` prop via `useEffect`
+- Calls `POST /api/validate` with 5s timeout and `AbortController`
+- Shows `idle | checking | pass | fail` states with colour-coded badge + `aria-live="polite"`
+
+---
+
+### Task 6.3: Dependency & env setup
+
+**New packages installed:**
+```
+ai@6.0.141  @ai-sdk/anthropic@3.0.64  @ai-sdk/openai@3.0.48
+@ai-sdk/google@3.0.53  @monaco-editor/react@4.7.0  zod@4.3.6
+```
+
+**Workspace packages added to `apps/docs`:**
+`@designforge/ai`, `@designforge/ui`, `@designforge/hooks`, `@designforge/icons`
+
+**`.env.local` created** at `apps/docs/.env.local` (gitignored):
+```
+ANTHROPIC_API_KEY=…  OPENAI_API_KEY=…  GOOGLE_API_KEY=…
+```
+
+---
+
+## Phase 6 Exit Gate — PASSED ✅
+
+| Criterion | Result |
+|---|---|
+| `@designforge/ai` builds (ESM + CJS + DTS) | ✅ |
+| type-check: 0 errors across all packages + docs app | ✅ |
+| Next.js production build: all routes compile | ✅ |
+| `/generator` route: 11.2 kB first-load JS | ✅ |
+| `/api/generate` Edge route: compilable | ✅ |
+| `/api/validate` Node route: compilable | ✅ |
+| `/api/tokens` Edge route: compilable | ✅ |
+| Monaco editor lazy-loaded | ✅ |
+| Preview iframe with Sucrase + stubs | ✅ |
+| Rate limit headers on all responses | ✅ |
+| Committed `960f984` + pushed to GitHub | ✅ |
+
+> **Note for deployment:** Add `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `GOOGLE_API_KEY` to Vercel project environment variables before the generator page will function in production.
+
+---
+
+*Log maintained by AI agent. Last updated: 2026-03-30.*
