@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DesignForge Preview</title>
+
+  <!-- Tailwind CDN — provides utility classes matching DesignForge tokens -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: { DEFAULT: "hsl(245 58% 60%)", foreground: "hsl(0 0% 100%)" },
+            secondary: { DEFAULT: "hsl(245 20% 92%)", foreground: "hsl(245 47% 25%)" },
+            destructive: { DEFAULT: "hsl(0 84% 60%)", foreground: "hsl(0 0% 100%)" },
+            muted: { DEFAULT: "hsl(210 40% 96%)", foreground: "hsl(215 16% 47%)" },
+            accent: { DEFAULT: "hsl(245 20% 96%)", foreground: "hsl(245 47% 25%)" },
+            background: "hsl(0 0% 100%)",
+            foreground: "hsl(222 47% 11%)",
+            border: "hsl(214 32% 91%)",
+            input: "hsl(214 32% 91%)",
+            ring: "hsl(245 58% 60%)",
+            card: { DEFAULT: "hsl(0 0% 100%)", foreground: "hsl(222 47% 11%)" },
+            popover: { DEFAULT: "hsl(0 0% 100%)", foreground: "hsl(222 47% 11%)" },
+            success: { DEFAULT: "hsl(142 76% 36%)", foreground: "hsl(0 0% 100%)" },
+            warning: { DEFAULT: "hsl(38 92% 50%)", foreground: "hsl(0 0% 100%)" },
+            info: { DEFAULT: "hsl(199 89% 48%)", foreground: "hsl(0 0% 100%)" },
+          },
+          borderRadius: {
+            DEFAULT: "0.375rem",
+            sm: "0.125rem",
+            md: "0.5rem",
+            lg: "0.75rem",
+            xl: "1rem",
+            "2xl": "1.5rem",
+          },
+        }
+      }
+    };
+  </script>
+
+  <!-- Sucrase — transpiles TSX → JS in the browser -->
+  <script src="https://unpkg.com/sucrase@3.35.0/dist/sucrase.js"></script>
+
+  <!-- React + ReactDOM — same version as the monorepo -->
+  <script crossorigin src="https://unpkg.com/react@19/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@19/umd/react-dom.development.js"></script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; padding: 16px; font-family: system-ui, sans-serif; background: white; }
+    #root { width: 100%; }
+    #error-panel {
+      display: none;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 8px;
+      padding: 12px 16px;
+      color: #b91c1c;
+      font-size: 12px;
+      font-family: monospace;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <div id="error-panel" role="alert" aria-label="Preview error"></div>
+
+  <script>
+    const root = document.getElementById('root');
+    const errorPanel = document.getElementById('error-panel');
+    let reactRoot = null;
+
+    function showError(msg) {
+      errorPanel.style.display = 'block';
+      errorPanel.textContent = msg;
+      if (reactRoot) { reactRoot.unmount(); reactRoot = null; }
+    }
+
+    function clearError() {
+      errorPanel.style.display = 'none';
+      errorPanel.textContent = '';
+    }
+
+    function renderCode(code) {
+      if (!code) return;
+      clearError();
+
+      try {
+        // Transpile TSX → JS using Sucrase
+        const transformed = Sucrase.transform(code, {
+          transforms: ['typescript', 'jsx'],
+          jsxRuntime: 'classic',
+          production: false,
+        }).code;
+
+        // Shim DesignForge imports with stub passthrough components
+        const shimmedCode = transformed
+          // Replace all @designforge/* imports with empty shims
+          .replace(/require\(["']@designforge\/[^"']+["']\)/g, '({})')
+          // React is global
+          .replace(/const React = require\(["']react["']\);?/g, '')
+          .replace(/const { .+ } = require\(["']react["']\);?/g, '');
+
+        // Provide stubs for DesignForge components so the component doesn't crash
+        const preamble = `
+          const React = window.React;
+          const ReactDOM = window.ReactDOM;
+          const useState = React.useState;
+          const useEffect = React.useEffect;
+          const useRef = React.useRef;
+          const useCallback = React.useCallback;
+          const useMemo = React.useMemo;
+
+          // DesignForge UI stubs (layout passthrough)
+          const mkDiv = (cls) => ({ children, className, ...p }) =>
+            React.createElement('div', { className: [cls, className].filter(Boolean).join(' '), ...p }, children);
+          const mkBtn = ({ children, className, variant, size, ...p }) =>
+            React.createElement('button', { className: ['df-btn', className].filter(Boolean).join(' '), ...p }, children);
+          const mkInput = ({ className, ...p }) =>
+            React.createElement('input', { className: ['df-input', className].filter(Boolean).join(' '), ...p });
+          const mkLabel = ({ children, className, ...p }) =>
+            React.createElement('label', { className, ...p }, children);
+          const mkSpan = ({ children, className, ...p }) =>
+            React.createElement('span', { className, ...p }, children);
+
+          const Box = mkDiv('');
+          const Flex = mkDiv('flex');
+          const Grid = mkDiv('grid');
+          const Stack = mkDiv('flex flex-col');
+          const Container = mkDiv('container mx-auto');
+          const Separator = () => React.createElement('hr', { className: 'border-border my-2' });
+          const Card = mkDiv('rounded-lg border border-border bg-card p-0 shadow-sm');
+          const CardHeader = mkDiv('flex flex-col p-6 pb-0');
+          const CardTitle = ({ children, className, ...p }) => React.createElement('h3', { className: ['font-semibold text-foreground', className].filter(Boolean).join(' '), ...p }, children);
+          const CardDescription = ({ children, className, ...p }) => React.createElement('p', { className: ['text-sm text-muted-foreground', className].filter(Boolean).join(' '), ...p }, children);
+          const CardContent = mkDiv('p-6');
+          const CardFooter = mkDiv('flex items-center p-6 pt-0');
+          const Button = mkBtn;
+          const Input = mkInput;
+          const Label = mkLabel;
+          const Badge = mkSpan;
+          const Avatar = mkDiv('relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full bg-muted');
+          const AvatarImage = ({ src, alt }) => React.createElement('img', { src, alt, className: 'h-full w-full object-cover' });
+          const AvatarFallback = mkDiv('flex h-full w-full items-center justify-center bg-muted text-muted-foreground text-sm font-medium');
+          const Textarea = ({ className, ...p }) => React.createElement('textarea', { className: ['df-textarea', className].filter(Boolean).join(' '), ...p });
+          const Progress = ({ value = 0, className, ...p }) => React.createElement('div', { className: ['relative h-2 w-full overflow-hidden rounded-full bg-muted', className].filter(Boolean).join(' '), role: 'progressbar', 'aria-valuenow': value, ...p }, React.createElement('div', { className: 'h-full bg-primary transition-all', style: { width: \`\${value}%\` } }));
+          const Skeleton = ({ className, ...p }) => React.createElement('div', { className: ['animate-pulse rounded bg-muted', className].filter(Boolean).join(' '), ...p });
+
+          // Icon stubs (render as SVG placeholder spans)
+          const mkIcon = (name) => ({ size = 16, className, color = 'currentColor' }) =>
+            React.createElement('span', {
+              'aria-hidden': 'true',
+              className,
+              style: { display: 'inline-flex', width: size, height: size, color, verticalAlign: 'middle', background: 'currentColor', borderRadius: 2, opacity: 0.3 }
+            });
+          const CheckIcon = mkIcon('Check');
+          const XIcon = mkIcon('X');
+          const SearchIcon = mkIcon('Search');
+          const ChevronDownIcon = mkIcon('ChevronDown');
+          const ChevronRightIcon = mkIcon('ChevronRight');
+          const SparklesIcon = mkIcon('Sparkles');
+          const Loader2Icon = ({ size = 16, className } ) => React.createElement('span', { className: ['animate-spin', className].filter(Boolean).join(' '), 'aria-hidden': 'true', style: { display: 'inline-block', width: size, height: size, border: '2px solid currentColor', borderTopColor: 'transparent', borderRadius: '50%' } });
+          const UserIcon = mkIcon('User');
+          const SettingsIcon = mkIcon('Settings');
+          const BellIcon = mkIcon('Bell');
+          const StarIcon = mkIcon('Star');
+          const HeartIcon = mkIcon('Heart');
+          const ArrowRightIcon = mkIcon('ArrowRight');
+          const ArrowLeftIcon = mkIcon('ArrowLeft');
+          const PlusIcon = mkIcon('Plus');
+          const MinusIcon = mkIcon('Minus');
+          const CopyIcon = mkIcon('Copy');
+          const TrashIcon = mkIcon('Trash');
+          const PencilIcon = mkIcon('Pencil');
+          const AlertCircleIcon = mkIcon('AlertCircle');
+          const InfoIcon = mkIcon('Info');
+          const CheckCircle2Icon = mkIcon('CheckCircle2');
+          const LockIcon = mkIcon('Lock');
+          const MailIcon = mkIcon('Mail');
+          const EyeIcon = mkIcon('Eye');
+          const EyeOffIcon = mkIcon('EyeOff');
+          const FilterIcon = mkIcon('Filter');
+          const SunIcon = mkIcon('Sun');
+          const MoonIcon = mkIcon('Moon');
+          const MenuIcon = mkIcon('Menu');
+          const ExternalLinkIcon = mkIcon('ExternalLink');
+          const DownloadIcon = mkIcon('Download');
+
+          // Hook stubs
+          const useDebounce = (v) => v;
+          const useMediaQuery = () => false;
+          const useClipboard = () => ({ copied: false, copy: async(t) => { await navigator.clipboard?.writeText?.(t); }, reset: () => {} });
+          const useLocalStorage = (key, init) => { const [v, sv] = React.useState(init); return [v, sv, () => sv(init)]; };
+          const useControllable = ({ value, defaultValue, onChange }) => {
+            const [u, su] = React.useState(defaultValue);
+            const set = (n) => { if (value === undefined) su(n); onChange?.(n); };
+            return [value !== undefined ? value : u, set];
+          };
+          const cn = (...args) => args.filter(Boolean).join(' ');
+        `;
+
+        // Evaluate the shimmed code
+        // eslint-disable-next-line no-new-func
+        const fn = new Function(preamble + '\n' + shimmedCode + '\n return typeof GeneratedComponent !== "undefined" ? GeneratedComponent : module?.exports?.default;');
+        let Component = fn();
+
+        // fallback — try to find a default export via last-defined function
+        if (!Component) {
+          const match = code.match(/export\s+default\s+function\s+([A-Z][A-Za-z0-9_]*)/);
+          if (match) {
+            // eslint-disable-next-line no-new-func
+            Component = new Function(preamble + '\n' + shimmedCode + '\n return ' + match[1] + ';')();
+          }
+        }
+
+        if (!Component) {
+          showError('No default export found. Make sure your component uses:\n  export default function MyComponent() { ... }');
+          return;
+        }
+
+        if (!reactRoot) {
+          reactRoot = ReactDOM.createRoot(root);
+        }
+        reactRoot.render(React.createElement(React.StrictMode, null, React.createElement(Component)));
+      } catch (err) {
+        showError(err instanceof Error ? err.message : String(err));
+      }
+    }
+
+    // Listen for RENDER_CODE messages from the parent
+    window.addEventListener('message', (e) => {
+      if (e.data?.type === 'RENDER_CODE') {
+        renderCode(e.data.code);
+      }
+    });
+
+    // Signal to parent that the frame is ready
+    window.parent.postMessage({ type: 'FRAME_READY' }, '*');
+  </script>
+</body>
+</html>

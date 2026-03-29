@@ -11,10 +11,20 @@
     "clean": "rimraf .next out"
   },
   "dependencies": {
+    "@ai-sdk/anthropic": "^3.0.64",
+    "@ai-sdk/google": "^3.0.53",
+    "@ai-sdk/openai": "^3.0.48",
+    "@designforge/ai": "workspace:*",
+    "@designforge/hooks": "workspace:*",
+    "@designforge/icons": "workspace:*",
     "@designforge/themes": "workspace:*",
+    "@designforge/ui": "workspace:*",
+    "@monaco-editor/react": "^4.7.0",
+    "ai": "^6.0.141",
     "next": "^15.2.3",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@designforge/eslint-config": "workspace:*",
