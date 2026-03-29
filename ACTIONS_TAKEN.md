@@ -1303,6 +1303,19 @@ ANTHROPIC_API_KEY=…  OPENAI_API_KEY=…  GOOGLE_API_KEY=…
 
 ---
 
+### Task 6.4: Iframe Preview Stabilisation & Refactoring
+
+**What was done:**  
+Refactored the iframe preview architecture to eliminate reliance on external CDNs or dynamic Next.js API routes (which were throwing 500 errors in Turbopack) by locally bundling the environment context.
+
+**Key resolutions:**
+- **Local Vendor Bundler (`bundle-vendor.mjs`):** Engineered a Node prebuild script that resolves `react`, `react-dom`, and `@babel/standalone` from `node_modules` and packs them as browser-safe IIFEs into Next.js's physical `public/vendor/` static dir.
+- **React 19 Subpath APIs:** Updated the bundler generator to additionally require `react-dom/client` so that `window.ReactDOMClient.createRoot()` operates successfully in the modern React 19 environment (since `react-dom` drops native `createRoot`).
+- **Comprehensive Radix Shells:** Re-evaluated the inner `makeStubs` payload for the iframe. Added heavy structural Radix UI exports (`Popover`, `Dialog`, `DropdownMenu`, `Accordion`, etc.) mapped to transparent `div` equivalents so AI imports don't trigger `ReferenceError` crashes.
+- **WSoD ErrorBoundary Intercept:** Wove a classical React `ErrorBoundary` wrapper class around dynamically eval'd components. React 18+ instantly unmounts the DOM asynchronously during render exceptions, causing silent "White Screen of Death" states—now successfully trapped and hoisted to the red visual feedback banner.
+
+---
+
 ## Phase 6 Exit Gate — PASSED ✅
 
 | Criterion | Result |
