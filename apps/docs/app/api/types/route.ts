@@ -7,11 +7,10 @@ const runtimeRequire = createRequire(import.meta.url);
 
 export async function GET() {
   try {
-    const pkgPath = runtimeRequire.resolve("@designforge/ui/package.json");
-    const distDir = path.join(path.dirname(pkgPath), "dist");
+    const uiDistPath = path.dirname(runtimeRequire.resolve("@designforge/ui"));
     
     // Serve the generated d.ts file text
-    const typesText = await readFile(path.join(distDir, "index.d.ts"), "utf-8");
+    const typesText = await readFile(path.join(uiDistPath, "index.d.ts"), "utf-8");
     
     return new NextResponse(typesText, {
       headers: {
@@ -20,6 +19,7 @@ export async function GET() {
       }
     });
   } catch (err) {
+    console.error("Failed to load types:", err);
     return new NextResponse("Failed to load types", { status: 500 });
   }
 }

@@ -3,7 +3,7 @@ import { create } from "zustand";
 export type ConsoleEntry = {
   id: string;
   type: "log" | "warn" | "error" | "info";
-  args: any[];
+  args: unknown[];
   timestamp: number;
 };
 
