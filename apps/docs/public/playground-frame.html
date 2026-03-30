@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DesignForge Preview</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="/vendor/babel.js?v=2"></script>
+<script src="/vendor/react.js?v=2"></script>
+<script src="/vendor/react-dom.js?v=2"></script>
+<script src="/vendor/axe.js?v=2"></script>
+<link rel="stylesheet" href="/vendor/themes.css?v=2" />
+
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: { DEFAULT: "hsl(245 58% 60%)", foreground: "hsl(0 0% 100%)" },
+            secondary: { DEFAULT: "hsl(245 20% 92%)", foreground: "hsl(245 47% 25%)" },
+            destructive: { DEFAULT: "hsl(0 84% 60%)", foreground: "hsl(0 0% 100%)" },
+            muted: { DEFAULT: "hsl(210 40% 96%)", foreground: "hsl(215 16% 47%)" },
+            accent: { DEFAULT: "hsl(245 20% 96%)", foreground: "hsl(245 47% 25%)" },
+            background: "hsl(0 0% 100%)", foreground: "hsl(222 47% 11%)",
+            border: "hsl(214 32% 91%)", input: "hsl(214 32% 91%)", ring: "hsl(245 58% 60%)",
+            card: { DEFAULT: "hsl(0 0% 100%)", foreground: "hsl(222 47% 11%)" },
+            success: { DEFAULT: "hsl(142 76% 36%)", foreground: "hsl(0 0% 100%)" },
+            warning: { DEFAULT: "hsl(38 92% 50%)", foreground: "hsl(0 0% 100%)" },
+            info: { DEFAULT: "hsl(199 89% 48%)", foreground: "hsl(0 0% 100%)" },
+          },
+          borderRadius: { DEFAULT: "0.375rem", sm: "0.125rem", md: "0.5rem", lg: "0.75rem", xl: "1rem", "2xl": "1.5rem" },
+          fontFamily: { sans: ["Inter", "system-ui", "sans-serif"] },
+        }
+      }
+    };
+  </script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; padding: 20px; font-family: Inter, system-ui, sans-serif; }
+    #root { width: 100%; }
+    #error-panel {
+      display: none; background: #fef2f2; border: 1px solid #fecaca;
+      border-radius: 8px; padding: 12px 16px; color: #b91c1c;
+      font-size: 12px; font-family: monospace; white-space: pre-wrap;
+      word-break: break-all; margin-bottom: 12px;
+    }
+  </style>
+</head>
+<body class="bg-background text-foreground">
+  <div id="error-panel" role="alert" aria-label="Preview error"></div>
+  <div id="root"></div>
+  <script>
+    const rootEl = document.getElementById('root');
+    const errorPanel = document.getElementById('error-panel');
+    let reactRoot = null;
+
+    function showError(msg) {
+      errorPanel.style.display = 'block';
+      errorPanel.textContent = '⚠ Preview Error\n\n' + msg;
+      if (reactRoot) { reactRoot.unmount(); reactRoot = null; }
+    }
+    function clearError() { errorPanel.style.display = 'none'; errorPanel.textContent = ''; }
+
+    // ─── Monkey-patch console to send logs to the parent playground UI ──────
+    const originalConsole = { log: console.log, warn: console.warn, error: console.error, info: console.info };
+    ['log', 'warn', 'error', 'info'].forEach(fn => {
+      console[fn] = (...args) => {
+        originalConsole[fn](...args);
+        // Serialize args to strings to safely postMessage them
+        const safeArgs = args.map(a => {
+          if (a instanceof Error) return a.stack || a.message;
+          if (typeof a === 'object') {
+            try { return JSON.stringify(a, null, 2); } catch { return String(a); }
+          }
+          return String(a);
+        });
+        window.parent.postMessage({ type: 'CONSOLE', level: fn, args: safeArgs }, '*');
+      };
+    });
+
+    // ─── Axe-core runner ──────────────────────────────────────────────────
+    async function runAxe() {
+      if (!window.axe || !document.getElementById('root')) return;
+      try {
+        const results = await window.axe.run('#root');
+        window.parent.postMessage({ type: 'AXE_RESULTS', results }, '*');
+      } catch (err) {
+        console.error("Axe-core run failed", err);
+      }
+    }
+
+    // ─── Stubs (created lazily so React is always available) ────────────────
+    function makeStubs(R) {
+      const h = R.createElement;
+      const mk = (tag, cls) => ({ children, className, ...p }) =>
+        h(tag, { className: [cls, className].filter(Boolean).join(' '), ...p }, children);
+
+      const Button = ({ children, className, variant = 'default', size = 'md', ...p }) => {
+        const v = { default:'bg-primary text-primary-foreground hover:bg-primary/90', outline:'border border-input hover:bg-accent', ghost:'hover:bg-accent hover:text-accent-foreground', destructive:'bg-destructive text-destructive-foreground', secondary:'bg-secondary text-secondary-foreground', link:'text-primary underline-offset-4 hover:underline' };
+        const s = { sm:'h-8 px-3 text-xs', md:'h-9 px-4 py-2 text-sm', lg:'h-10 px-8 text-sm', icon:'h-9 w-9' };
+        return h('button', { className: ['inline-flex items-center justify-center rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50', v[variant]||v.default, s[size]||s.md, className].filter(Boolean).join(' '), ...p }, children);
+      };
+      const Input = ({ className, ...p }) => h('input', { className: ['flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:opacity-50', className].filter(Boolean).join(' '), ...p });
+      const Textarea = ({ className, ...p }) => h('textarea', { className: ['flex min-h-[80px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring', className].filter(Boolean).join(' '), ...p });
+      const Label = mk('label', 'text-sm font-medium leading-none');
+      const Badge = ({ children, className, variant = 'default', ...p }) => {
+        const v = { default:'bg-primary text-primary-foreground', secondary:'bg-secondary text-secondary-foreground', outline:'border border-border', destructive:'bg-destructive text-destructive-foreground' };
+        return h('span', { className: ['inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold', v[variant]||v.default, className].filter(Boolean).join(' '), ...p }, children);
+      };
+      const Avatar = mk('div', 'relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full');
+      const AvatarImage = ({ src, alt, className, ...p }) => h('img', { src, alt, className: ['h-full w-full object-cover', className].filter(Boolean).join(' '), ...p });
+      const AvatarFallback = mk('div', 'flex h-full w-full items-center justify-center rounded-full bg-muted text-muted-foreground text-sm font-medium');
+      const Separator = () => h('div', { className: 'shrink-0 bg-border h-[1px] w-full my-2' });
+      const Skeleton = mk('div', 'animate-pulse rounded-md bg-muted');
+      const Progress = ({ value = 0, className, ...p }) =>
+        h('div', { className: ['relative h-2 w-full overflow-hidden rounded-full bg-muted', className].filter(Boolean).join(' '), role:'progressbar', 'aria-valuenow': value, ...p },
+          h('div', { className: 'h-full bg-primary transition-all', style: { width: `${value}%` } }));
+      const Switch = ({ checked, onChange, className, ...p }) =>
+        h('button', { role:'switch', 'aria-checked': checked, onClick: () => onChange?.(!checked),
+          className: ['inline-flex h-5 w-9 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors', checked ? 'bg-primary' : 'bg-input', className].filter(Boolean).join(' '), ...p },
+          h('span', { className: ['pointer-events-none block h-4 w-4 rounded-full bg-background shadow-lg transition-transform', checked ? 'translate-x-4' : 'translate-x-0'].join(' ') }));
+      const Tabs = ({ children, defaultValue, value, onValueChange, className, ...p }) => {
+        const [active, setActive] = R.useState(value || defaultValue || '');
+        const go = v => { setActive(v); onValueChange?.(v); };
+        return h('div', { className, ...p, onClick: e => { const t = e.target.closest('[role="tab"]'); if (t) go(t.getAttribute('data-value')); } },
+          R.Children.map(children, c => c && R.cloneElement(c, { _active: active })));
+      };
+      const TabsList = mk('div', 'inline-flex h-9 items-center justify-center rounded-lg bg-muted p-1');
+      const TabsTrigger = ({ children, value, _active, className, ...p }) =>
+        h('button', { role:'tab', 'data-value': value, 'aria-selected': _active === value,
+          className: ['inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium transition-all', _active === value ? 'bg-background text-foreground shadow' : 'text-muted-foreground hover:text-foreground', className].filter(Boolean).join(' '), ...p }, children);
+      const TabsContent = ({ children, value, _active, className, ...p }) =>
+        _active === value ? h('div', { className, ...p }, children) : null;
+      const Alert = ({ children, className, variant = 'default', ...p }) =>
+        h('div', { role:'alert', className: ['relative w-full rounded-lg border p-4', variant === 'destructive' ? 'border-destructive/50 text-destructive' : 'bg-background', className].filter(Boolean).join(' '), ...p }, children);
+
+      const mkIcon = () => ({ size = 16, color = 'currentColor', className, strokeWidth = 1.5 }) =>
+        h('svg', { width: size, height: size, viewBox: '0 0 24 24', fill: 'none', stroke: color, strokeWidth, strokeLinecap: 'round', strokeLinejoin: 'round', className, 'aria-hidden': 'true' },
+          h('circle', { cx: 12, cy: 12, r: 8, opacity: 0.25 }),
+          h('line', { x1: 8, y1: 12, x2: 16, y2: 12, opacity: 0.25 }));
+
+      const icons = {};
+      ['Check','X','ChevronDown','ChevronUp','ChevronRight','ChevronLeft','Search','Plus','Minus','Menu',
+       'XCircle','AlertCircle','Info','CheckCircle2','Star','Heart','Bookmark','Share','ExternalLink',
+       'ArrowRight','ArrowLeft','ArrowUp','ArrowDown','Home','User','Settings','Bell','Copy',
+       'ClipboardCheck','Trash','Pencil','Edit','Download','Upload','Filter','SortAsc','SortDesc',
+       'Grid','List','Layout','Sidebar','Sun','Moon','Mail','MessageSquare','Phone','Globe',
+       'Lock','Unlock','Eye','EyeOff','Sparkles'].forEach(n => { icons[n+'Icon'] = mkIcon(); });
+
+      icons['Loader2Icon'] = ({ size = 16, className }) =>
+        h('span', { className: ['inline-block animate-spin rounded-full border-2 border-current border-t-transparent', className].filter(Boolean).join(' '), style: { width: size, height: size }, 'aria-hidden': 'true' });
+
+      return {
+        ui: { Box:mk('div',''), Flex:mk('div','flex'), Grid:mk('div','grid'), Stack:mk('div','flex flex-col'), Container:mk('div','container mx-auto px-4'),
+          Card:mk('div','rounded-lg border border-border bg-card shadow-sm'), CardHeader:mk('div','flex flex-col space-y-1.5 p-6 pb-2'),
+          CardTitle:({ children, className, ...p }) => h('h3', { className: ['font-semibold leading-none', className].filter(Boolean).join(' '), ...p }, children),
+          CardDescription:({ children, className, ...p }) => h('p', { className: ['text-sm text-muted-foreground', className].filter(Boolean).join(' '), ...p }, children),
+          CardContent:mk('div','p-6 pt-0'), CardFooter:mk('div','flex items-center p-6 pt-0'),
+          Button, Input, Textarea, Label, Badge, Avatar, AvatarImage, AvatarFallback,
+          Separator, Skeleton, Progress, Switch, Tabs, TabsList, TabsTrigger, TabsContent,
+          Alert, AlertTitle:mk('h5','mb-1 font-medium leading-none'), AlertDescription:mk('p','text-sm text-muted-foreground'),
+          Select:mk('select','flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm'),
+          SelectTrigger:mk('button','flex h-9 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50'),
+          SelectValue:mk('span','pointer-events-none'),
+          SelectContent:mk('div','relative z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0'),
+          SelectItem:mk('div','relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-2 pr-8 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50'),
+          Popover:mk('div','relative inline-block'),
+          PopoverTrigger: Button,
+          PopoverContent:mk('div','z-50 w-72 rounded-md border bg-popover p-4 text-popover-foreground shadow-md outline-none'),
+          Dialog:mk('div',''),
+          DialogTrigger: Button,
+          DialogContent:mk('div','fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 sm:rounded-lg'),
+          DialogHeader:mk('div','flex flex-col space-y-1.5 text-center sm:text-left'),
+          DialogTitle:mk('h2','text-lg font-semibold leading-none tracking-tight'),
+          DialogDescription:mk('p','text-sm text-muted-foreground'),
+          DialogFooter:mk('div','flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2'),
+          DropdownMenu:mk('div','relative inline-block'),
+          DropdownMenuTrigger: Button,
+          DropdownMenuContent:mk('div','z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md'),
+          DropdownMenuItem:mk('div','relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground'),
+          DropdownMenuLabel:mk('div','px-2 py-1.5 text-sm font-semibold'),
+          DropdownMenuSeparator: Separator,
+          Accordion:mk('div','w-full'),
+          AccordionItem:mk('div','border-b'),
+          AccordionTrigger:mk('button','flex flex-1 items-center justify-between py-4 text-sm font-medium transition-all hover:underline'),
+          AccordionContent:mk('div','overflow-hidden text-sm data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down pb-4 pt-0'),
+          TooltipProvider:mk('div',''),
+          Tooltip:mk('div','relative inline-block'),
+          TooltipTrigger: mk('div', 'inline-block'),
+          TooltipContent:mk('div','z-50 overflow-hidden rounded-md bg-primary px-3 py-1.5 text-xs text-primary-foreground animate-in fade-in-0 zoom-in-95'),
+          Table:mk('table','w-full caption-bottom text-sm'),
+          TableHeader:mk('thead','[&_tr]:border-b'),
+          TableBody:mk('tbody','[&_tr:last-child]:border-0'),
+          TableFooter:mk('tfoot','border-t bg-muted/50 font-medium [&>tr]:last:border-b-0'),
+          TableRow:mk('tr','border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted'),
+          TableHead:mk('th','h-10 px-2 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]'),
+          TableCell:mk('td','p-2 align-middle [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]'),
+          TableCaption:mk('caption','mt-4 text-sm text-muted-foreground'),
+        },
+        icons,
+        hooks: {
+          useDebounce: v => v,
+          useMediaQuery: () => false,
+          useClipboard: () => ({ copied: false, copy: async t => { try { await navigator.clipboard?.writeText(t); } catch {} }, reset: () => {} }),
+          useLocalStorage: (key, init) => {
+            const [v, sv] = R.useState(() => { try { const s = localStorage.getItem(key); return s ? JSON.parse(s) : init; } catch { return init; } });
+            return [v, nv => { sv(nv); try { localStorage.setItem(key, JSON.stringify(nv)); } catch {} }, () => sv(init)];
+          },
+          useControllable: ({ value, defaultValue, onChange }) => {
+            const [u, su] = R.useState(defaultValue);
+            return [value !== undefined ? value : u, n => { if (value === undefined) su(n); onChange?.(n); }];
+          },
+        },
+      };
+    }
+
+    // ─── Main render function ────────────────────────────────────────────────
+    // renderCode with retry — CDN scripts may still be fetching when the first
+    // RENDER_CODE message arrives. Retry up to 10× with 300ms gaps (3s total).
+    function renderCode(code, _attempt) {
+      if (!code) return;
+      clearError();
+
+      const R = window.React;
+      const RD = window.ReactDOM;
+
+      if (!R || !RD) {
+        const attempt = (_attempt ?? 0);
+        if (attempt < 10) {
+          setTimeout(() => renderCode(code, attempt + 1), 300);
+        } else {
+          showError('Failed to load React from CDN after 3 seconds.\nCheck your internet connection or refresh the preview.');
+        }
+        return;
+      }
+
+      // ErrorBoundary prevents React "White Screen of Death"
+      class ErrorBoundary extends R.Component {
+        constructor(props) { super(props); this.state = { hasError: false }; }
+        static getDerivedStateFromError(error) { return { hasError: true }; }
+        componentDidCatch(error, info) { showError(error.message || String(error)); }
+        render() { return this.state.hasError ? null : this.props.children; }
+      }
+
+      try {
+        // ── Step 1: strip module syntax BEFORE Babel ────────────────────────
+        // Babel auto-detects import/export and emits require() calls if not told otherwise.
+        // require() is not defined in the iframe → undefined.useState → the error.
+        // Solution: remove all import/export FIRST so Babel sees plain script code.
+        let src = code;
+
+        // Multi-line import: "import { ... } from '...';" ([\s\S]*? = non-greedy, spans newlines)
+        src = src.replace(/import\s[\s\S]*?from\s*['"][^'"]+['"]\s*;?/g, '');
+        // Side-effect import: "import 'something';"
+        src = src.replace(/import\s*['"][^'"]+['"]\s*;?/g, '');
+        // "use client" / "use server"
+        src = src.replace(/["']use (?:client|server)["']\s*;?\s*/g, '');
+        // "export default function Foo" → "function Foo"
+        src = src.replace(/\bexport\s+default\s+(?=function|class)/g, '');
+        // Standalone "export default Foo;"
+        src = src.replace(/^\s*export\s+default\s+[\w$]+\s*;?\s*$/gm, '');
+        // "export { Foo, Bar } from '...';" or "export { Foo };"
+        src = src.replace(/^\s*export\s*\{[^}]*\}[^;]*;?\s*$/gm, '');
+        // "export const/let/function/class" → strip "export"
+        src = src.replace(/^export\s+(?!default)/gm, '');
+
+        // ── Step 2: find component name (from original code) ────────────────
+        const nameMatch = code.match(/export\s+default\s+function\s+([A-Z][A-Za-z0-9_]*)/);
+        const componentName = nameMatch?.[1] ?? 'GeneratedComponent';
+
+        // ── Step 3: Babel (JSX + TypeScript only, no module transform) ──────
+        const result = Babel.transform(src, {
+          presets: [
+            ['react', { runtime: 'classic', pragma: 'React.createElement', pragmaFrag: 'React.Fragment' }],
+            ['typescript', { isTSX: true, allExtensions: true }],
+          ],
+          filename: 'component.tsx',
+          sourceType: 'script',  // no import/export left → script mode → no require() emitted
+          configFile: false,
+          babelrc: false,
+        });
+
+        if (!result?.code) throw new Error('Babel produced no output.');
+
+        // ── Step 4: build factory with all stubs ────────────────────────────
+        // Stubs are created fresh here so they close over the verified R reference.
+        const { ui, icons, hooks } = makeStubs(R);
+        const uiKeys = Object.keys(ui);
+        const iconKeys = Object.keys(icons);
+        const hookKeys = Object.keys(hooks);
+        const reactHookKeys = ['useState','useEffect','useRef','useCallback','useMemo','useReducer','useContext'];
+
+        const factory = new Function(
+          'React', 'ReactDOM',
+          ...uiKeys, ...iconKeys, ...hookKeys, ...reactHookKeys,
+          'cn',
+          result.code + '\n\nreturn typeof ' + componentName + ' !== "undefined" ? ' + componentName + ' : undefined;'
+        );
+
+        const Component = factory(
+          R, RD,
+          ...Object.values(ui), ...Object.values(icons), ...Object.values(hooks),
+          R.useState, R.useEffect, R.useRef, R.useCallback, R.useMemo, R.useReducer, R.useContext,
+          (...args) => args.filter(Boolean).join(' '), // cn
+        );
+
+        if (typeof Component !== 'function') {
+          throw new Error(
+            `No default export found (got: ${typeof Component}).\n` +
+            `Make sure your component uses:\n  export default function ${componentName}() { ... }`
+          );
+        }
+
+        if (!reactRoot) reactRoot = window.ReactDOMClient.createRoot(rootEl);
+        reactRoot.render(
+          R.createElement(R.StrictMode, null,
+            R.createElement(ErrorBoundary, null, 
+              R.createElement(Component)
+            )
+          )
+        );
+
+      } catch (err) {
+        showError(err instanceof Error ? err.message : String(err));
+      }
+    }
+
+    // ─── Bootstrap: wait for DOM + scripts, then register listener ──────────
+    // DOMContentLoaded fires after all synchronous scripts (including CDN ones)
+    // have executed. Only then do we send FRAME_READY so the parent knows the
+    // iframe is actually ready to receive RENDER_CODE.
+    const onMessage = async (e) => {
+      if (e.data?.type === 'RENDER_CODE') {
+        renderCode(e.data.code);
+      } else if (e.data?.type === 'RUN_AXE') {
+        await runAxe();
+      } else if (e.data?.type === 'THEME_UPDATE') {
+        document.documentElement.classList.toggle('dark', e.data.theme === 'dark');
+      }
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      window.addEventListener('message', onMessage);
+      window.parent.postMessage({ type: 'FRAME_READY' }, '*');
+    });
+
+    // Fallback: if DOMContentLoaded already fired (unlikely in iframe), send now
+    if (document.readyState !== 'loading') {
+      window.addEventListener('message', onMessage);
+      window.parent.postMessage({ type: 'FRAME_READY' }, '*');
+    }
+  </script>
+</body>
+</html>

@@ -42,3 +42,13 @@ console.log("✓ vendor/react-dom.js");
 await writeFile(path.join(OUT, "babel.js"), await readFile(require.resolve("@babel/standalone"), "utf-8"));
 console.log("✓ vendor/babel.js");
 
+// Axe-core
+await writeFile(path.join(OUT, "axe.js"), await readFile(require.resolve("axe-core/axe.min.js"), "utf-8"));
+console.log("✓ vendor/axe.js");
+
+// DesignForge Themes CSS
+const fsProm = await import("fs/promises");
+const themesDistPath = path.dirname(require.resolve("@designforge/themes"));
+await fsProm.copyFile(path.join(themesDistPath, "styles.css"), path.join(OUT, "themes.css"));
+console.log("✓ vendor/themes.css");
+

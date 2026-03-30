@@ -1,0 +1,217 @@
+/* @designforge/themes — import this once in your app root */
+/* https://github.com/mynk-13/design-forge */
+
+/**
+ * DesignForge — Light theme preset
+ * All CSS custom properties are HSL channel values (no hsl() wrapper).
+ * Consume via: hsl(var(--df-primary) / <alpha>)
+ */
+
+:root {
+  /* ── Brand colors ─────────────────────────────────── */
+  --df-primary: 245 58% 60%;
+  --df-primary-foreground: 0 0% 100%;
+  --df-secondary: 245 20% 92%;
+  --df-secondary-foreground: 245 47% 25%;
+
+  /* ── Surface colors ───────────────────────────────── */
+  --df-background: 0 0% 100%;
+  --df-foreground: 222 47% 11%;
+  --df-card: 0 0% 100%;
+  --df-card-foreground: 222 47% 11%;
+  --df-popover: 0 0% 100%;
+  --df-popover-foreground: 222 47% 11%;
+
+  /* ── Neutral colors ───────────────────────────────── */
+  --df-muted: 210 40% 96%;
+  --df-muted-foreground: 215 16% 47%;
+  --df-accent: 245 20% 96%;
+  --df-accent-foreground: 245 47% 25%;
+
+  /* ── Semantic colors ──────────────────────────────── */
+  --df-destructive: 0 84% 60%;
+  --df-destructive-foreground: 0 0% 100%;
+  --df-success: 142 76% 36%;
+  --df-success-foreground: 0 0% 100%;
+  --df-warning: 38 92% 50%;
+  --df-warning-foreground: 0 0% 100%;
+  --df-info: 199 89% 48%;
+  --df-info-foreground: 0 0% 100%;
+
+  /* ── Chrome ───────────────────────────────────────── */
+  --df-border: 214 32% 91%;
+  --df-input: 214 32% 91%;
+  --df-ring: 245 58% 60%;
+
+  /* ── Spacing ──────────────────────────────────────── */
+  --df-space-px: 1px;
+  --df-space-0: 0px;
+  --df-space-0-5: 0.125rem;
+  --df-space-1: 0.25rem;
+  --df-space-1-5: 0.375rem;
+  --df-space-2: 0.5rem;
+  --df-space-2-5: 0.625rem;
+  --df-space-3: 0.75rem;
+  --df-space-3-5: 0.875rem;
+  --df-space-4: 1rem;
+  --df-space-5: 1.25rem;
+  --df-space-6: 1.5rem;
+  --df-space-7: 1.75rem;
+  --df-space-8: 2rem;
+  --df-space-9: 2.25rem;
+  --df-space-10: 2.5rem;
+  --df-space-11: 2.75rem;
+  --df-space-12: 3rem;
+
+  /* ── Border radius ────────────────────────────────── */
+  --df-radius-none: 0px;
+  --df-radius-sm: 0.25rem;
+  --df-radius: 0.5rem;
+  --df-radius-md: 0.5rem;
+  --df-radius-lg: 0.75rem;
+  --df-radius-xl: 1rem;
+  --df-radius-2xl: 1.5rem;
+  --df-radius-full: 9999px;
+
+  /* ── Typography ───────────────────────────────────── */
+  --df-font-sans: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, sans-serif;
+  --df-font-mono: "JetBrains Mono", "Fira Code", "Cascadia Code", Consolas,
+    "Courier New", monospace;
+  --df-font-size-xs: 0.75rem;
+  --df-font-size-sm: 0.875rem;
+  --df-font-size-base: 1rem;
+  --df-font-size-lg: 1.125rem;
+  --df-font-size-xl: 1.25rem;
+  --df-font-size-2xl: 1.5rem;
+  --df-font-size-3xl: 1.875rem;
+  --df-font-size-4xl: 2.25rem;
+  --df-font-size-5xl: 3rem;
+  --df-font-weight-normal: 400;
+  --df-font-weight-medium: 500;
+  --df-font-weight-semibold: 600;
+  --df-font-weight-bold: 700;
+  --df-line-height-none: 1;
+  --df-line-height-tight: 1.25;
+  --df-line-height-snug: 1.375;
+  --df-line-height-normal: 1.5;
+  --df-line-height-relaxed: 1.625;
+  --df-line-height-loose: 2;
+  --df-letter-spacing-tight: -0.05em;
+  --df-letter-spacing-normal: 0em;
+  --df-letter-spacing-wide: 0.025em;
+  --df-letter-spacing-wider: 0.05em;
+  --df-letter-spacing-widest: 0.1em;
+
+  /* ── Shadows ──────────────────────────────────────── */
+  --df-shadow-sm: 0 1px 2px 0 hsl(0 0% 0% / 0.05);
+  --df-shadow: 0 1px 3px 0 hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
+  --df-shadow-md: 0 4px 6px -1px hsl(0 0% 0% / 0.1),
+    0 2px 4px -2px hsl(0 0% 0% / 0.1);
+  --df-shadow-lg: 0 10px 15px -3px hsl(0 0% 0% / 0.1),
+    0 4px 6px -4px hsl(0 0% 0% / 0.1);
+  --df-shadow-xl: 0 20px 25px -5px hsl(0 0% 0% / 0.1),
+    0 8px 10px -6px hsl(0 0% 0% / 0.1);
+  --df-shadow-2xl: 0 25px 50px -12px hsl(0 0% 0% / 0.25);
+  --df-shadow-none: 0 0 #0000;
+  --df-shadow-overlay: 0 0 0 1px hsl(0 0% 0% / 0.05),
+    0 10px 38px -10px hsl(0 0% 0% / 0.3), 0 10px 20px -15px hsl(0 0% 0% / 0.2);
+
+  /* ── Animation ────────────────────────────────────── */
+  --df-duration-instant: 0ms;
+  --df-duration-fast: 150ms;
+  --df-duration-normal: 200ms;
+  --df-duration-slow: 300ms;
+  --df-duration-slower: 500ms;
+  --df-ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --df-ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --df-ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --df-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --df-ease-bounce: cubic-bezier(0.68, -0.55, 0.27, 1.55);
+}
+
+
+/**
+ * DesignForge — Dark theme preset
+ * Only overrides tokens that differ from the light preset.
+ * Apply by adding class="dark" to <html>.
+ * System-preference auto-detection: :root:not(.light) within prefers-color-scheme media query.
+ */
+
+.dark {
+  --df-primary: 245 58% 65%;
+  --df-secondary: 245 20% 20%;
+  --df-secondary-foreground: 245 30% 80%;
+  --df-background: 222 47% 11%;
+  --df-foreground: 210 40% 98%;
+  --df-card: 222 47% 14%;
+  --df-card-foreground: 210 40% 98%;
+  --df-popover: 222 47% 14%;
+  --df-popover-foreground: 210 40% 98%;
+  --df-muted: 217 33% 17%;
+  --df-muted-foreground: 215 20% 65%;
+  --df-accent: 245 20% 20%;
+  --df-accent-foreground: 245 30% 80%;
+  --df-destructive: 0 72% 51%;
+  --df-success: 142 69% 58%;
+  --df-border: 217 33% 17%;
+  --df-input: 217 33% 17%;
+  --df-ring: 245 58% 65%;
+}
+
+/* Respect OS-level dark mode when no explicit class is set */
+@media (prefers-color-scheme: dark) {
+  :root:not(.light) {
+    --df-primary: 245 58% 65%;
+    --df-secondary: 245 20% 20%;
+    --df-secondary-foreground: 245 30% 80%;
+    --df-background: 222 47% 11%;
+    --df-foreground: 210 40% 98%;
+    --df-card: 222 47% 14%;
+    --df-card-foreground: 210 40% 98%;
+    --df-popover: 222 47% 14%;
+    --df-popover-foreground: 210 40% 98%;
+    --df-muted: 217 33% 17%;
+    --df-muted-foreground: 215 20% 65%;
+    --df-accent: 245 20% 20%;
+    --df-accent-foreground: 245 30% 80%;
+    --df-destructive: 0 72% 51%;
+    --df-success: 142 69% 58%;
+    --df-border: 217 33% 17%;
+    --df-input: 217 33% 17%;
+    --df-ring: 245 58% 65%;
+  }
+}
+
+
+/* ── Base reset ───────────────────────────────────────── */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  border-color: hsl(var(--df-border));
+}
+
+body {
+  background-color: hsl(var(--df-background));
+  color: hsl(var(--df-foreground));
+  font-family: var(--df-font-sans);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
