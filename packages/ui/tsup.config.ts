@@ -3,6 +3,9 @@ import { defineConfig } from "tsup";
 export default defineConfig({
   entry: ["src/index.ts"],
   format: ["esm", "cjs"],
+  banner: {
+    js: '"use client";',
+  },
   dts: true,
   splitting: true,
   treeshake: true,

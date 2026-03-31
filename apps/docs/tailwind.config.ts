@@ -5,6 +5,7 @@ const config: Config = {
   content: [
     "./app/**/*.{ts,tsx}",
     "./components/**/*.{ts,tsx}",
+    "./content/**/*.mdx",
     "../../packages/ui/src/**/*.{ts,tsx}",
   ],
   darkMode: "class",
@@ -14,7 +15,7 @@ const config: Config = {
       // by the @designforge/themes tailwindPlugin below.
     },
   },
-  plugins: [tailwindPlugin],
+  plugins: [tailwindPlugin, require("@tailwindcss/typography")],
 };
 
 export default config;

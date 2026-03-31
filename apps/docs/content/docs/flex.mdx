@@ -1,0 +1,47 @@
+---
+title: "Flex"
+description: "A flexible container component for arranging children seamlessly."
+---
+
+The `Flex` component abstracts the standard CSS flexbox model into simple configurable properties, minimizing the need for manual class utilities in common grid arrangements.
+
+## Installation
+
+```bash
+npm install @designforge/ui
+```
+
+## Usage
+
+```tsx
+import { Flex } from "@designforge/ui";
+
+export default function App() {
+  return (
+    <Flex direction="row" align="center" justify="between" gap="4">
+      <div>Left Content</div>
+      <div>Right Content</div>
+    </Flex>
+  );
+}
+```
+
+### Attributes
+
+| Prop        | Type                                                                     | Default     | Description                                    |
+| :---------- | :----------------------------------------------------------------------- | :---------- | :--------------------------------------------- |
+| `direction` | `row` \| `col` \| `row-reverse` \| `col-reverse`                         | `"row"`     | The flex-direction CSS mapping.                |
+| `align`     | `start` \| `center` \| `end` \| `stretch` \| `baseline`                  | `undefined` | The align-items CSS mapping.                   |
+| `justify`   | `start` \| `center` \| `end` \| `between` \| `around` \| `evenly`        | `undefined` | The justify-content CSS mapping.               |
+| `gap`       | `0` \| `1` \| `2` \| `3` \| `4` \| `5` \| `6` \| `8` \| `10` \| `12`     | `undefined` | The flex grid gap token mapped to the token CSS. |
+| `inline`    | `boolean`                                                                | `false`     | Determines if display is `inline-flex`.        |
+
+
+## Live View
+
+Here is a live contextual rendering of the component directly from our isolated Storybook environment.
+
+<StorybookPreview src="http://localhost:6006/iframe.html?id=layout-flex--row&viewMode=story" />
+
+> [!TIP]
+> [Open Component in Storybook ↗](http://localhost:6006/?path=/story/layout-flex--row)

@@ -1,0 +1,43 @@
+---
+title: "Box"
+description: "A polymorphic generic wrapper component for applying styles natively."
+---
+
+The `Box` component serves as a foundational building block for constructing layouts. By default, it renders as a `div`, but you can cleanly substitute its underlying tag using the `asChild` prop or polymorphic parameters.
+
+## Installation
+
+```bash
+npm install @designforge/ui
+```
+
+## Usage
+
+```tsx
+import { Box } from "@designforge/ui";
+
+export default function App() {
+  return (
+    <Box className="bg-primary text-primary-foreground p-4 rounded-md">
+      Natively styled container
+    </Box>
+  );
+}
+```
+
+### Attributes
+
+| Prop      | Type      | Default       | Description                                                 |
+| :-------- | :-------- | :------------ | :---------------------------------------------------------- |
+| `asChild` | `boolean` | `false`       | Merges all styles directly onto the first provided element. |
+| `ref`     | `Ref`     | `undefined`   | Forwards standard DOM references reliably.                  |
+
+
+## Live View
+
+Here is a live contextual rendering of the component directly from our isolated Storybook environment.
+
+<StorybookPreview src="http://localhost:6006/iframe.html?id=layout-box--default&viewMode=story" />
+
+> [!TIP]
+> [Open Component in Storybook ↗](http://localhost:6006/?path=/story/layout-box--default)

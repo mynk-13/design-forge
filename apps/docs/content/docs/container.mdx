@@ -1,0 +1,42 @@
+---
+title: "Container"
+description: "A constrained layout wrapper centering content universally."
+---
+
+The `Container` component limits the maximum expansion width of nested elements. It correctly applies central margins automatically to force the element tree to align seamlessly.
+
+## Installation
+
+```bash
+npm install @designforge/ui
+```
+
+## Usage
+
+```tsx
+import { Container } from "@designforge/ui";
+
+export default function App() {
+  return (
+    <Container size="md">
+      Constrained middle content segment.
+    </Container>
+  );
+}
+```
+
+### Attributes
+
+| Prop       | Type                                                                       | Default     | Description                                                     |
+| :--------- | :------------------------------------------------------------------------- | :---------- | :-------------------------------------------------------------- |
+| `size`     | `sm` \| `md` \| `lg` \| `xl` \| `2xl` \| `full`                            | `"xl"`      | Restricts maximum breakpoint dimensions symmetrically mapping to standard breakpoint numbers (`640px` to `1536px`). |
+
+
+## Live View
+
+Here is a live contextual rendering of the component directly from our isolated Storybook environment.
+
+<StorybookPreview src="http://localhost:6006/iframe.html?id=layout-container--default&viewMode=story" />
+
+> [!TIP]
+> [Open Component in Storybook ↗](http://localhost:6006/?path=/story/layout-container--default)

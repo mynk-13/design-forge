@@ -1,0 +1,28 @@
+---
+title: "Interactive Playground"
+description: "An isolated Monaco sandbox environment for real-time React telemetry and previewing."
+---
+
+The **Playground** enables you to instantly test, edit, and experiment with DesignForge components locally in your browser. Powered by an integrated **Monaco code editor** and a live execution sandbox, it's designed to provide instant feedback without needing to boot up a local IDE.
+
+## Features
+
+- **Split-Pane Layout:** Resizable panels allowing custom preview/editor sizing dynamically.
+- **Monaco Intellisense:** Full TypeScript support for `@designforge/ui` imported primitives locally out-of-the-box.
+- **Simulated Runtimes:** Change the simulated viewport scale (`375px`, `768px`, `1280px`).
+- **Telemetry Console:** Live console capture intercepting internal browser logs.
+- **Save State:** Unique algorithmic strings serialization mapping exact state data securely to shareable URLs!
+
+## Open Sandbox
+
+You can jump into the unified Playground manually at any time using the global navigation bar, or via the quick link below:
+
+<div className="mt-8 mb-4">
+  <a href="/playground" className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 bg-secondary text-secondary-foreground hover:bg-secondary/80 h-10 px-8 gap-2 border">
+    Open the Playground
+  </a>
+</div>
+
+### Share Functionality
+
+Any changes made in the Playground editor can be serialized into compressed LZString formats seamlessly by clicking the **Share** button in the top navigation. Once copied, providing the extracted URI to anyone else will autonomously rehydrate the editor back up completely instantly!

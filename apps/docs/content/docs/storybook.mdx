@@ -1,0 +1,24 @@
+---
+title: "Storybook Navigation"
+description: "Interactive UI primitive verification within the isolated Storybook environment."
+---
+
+The ecosystem hosts a fully configured Storybook instance that runs independently from the Next.js production router. This allows us to visually test all 34 structural components in isolation with granular addon-controls, simulated viewports, and deep accessibility tracking using `axe-core`.
+
+## Integration Highlights
+
+- **Vite Bundler:** Driven entirely by `@storybook/react-vite` to provide near-instant HMR preview reloads parallel to the Next.js ecosystem.
+- **A11y Validations:** Native `@storybook/addon-a11y` bindings inject live contrast matching and ARIA role conformance metrics across all component states automatically.
+- **Zero-Config Styles:** Resolves `@designforge/themes` via `styles.css` natively so components appear correctly within Storybook without relying on Next.js Tailwind loaders!
+
+## Open Storybook
+
+Storybook automatically mounts all `.stories.tsx` files located inside `packages/ui` and groups them systematically.
+
+<div className="mt-8 mb-4 flex gap-4">
+  <a href="http://localhost:6006" target="_blank" className="inline-flex items-center justify-center font-bold rounded-md text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 bg-[#ff4785] text-white hover:bg-[#ff4785]/90 h-10 px-8 gap-2 shadow-md">
+    Launch Main Storybook
+  </a>
+</div>
+
+*(Note: Ensure your local environment is currently running `pnpm run storybook` inside your terminal!)*

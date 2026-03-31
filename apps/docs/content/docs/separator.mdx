@@ -1,0 +1,45 @@
+---
+title: "Separator"
+description: "A visually and semantically accessible dividing line element."
+---
+
+The `Separator` component represents a thematic and structural break spanning visually across the screen or an inner container. Under the hood, it's firmly bound to Radix's standard `<hr>` structural element mapping.
+
+## Installation
+
+```bash
+npm install @designforge/ui @radix-ui/react-separator
+```
+
+## Usage
+
+```tsx
+import { Separator } from "@designforge/ui";
+
+export default function App() {
+  return (
+    <div>
+      <p>Above</p>
+      <Separator orientation="horizontal" />
+      <p>Below</p>
+    </div>
+  );
+}
+```
+
+### Attributes
+
+| Prop          | Type                                                                     | Default        | Description                                    |
+| :------------ | :----------------------------------------------------------------------- | :------------- | :--------------------------------------------- |
+| `orientation` | `"horizontal"` \| `"vertical"`                                           | `"horizontal"` | Defines the physical and semantic render plane.|
+| `decorative`  | `boolean`                                                                | `false`        | Prevents screen readers from announcing it.    |
+
+
+## Live View
+
+Here is a live contextual rendering of the component directly from our isolated Storybook environment.
+
+<StorybookPreview src="http://localhost:6006/iframe.html?id=layout-separator--horizontal&viewMode=story" />
+
+> [!TIP]
+> [Open Component in Storybook ↗](http://localhost:6006/?path=/story/layout-separator--horizontal)

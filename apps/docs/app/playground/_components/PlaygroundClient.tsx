@@ -181,7 +181,7 @@ export function PlaygroundClient() {
 
           {/* Collapsible Developer Console */}
           <div className={`mt-4 overflow-hidden rounded-lg border bg-card text-card-foreground shadow-sm transition-all duration-300 flex flex-col ${store.isConsoleOpen ? "h-64" : "h-10"}`}>
-            <button type="button" className="flex h-10 w-full shrink-0 select-none items-center justify-between border-b bg-muted/50 px-3 py-2 cursor-pointer cursor-ns-resize outline-none focus-visible:bg-muted/80" onClick={() => store.toggleConsole()}>
+            <div role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') store.toggleConsole(); }} className="flex h-10 w-full shrink-0 select-none items-center justify-between border-b bg-muted/50 px-3 py-2 cursor-pointer cursor-ns-resize outline-none focus-visible:bg-muted/80" onClick={() => store.toggleConsole()}>
               <div className="flex items-center gap-2">
                 <TerminalSquareIcon className="h-4 w-4" />
                 <span className="text-sm font-medium">Console ({store.consoleEntries.length})</span>
@@ -191,7 +191,7 @@ export function PlaygroundClient() {
                    <TrashIcon className="h-3 w-3" />
                  </Button>
               </div>
-            </button>
+            </div>
             
             <div className="flex-1 overflow-y-auto p-2 font-mono text-xs">
               {store.consoleEntries.map((c) => (

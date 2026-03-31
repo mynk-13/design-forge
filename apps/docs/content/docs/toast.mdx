@@ -1,0 +1,40 @@
+---
+title: "Toast"
+description: "Documentation for the Toast component."
+---
+
+The `Toast` component represents a fundamental UI building block within the DesignForge token system.
+
+## Installation
+
+```bash
+npm install @designforge/ui
+```
+
+## Usage
+
+```tsx
+import { Toast } from "@designforge/ui";
+
+export default function App() {
+  return (
+    <Toast>Example Content</Toast>
+  );
+}
+```
+
+### Attributes
+
+| Prop      | Type      | Default       | Description                                                 |
+| :-------- | :-------- | :------------ | :---------------------------------------------------------- |
+| `className` | `string`  | `undefined`   | Merges all optional utility styles directly. |
+
+
+## Live View
+
+Here is a live contextual rendering of the component directly from our isolated Storybook environment.
+
+<StorybookPreview src="http://localhost:6006/iframe.html?id=feedback-toast--default&viewMode=story" />
+
+> [!TIP]
+> [Open Component in Storybook ↗](http://localhost:6006/?path=/story/feedback-toast--default)

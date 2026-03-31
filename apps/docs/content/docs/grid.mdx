@@ -1,0 +1,51 @@
+---
+title: "Grid"
+description: "A two-dimensional grid layout primitive for structural mapping."
+---
+
+The `Grid` component abstracts the standard CSS grid definition into straightforward numeric tokens for columns, rows, spans, and responsive flow.
+
+## Installation
+
+```bash
+npm install @designforge/ui
+```
+
+## Usage
+
+```tsx
+import { Grid } from "@designforge/ui";
+
+export default function App() {
+  return (
+    <Grid cols={3} gap="4">
+      <div>Item 1</div>
+      <div>Item 2</div>
+      <div>Item 3</div>
+    </Grid>
+  );
+}
+```
+
+### Attributes
+
+| Prop       | Type                                                                       | Default     | Description                                                     |
+| :--------- | :------------------------------------------------------------------------- | :---------- | :-------------------------------------------------------------- |
+| `cols`     | `1` \| `2` \| `3` \| `4` \| `5` \| `6` \| `7` \| `8` \| `9` \| `10` \| `11` \| `12` | `undefined` | Defines the number of grid column tracks mapping to CSS counts. |
+| `rows`     | `1` \| `2` \| `3` \| `4` \| `5` \| `6`                                     | `undefined` | Defines the number of explicit grid rows natively wrapped.      |
+| `gap`      | `0` \| `1` \| `2` \| `3` \| `4` \| `5` \| `6` \| `8` \| `10` \| `12`       | `undefined` | The grid gap magnitude across X and Y axes unified.             |
+| `gapX`     | `0` \| `1` \| `2` \| `3` \| `4` \| `6` \| `8`                              | `undefined` | Exclusive Y axis cross gap padding definitions.                 |
+| `gapY`     | `0` \| `1` \| `2` \| `3` \| `4` \| `6` \| `8`                              | `undefined` | Exclusive X axis parallel gap padding margins.                  |
+| `align`    | `start` \| `center` \| `end` \| `stretch`                                  | `undefined` | Row-aligned items mapped linearly.                              |
+| `justify`  | `start` \| `center` \| `end` \| `stretch`                                  | `undefined` | Column-aligned items cross mapped logically.                    |
+| `flow`     | `row` \| `col` \| `dense` \| `row-dense` \| `col-dense`                    | `undefined` | Flow interpolation pattern to auto-fit blank dense holes.       |
+
+
+## Live View
+
+Here is a live contextual rendering of the component directly from our isolated Storybook environment.
+
+<StorybookPreview src="http://localhost:6006/iframe.html?id=layout-grid--two-columns&viewMode=story" />
+
+> [!TIP]
+> [Open Component in Storybook ↗](http://localhost:6006/?path=/story/layout-grid--two-columns)

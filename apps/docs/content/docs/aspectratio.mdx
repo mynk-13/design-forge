@@ -1,0 +1,46 @@
+---
+title: "AspectRatio"
+description: "A functional layout constraint for maintaining specific image ratios."
+---
+
+The `AspectRatio` component restricts internal components such as video embeds or raw images to precise mathematical resolutions across any viewport scaling sequence.
+
+## Installation
+
+```bash
+npm install @designforge/ui @radix-ui/react-aspect-ratio
+```
+
+## Usage
+
+```tsx
+import Image from "next/image";
+import { AspectRatio } from "@designforge/ui";
+
+export default function App() {
+  return (
+    <div className="w-[400px]">
+      <AspectRatio ratio={16 / 9} className="bg-muted">
+        <Image src="https://images.unsplash.com/photo-1" alt="landscape" fill className="object-cover rounded-md" />
+      </AspectRatio>
+    </div>
+  );
+}
+```
+
+### Attributes
+
+| Prop          | Type                                                                     | Default        | Description                                    |
+| :------------ | :----------------------------------------------------------------------- | :------------- | :--------------------------------------------- |
+| `ratio`       | `number`                                                                 | `1`            | Mathematical numerical dimension multiplier.   |
+| `asChild`     | `boolean`                                                                | `false`        | Prevents additional DOM layers via fragmenting.|
+
+
+## Live View
+
+Here is a live contextual rendering of the component directly from our isolated Storybook environment.
+
+<StorybookPreview src="http://localhost:6006/iframe.html?id=layout-aspectratio--widescreen&viewMode=story" />
+
+> [!TIP]
+> [Open Component in Storybook ↗](http://localhost:6006/?path=/story/layout-aspectratio--widescreen)

@@ -1,0 +1,47 @@
+---
+title: "Stack"
+description: "A flexbox-driven flow container tailored to 1D spacing."
+---
+
+The `Stack` component manages vertical or horizontal gaps recursively, acting seamlessly as the quickest macro flex wrapper to construct layout hierarchies. By default, it flows vertically with a moderate gap.
+
+## Installation
+
+```bash
+npm install @designforge/ui
+```
+
+## Usage
+
+```tsx
+import { Stack } from "@designforge/ui";
+
+export default function App() {
+  return (
+    <Stack gap="4">
+      <div>Top Element</div>
+      <div>Bottom Element</div>
+    </Stack>
+  );
+}
+```
+
+### Attributes
+
+| Prop        | Type                                                                     | Default     | Description                                    |
+| :---------- | :----------------------------------------------------------------------- | :---------- | :--------------------------------------------- |
+| `direction` | `vertical` \| `horizontal`                                               | `"vertical"`| Axis layout flow direction CSS equivalent mapping. |
+| `align`     | `start` \| `center` \| `end` \| `stretch`                                | `undefined` | Flow cross-align property binding.             |
+| `justify`   | `start` \| `center` \| `end` \| `between`                                | `undefined` | Secondary layout axis spread justification.    |
+| `gap`       | `0` \| `1` \| `2` \| `3` \| `4` \| `5` \| `6` \| `8` \| `10` \| `12`     | `"4"`       | Symmetrical token gap value spacing properties.|
+| `wrap`      | `boolean`                                                                | `false`     | Permits native wrapping overflow breakage limit.|
+
+
+## Live View
+
+Here is a live contextual rendering of the component directly from our isolated Storybook environment.
+
+<StorybookPreview src="http://localhost:6006/iframe.html?id=layout-stack--vertical&viewMode=story" />
+
+> [!TIP]
+> [Open Component in Storybook ↗](http://localhost:6006/?path=/story/layout-stack--vertical)

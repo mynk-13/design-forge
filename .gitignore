@@ -37,3 +37,6 @@ test-results/
 .DS_Store
 Thumbs.db
 *.log
+.claude/
+error.html
+test_error.html

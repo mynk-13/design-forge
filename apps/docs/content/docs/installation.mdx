@@ -1,0 +1,60 @@
+---
+title: "Installation"
+description: "How to install and configure DesignForge in your React application."
+---
+
+DesignForge is designed to be highly modular. You can install the entire suite or specific packages depending on your use case.
+
+## Requirements
+
+- Node.js 18+
+- React 18 or 19
+- Tailwind CSS 3.4+ or 4.0
+
+## 1. Install Packages
+
+```bash
+npm install @designforge/ui @designforge/themes @designforge/icons
+```
+
+## 2. Configure Tailwind
+
+Open your `tailwind.config.ts` (or `js`) and add the DesignForge plugin to inject all the required CSS variables and component utility behaviors.
+
+```ts title="tailwind.config.ts"
+import type { Config } from "tailwindcss";
+import { tailwindPlugin } from "@designforge/themes";
+
+const config: Config = {
+  content: [
+    "./app/**/*.{ts,tsx}",
+    "./components/**/*.{ts,tsx}",
+    "./node_modules/@designforge/ui/dist/**/*.js",
+  ],
+  darkMode: "class",
+  plugins: [tailwindPlugin],
+};
+
+export default config;
+```
+
+## 3. Import Global Styles
+
+Import the baseline CSS file from the themes package into your root layout or root `index.css` file:
+
+```tsx title="app/layout.tsx"
+import "@designforge/themes/styles.css";
+// ...
+```
+
+## 4. You're set!
+
+Start importing components directly from the UI package:
+
+```tsx
+import { Button } from "@designforge/ui";
+
+export default function App() {
+  return <Button>Hello World</Button>;
+}
+```
