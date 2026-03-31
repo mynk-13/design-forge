@@ -33,7 +33,7 @@ function getInitialHeight(src: string): number {
   try {
     const url = new URL(src);
     const storyId = url.searchParams.get("id") ?? "";
-    const name = storyId.split("--")[0].split("-").pop()?.toLowerCase() ?? "";
+    const name = (storyId.split("--")[0] ?? "").split("-").pop()?.toLowerCase() ?? "";
     return INITIAL_HEIGHTS[name] ?? DEFAULT_INITIAL;
   } catch {
     return DEFAULT_INITIAL;
