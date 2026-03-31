@@ -34,9 +34,9 @@ import * as UI from "@designforge/ui";
 import { StorybookPreview } from "../../../../components/StorybookPreview";
 
 const components = {
-  h1: (props: any) => <h1 className="mt-2 scroll-m-20 text-4xl font-bold tracking-tight" {...props} />,
-  h2: (props: any) => <h2 className="mt-10 scroll-m-20 border-b pb-1 text-3xl font-semibold tracking-tight first:mt-0" {...props} />,
-  h3: (props: any) => <h3 className="mt-8 scroll-m-20 text-2xl font-semibold tracking-tight" {...props} />,
+  h1: ({ children, ...props }: any) => <h1 className="mt-2 scroll-m-20 text-4xl font-bold tracking-tight" {...props}>{children}</h1>,
+  h2: ({ children, ...props }: any) => <h2 className="mt-10 scroll-m-20 border-b pb-1 text-3xl font-semibold tracking-tight first:mt-0" {...props}>{children}</h2>,
+  h3: ({ children, ...props }: any) => <h3 className="mt-8 scroll-m-20 text-2xl font-semibold tracking-tight" {...props}>{children}</h3>,
   p: (props: any) => <p className="leading-7 [&:not(:first-child)]:mt-6" {...props} />,
   ul: (props: any) => <ul className="my-6 ml-6 list-disc [&>li]:mt-2" {...props} />,
   code: (props: any) => <code className="relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold" {...props} />,

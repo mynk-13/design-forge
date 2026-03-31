@@ -44,7 +44,7 @@ export function getDocBySlug(slug: string): Doc | undefined {
       meta: data as DocMeta,
       content,
     };
-  } catch (err) {
+  } catch (_err) {
     return undefined;
   }
 }
