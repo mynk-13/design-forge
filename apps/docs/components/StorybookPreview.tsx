@@ -2,6 +2,14 @@
 
 import { useEffect, useRef, useState } from "react";
 
+const STORYBOOK_BASE =
+  process.env.NEXT_PUBLIC_STORYBOOK_URL?.replace(/\/$/, "") ?? "http://localhost:6006";
+
+/** Rewrite localhost URLs to the deployed Storybook base in production. */
+function resolveStorybookSrc(src: string): string {
+  return src.replace(/^https?:\/\/localhost:\d+/, STORYBOOK_BASE);
+}
+
 // ── Initial height estimates ──────────────────────────────────────────────────
 // Shown immediately while the story loads, preventing a jarring 0→N height
 // jump. Once the Storybook iframe posts its real scrollHeight via postMessage,
@@ -65,8 +73,10 @@ export function StorybookPreview({
   src,
   title = "Storybook Preview",
 }: StorybookPreviewProps) {
+  const resolvedSrc = resolveStorybookSrc(src);
   const iframeRef = useRef<HTMLIFrameElement>(null);
-  const [height, setHeight] = useState(() => getInitialHeight(src));
+  const [height, setHeight] = useState(() => getInitialHeight(resolvedSrc));
+  const [errored, setErrored] = useState(false);
 
   useEffect(() => {
     // Listen for height reports from the Storybook preview iframe
@@ -107,14 +117,23 @@ export function StorybookPreview({
     };
   }, []);
 
+  if (errored) {
+    return (
+      <div className="not-prose my-6 flex items-center justify-center rounded-lg border bg-muted text-muted-foreground text-sm" style={{ height: "200px" }}>
+        Live preview unavailable
+      </div>
+    );
+  }
+
   return (
     <div className="not-prose my-6">
       <iframe
         ref={iframeRef}
-        src={src}
+        src={resolvedSrc}
         title={title}
         className="w-full rounded-lg border bg-background shadow-sm"
         style={{ height: `${height}px`, display: "block" }}
+        onError={() => setErrored(true)}
       />
     </div>
   );
