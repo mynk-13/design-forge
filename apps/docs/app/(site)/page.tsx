@@ -33,7 +33,7 @@ export default function MarketingPage() {
             </Button>
           </Link>
           <Link href="/playground">
-            <Button size="lg" variant="secondary" className="h-12 px-8 gap-2 w-full sm:w-auto">
+            <Button size="lg" variant="outline" className="h-12 px-8 gap-2 w-full sm:w-auto">
               <PlayIcon className="h-4 w-4" />
               Playground
             </Button>
