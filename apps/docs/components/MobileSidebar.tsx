@@ -36,7 +36,12 @@ export function MobileSidebar() {
       {open && (
         <div className="fixed inset-0 z-50 md:hidden" role="dialog" aria-modal="true" aria-label="Navigation">
           {/* Backdrop */}
-          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={close} />
+          <button
+            className="absolute inset-0 bg-background/80 backdrop-blur-sm w-full cursor-default"
+            onClick={close}
+            aria-label="Close navigation menu"
+            tabIndex={-1}
+          />
 
           {/* Drawer */}
           <div className="absolute left-0 top-0 h-full w-72 bg-background border-r shadow-xl flex flex-col">

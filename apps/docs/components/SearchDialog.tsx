@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { SearchIcon } from "lucide-react";
 import { Button } from "@designforge/ui";
@@ -51,6 +51,12 @@ function SearchDialog({ onClose }: { onClose: () => void }) {
   const [entries, setEntries] = useState<SearchEntry[]>([]);
   const [selected, setSelected] = useState(0);
   const router = useRouter();
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Focus input on mount (replaces autoFocus which fails jsx-a11y)
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
 
   useEffect(() => {
     fetch("/api/search")
@@ -105,9 +111,11 @@ function SearchDialog({ onClose }: { onClose: () => void }) {
       aria-label="Search documentation"
     >
       {/* Backdrop */}
-      <div
-        className="absolute inset-0 bg-background/80 backdrop-blur-sm"
+      <button
+        className="absolute inset-0 bg-background/80 backdrop-blur-sm w-full cursor-default"
         onClick={onClose}
+        aria-label="Close search"
+        tabIndex={-1}
       />
 
       {/* Panel */}
@@ -116,7 +124,7 @@ function SearchDialog({ onClose }: { onClose: () => void }) {
         <div className="flex items-center gap-3 border-b px-4 py-3">
           <SearchIcon className="h-4 w-4 shrink-0 text-muted-foreground" />
           <input
-            autoFocus
+            ref={inputRef}
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
