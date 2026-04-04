@@ -20,6 +20,13 @@ const meta: Meta<typeof Grid> = {
   title: "Layout/Grid",
   component: Grid,
   tags: ["autodocs"],
+  argTypes: {
+    cols: { control: "select", options: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] },
+    rows: { control: "select", options: [1, 2, 3, 4, 5, 6] },
+    gap: { control: "select", options: ["0", "1", "2", "3", "4", "5", "6", "8", "10", "12"] },
+    align: { control: "select", options: ["start", "center", "end", "stretch"] },
+    justify: { control: "select", options: ["start", "center", "end", "stretch"] },
+  },
 };
 
 export default meta;
@@ -52,6 +59,15 @@ export const FourColumns: Story = {
 export const AsymmetricGap: Story = {
   render: () => (
     <Grid cols={3} gapX="8" gapY="2">
+      {Array.from({ length: 6 }, (_, i) => <Cell key={i}>Cell {i + 1}</Cell>)}
+    </Grid>
+  ),
+};
+
+export const Playground: Story = {
+  args: { cols: 3, gap: "4" },
+  render: (args) => (
+    <Grid {...args}>
       {Array.from({ length: 6 }, (_, i) => <Cell key={i}>Cell {i + 1}</Cell>)}
     </Grid>
   ),

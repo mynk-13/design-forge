@@ -5,6 +5,10 @@ const meta: Meta<typeof Separator> = {
   title: "Layout/Separator",
   component: Separator,
   tags: ["autodocs"],
+  argTypes: {
+    orientation: { control: "radio", options: ["horizontal", "vertical"] },
+    decorative: { control: "boolean" },
+  },
   parameters: {
     docs: {
       description: {

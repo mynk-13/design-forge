@@ -13,7 +13,9 @@
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsup",
     "postbuild": "node -e \"const fs=require('fs');['dist/index.js','dist/index.cjs'].forEach(f=>{const p=require('path').resolve(f);if(fs.existsSync(p)){fs.writeFileSync(p,'\\\"use client\\\";\\n'+fs.readFileSync(p))}})\"",
@@ -60,12 +62,13 @@
   },
   "devDependencies": {
     "@designforge/tsconfig": "workspace:*",
+    "@storybook/react": "^8.6.18",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.5.2",
     "@types/react": "^19.1.0",
-    "axe-core": "^4.10.0",
     "@types/react-dom": "^19.1.0",
+    "axe-core": "^4.10.0",
     "jsdom": "^25.0.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

@@ -19,6 +19,13 @@ const meta: Meta<typeof Stack> = {
   title: "Layout/Stack",
   component: Stack,
   tags: ["autodocs"],
+  argTypes: {
+    direction: { control: "radio", options: ["vertical", "horizontal"] },
+    gap: { control: "select", options: ["0", "1", "2", "3", "4", "5", "6", "8", "10", "12"] },
+    align: { control: "select", options: ["start", "center", "end", "stretch"] },
+    justify: { control: "select", options: ["start", "center", "end", "between"] },
+    wrap: { control: "boolean" },
+  },
   parameters: {
     docs: {
       description: {
@@ -74,6 +81,17 @@ export const ZeroGap: Story = {
       <div style={{ padding: "0.5rem", background: "hsl(var(--df-primary) / 0.4)", color: "white" }}>
         Items
       </div>
+    </Stack>
+  ),
+};
+
+export const Playground: Story = {
+  args: { direction: "vertical", gap: "4", align: "stretch" },
+  render: (args) => (
+    <Stack {...args} style={{ minHeight: "80px" }}>
+      <Item label="Item A" />
+      <Item label="Item B" />
+      <Item label="Item C" />
     </Stack>
   ),
 };

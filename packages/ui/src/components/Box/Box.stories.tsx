@@ -5,6 +5,13 @@ const meta: Meta<typeof Box> = {
   title: "Layout/Box",
   component: Box,
   tags: ["autodocs"],
+  argTypes: {
+    as: {
+      control: "select",
+      options: ["div", "section", "article", "main", "aside", "header", "footer", "nav", "span", "p"],
+      description: "HTML element to render as",
+    },
+  },
   parameters: {
     docs: {
       description: {
@@ -59,5 +66,20 @@ export const Nested: Story = {
         </Box>
       </Box>
     </Box>
+  ),
+};
+
+export const Playground: Story = {
+  args: { as: "div", children: "Box content — change the 'as' control above" },
+  render: (args) => (
+    <Box
+      {...args}
+      style={{
+        padding: "1.5rem",
+        background: "hsl(var(--df-muted))",
+        borderRadius: "var(--df-radius)",
+        fontSize: "0.875rem",
+      }}
+    />
   ),
 };

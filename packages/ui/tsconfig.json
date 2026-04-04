@@ -11,5 +11,6 @@
     "dist",
     "src/**/*.stories.tsx",
     "src/**/*.stories.ts"
-  ]
+  ],
+  "references": [{ "path": "./tsconfig.stories.json" }]
 }

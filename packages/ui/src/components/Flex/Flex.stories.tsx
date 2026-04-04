@@ -20,6 +20,14 @@ const meta: Meta<typeof Flex> = {
   title: "Layout/Flex",
   component: Flex,
   tags: ["autodocs"],
+  argTypes: {
+    direction: { control: "select", options: ["row", "col", "row-reverse", "col-reverse"] },
+    align: { control: "select", options: ["start", "center", "end", "stretch", "baseline"] },
+    justify: { control: "select", options: ["start", "center", "end", "between", "around", "evenly"] },
+    wrap: { control: "select", options: ["wrap", "nowrap", "wrap-reverse"] },
+    gap: { control: "select", options: ["0", "1", "2", "3", "4", "5", "6", "8", "10", "12"] },
+    inline: { control: "boolean" },
+  },
   parameters: {
     docs: {
       description: {
@@ -86,6 +94,20 @@ export const Wrapping: Story = {
       {Array.from({ length: 8 }, (_, i) => (
         <Item key={i}>Item {i + 1}</Item>
       ))}
+    </Flex>
+  ),
+};
+
+export const Playground: Story = {
+  args: { direction: "row", gap: "3", align: "center", justify: "start" },
+  render: (args) => (
+    <Flex
+      {...args}
+      style={{ minHeight: "80px", padding: "1rem", border: "1px dashed hsl(var(--df-border))", borderRadius: "var(--df-radius)" }}
+    >
+      <Item>A</Item>
+      <Item>B</Item>
+      <Item>C</Item>
     </Flex>
   ),
 };

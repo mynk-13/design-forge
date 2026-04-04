@@ -11,6 +11,13 @@ const meta: Meta<typeof Container> = {
   title: "Layout/Container",
   component: Container,
   tags: ["autodocs"],
+  argTypes: {
+    size: {
+      control: "select",
+      options: ["sm", "md", "lg", "xl", "2xl", "full"],
+      description: "Max-width breakpoint",
+    },
+  },
   parameters: {
     layout: "fullscreen",
   },
@@ -56,5 +63,14 @@ export const AllSizes: Story = {
         </Container>
       ))}
     </div>
+  ),
+};
+
+export const Playground: Story = {
+  args: { size: "xl" },
+  render: (args) => (
+    <Container {...args}>
+      <Content />
+    </Container>
   ),
 };

@@ -5,6 +5,13 @@ const meta: Meta<typeof AspectRatio> = {
   title: "Layout/AspectRatio",
   component: AspectRatio,
   tags: ["autodocs"],
+  argTypes: {
+    ratio: {
+      control: { type: "select" },
+      options: [16 / 9, 4 / 3, 1, 3 / 4, 9 / 16, 2 / 1, 21 / 9],
+      description: "Width / height ratio",
+    },
+  },
   parameters: {
     docs: {
       description: {

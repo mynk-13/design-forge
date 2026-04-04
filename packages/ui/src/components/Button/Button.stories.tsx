@@ -11,6 +11,12 @@ const meta: Meta<typeof Button> = {
     size: { control: "select", options: ["sm", "md", "lg", "icon"] },
     loading: { control: "boolean" },
     disabled: { control: "boolean" },
+    children: { control: "text" },
+  },
+  args: {
+    children: "Button",
+    disabled: false,
+    loading: false,
   },
 };
 
@@ -78,4 +84,14 @@ export const AsLink: Story = {
       </a>
     </Button>
   ),
+};
+
+export const Playground: Story = {
+  args: {
+    variant: "default",
+    size: "md",
+    children: "Button",
+    disabled: false,
+    loading: false,
+  },
 };
