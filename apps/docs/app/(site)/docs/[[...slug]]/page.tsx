@@ -2,7 +2,8 @@ import { notFound } from "next/navigation";
 import { getDocBySlug, getAllDocs } from "../../../../lib/docs";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import remarkGfm from "remark-gfm";
-// import rehypePrettyCode from "rehype-pretty-code";
+import rehypePrettyCode from "rehype-pretty-code";
+import type { Options } from "rehype-pretty-code";
 
 interface DocPageProps {
   params: Promise<{ slug?: string[] }>;
@@ -27,11 +28,29 @@ export async function generateMetadata({ params }: DocPageProps) {
   return {
     title: doc.meta.title,
     description: doc.meta.description,
+    openGraph: {
+      title: `${doc.meta.title} | DesignForge`,
+      description: doc.meta.description,
+      type: "article",
+    },
+    twitter: {
+      title: `${doc.meta.title} | DesignForge`,
+      description: doc.meta.description,
+    },
   };
 }
 
 import * as UI from "@designforge/ui";
 import { StorybookPreview } from "../../../../components/StorybookPreview";
+
+const rehypePrettyCodeOptions: Options = {
+  // Dual theme: github-light in light mode, github-dark-dimmed in dark mode
+  theme: {
+    dark: "github-dark-dimmed",
+    light: "github-light",
+  },
+  keepBackground: false,
+};
 
 const components = {
   h1: ({ children, ...props }: any) => <h1 className="mt-2 scroll-m-20 text-4xl font-bold tracking-tight" {...props}>{children}</h1>,
@@ -39,10 +58,16 @@ const components = {
   h3: ({ children, ...props }: any) => <h3 className="mt-8 scroll-m-20 text-2xl font-semibold tracking-tight" {...props}>{children}</h3>,
   p: (props: any) => <p className="leading-7 [&:not(:first-child)]:mt-6" {...props} />,
   ul: (props: any) => <ul className="my-6 ml-6 list-disc [&>li]:mt-2" {...props} />,
-  code: (props: any) => <code className="relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold" {...props} />,
+  // Inline code only — pre>code blocks are handled by rehype-pretty-code
+  code: ({ className, ...props }: any) =>
+    className ? (
+      <code className={className} {...props} />
+    ) : (
+      <code className="relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold" {...props} />
+    ),
   iframe: (props: any) => <StorybookPreview {...props} />,
   StorybookPreview: (props: any) => <StorybookPreview {...props} />,
-  ...UI, // Spreads all 34 native UI React components into the MDX scope autonomously!
+  ...UI, // Spreads all 33 UI components into the MDX scope
 };
 
 export default async function DocPage({ params }: DocPageProps) {
@@ -72,14 +97,7 @@ export default async function DocPage({ params }: DocPageProps) {
         options={{
           mdxOptions: {
             remarkPlugins: [remarkGfm],
-            // rehypePlugins: [
-            //   [
-            //     rehypePrettyCode,
-            //     {
-            //       theme: "github-dark",
-            //     },
-            //   ]
-            // ]
+            rehypePlugins: [[rehypePrettyCode, rehypePrettyCodeOptions]],
           },
         }}
       />

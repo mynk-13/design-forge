@@ -3,13 +3,38 @@ import { ThemeProvider } from "../components/Providers";
 import "@designforge/themes/styles.css";
 import "./globals.css";
 
+const siteUrl = "https://designforge-docs.vercel.app";
+const siteDescription =
+  "Open-source React 19 component design system with AI-powered generation and Monaco playground.";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: {
     default: "DesignForge",
     template: "%s | DesignForge",
   },
-  description:
-    "Open-source React component design system with AI-powered generation and Monaco playground.",
+  description: siteDescription,
+  openGraph: {
+    type: "website",
+    url: siteUrl,
+    siteName: "DesignForge",
+    title: "DesignForge — React Component Design System",
+    description: siteDescription,
+    images: [
+      {
+        url: "/og.png",
+        width: 1200,
+        height: 630,
+        alt: "DesignForge — React Component Design System",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "DesignForge — React Component Design System",
+    description: siteDescription,
+    images: ["/og.png"],
+  },
 };
 
 export default function RootLayout({
