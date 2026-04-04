@@ -38,5 +38,6 @@ test-results/
 Thumbs.db
 *.log
 .claude/
+.code-review-graph/
 error.html
 test_error.html
