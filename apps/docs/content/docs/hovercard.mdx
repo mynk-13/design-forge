@@ -1,40 +1,256 @@
 ---
-title: "HoverCard"
-description: "Documentation for the HoverCard component."
+title: HoverCard
+description: A Radix UI-based popover that appears when hovering over a trigger element. Ideal for link previews, user profile previews, and contextual information that does not require a click to reveal.
 ---
-
-The `HoverCard` component represents a fundamental UI building block within the DesignForge token system.
 
 ## Installation
 
 ```bash
-npm install @designforge/ui
+npm install @radix-ui/react-hover-card
 ```
 
 ## Usage
 
 ```tsx
-import { HoverCard } from "@designforge/ui";
+import {
+  HoverCard,
+  HoverCardTrigger,
+  HoverCardContent,
+} from "@/components/ui/hover-card";
+```
 
-export default function App() {
+## Examples
+
+### Basic Link Preview
+
+```tsx
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
+
+export function BasicLinkPreview() {
   return (
-    <HoverCard>Example Content</HoverCard>
+    <HoverCard>
+      <HoverCardTrigger asChild>
+        <a href="#" className="text-sm font-medium underline underline-offset-4">
+          @designforge
+        </a>
+      </HoverCardTrigger>
+      <HoverCardContent className="w-64">
+        <p className="text-sm text-muted-foreground">
+          DesignForge is a React 19 component library built for SDE-2/3
+          portfolio-grade design systems.
+        </p>
+      </HoverCardContent>
+    </HoverCard>
   );
 }
 ```
 
-### Attributes
+### User Profile Card
 
-| Prop      | Type      | Default       | Description                                                 |
-| :-------- | :-------- | :------------ | :---------------------------------------------------------- |
-| `className` | `string`  | `undefined`   | Merges all optional utility styles directly. |
+```tsx
+import { CalendarDays } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
 
+export function UserProfileCard() {
+  return (
+    <HoverCard>
+      <HoverCardTrigger asChild>
+        <Button variant="link" className="p-0">@mayank_dev</Button>
+      </HoverCardTrigger>
+      <HoverCardContent className="w-80">
+        <div className="flex justify-between space-x-4">
+          <Avatar>
+            <AvatarImage src="https://github.com/shadcn.png" />
+            <AvatarFallback>MK</AvatarFallback>
+          </Avatar>
+          <div className="space-y-1">
+            <h4 className="text-sm font-semibold">@mayank_dev</h4>
+            <p className="text-sm text-muted-foreground">
+              Senior frontend engineer building component systems.
+            </p>
+            <div className="flex items-center pt-2">
+              <CalendarDays className="mr-2 h-4 w-4 text-muted-foreground" />
+              <span className="text-xs text-muted-foreground">
+                Joined April 2021
+              </span>
+            </div>
+          </div>
+        </div>
+      </HoverCardContent>
+    </HoverCard>
+  );
+}
+```
+
+### GitHub-style Repo Card
+
+```tsx
+import { Star, GitFork } from "lucide-react";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
+
+export function RepoCard() {
+  return (
+    <HoverCard openDelay={400} closeDelay={200}>
+      <HoverCardTrigger asChild>
+        <a href="#" className="font-mono text-sm text-blue-600 hover:underline">
+          design-forge/ui
+        </a>
+      </HoverCardTrigger>
+      <HoverCardContent side="bottom" align="start" className="w-80">
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium">
+              Public
+            </span>
+            <span className="text-xs text-muted-foreground">TypeScript</span>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            A React 19 design system with 33 components, Storybook, and full
+            docs site.
+          </p>
+          <div className="flex items-center gap-4 text-xs text-muted-foreground">
+            <span className="flex items-center gap-1">
+              <Star className="h-3 w-3" /> 124
+            </span>
+            <span className="flex items-center gap-1">
+              <GitFork className="h-3 w-3" /> 18
+            </span>
+          </div>
+        </div>
+      </HoverCardContent>
+    </HoverCard>
+  );
+}
+```
+
+### Product Preview Card
+
+```tsx
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
+
+export function ProductPreviewCard() {
+  return (
+    <HoverCard openDelay={300}>
+      <HoverCardTrigger asChild>
+        <span className="cursor-default border-b border-dashed border-foreground/40 text-sm">
+          Pro Plan
+        </span>
+      </HoverCardTrigger>
+      <HoverCardContent className="w-72">
+        <div className="space-y-2">
+          <h4 className="font-semibold">Pro Plan — $19/mo</h4>
+          <ul className="space-y-1 text-sm text-muted-foreground">
+            <li>Unlimited projects</li>
+            <li>Priority support</li>
+            <li>Advanced analytics</li>
+            <li>Custom domain</li>
+          </ul>
+        </div>
+      </HoverCardContent>
+    </HoverCard>
+  );
+}
+```
+
+### With Avatar
+
+```tsx
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
+
+export function WithAvatar() {
+  return (
+    <HoverCard>
+      <HoverCardTrigger>
+        <Avatar className="cursor-pointer">
+          <AvatarImage src="https://github.com/shadcn.png" alt="shadcn" />
+          <AvatarFallback>SC</AvatarFallback>
+        </Avatar>
+      </HoverCardTrigger>
+      <HoverCardContent align="start" className="w-72">
+        <div className="flex gap-4">
+          <Avatar className="h-12 w-12">
+            <AvatarImage src="https://github.com/shadcn.png" />
+            <AvatarFallback>SC</AvatarFallback>
+          </Avatar>
+          <div className="space-y-1">
+            <p className="text-sm font-semibold">shadcn</p>
+            <p className="text-xs text-muted-foreground">
+              Building UI components that are accessible by default.
+            </p>
+          </div>
+        </div>
+      </HoverCardContent>
+    </HoverCard>
+  );
+}
+```
+
+## API Reference
+
+### HoverCard
+
+The root component that manages open/close state and hover delay timers.
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `openDelay` | `number` | `700` | Milliseconds to wait after hover before opening the card. |
+| `closeDelay` | `number` | `300` | Milliseconds to wait after the pointer leaves before closing. |
+| `open` | `boolean` | — | Controlled open state. |
+| `defaultOpen` | `boolean` | `false` | Initial open state (uncontrolled). |
+| `onOpenChange` | `(open: boolean) => void` | — | Callback fired when the open state changes. |
+
+### HoverCardTrigger
+
+The element whose hover state controls the card visibility.
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `asChild` | `boolean` | `false` | Merges trigger props onto the child element instead of wrapping in a `<span>`. |
+
+### HoverCardContent
+
+The floating card panel that displays contextual content.
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `align` | `"start" \| "center" \| "end"` | `"center"` | Alignment of the card relative to the trigger. |
+| `sideOffset` | `number` | `4` | Distance in px between the card and the trigger element. |
+| `side` | `"top" \| "right" \| "bottom" \| "left"` | `"bottom"` | Preferred side on which to render the card. |
+| `className` | `string` | — | Additional CSS classes. |
+
+## Accessibility
+
+- Built on Radix UI's `HoverCard` primitive. The content panel is rendered with `role="tooltip"` semantics so assistive technologies can associate it with the trigger.
+- HoverCard content is **not** accessible to keyboard-only users by default because it relies on pointer hover. For information that must be available to everyone, consider using a `Tooltip` (keyboard-focusable) or a `Popover` (click-triggered) instead.
+- Use `asChild` on `HoverCardTrigger` to apply hover behaviour to a semantically appropriate element such as an `<a>` or `<button>` rather than a generic `<div>`.
+- Keep `openDelay` at or above `700 ms` (the default) to avoid triggering the card on accidental cursor passes, which can interrupt screen reader virtual browsing.
+- Do not put interactive elements (buttons, inputs) inside `HoverCardContent` — they are unreachable without pointer interaction. Use a `Popover` for interactive overlay content.
 
 ## Live View
 
-Here is a live contextual rendering of the component directly from our isolated Storybook environment.
-
 <StorybookPreview src="http://localhost:6006/iframe.html?id=overlay-hovercard--default&viewMode=story" />
 
-> [!TIP]
-> [Open Component in Storybook ↗](http://localhost:6006/?path=/story/overlay-hovercard--default)
+[Open in Storybook ↗](https://designforge-storybook.vercel.app/?path=/story/overlay-hovercard--default)

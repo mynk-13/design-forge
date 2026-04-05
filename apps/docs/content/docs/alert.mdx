@@ -1,9 +1,9 @@
 ---
 title: "Alert"
-description: "Documentation for the Alert component."
+description: "Displays a callout for important user feedback with contextual variants and optional icons."
 ---
 
-The `Alert` component represents a fundamental UI building block within the DesignForge token system.
+The `Alert` component surfaces important messages with five semantic variants. Each variant ships with an auto-rendered icon and the correct ARIA live-region role.
 
 ## Installation
 
@@ -14,21 +14,142 @@ npm install @designforge/ui
 ## Usage
 
 ```tsx
-import { Alert } from "@designforge/ui";
+import { Alert, AlertTitle, AlertDescription } from "@designforge/ui";
 
 export default function App() {
   return (
-    <Alert>Example Content</Alert>
+    <Alert variant="info">
+      <AlertTitle>Heads up!</AlertTitle>
+      <AlertDescription>
+        You can customise alert variants with CSS variables.
+      </AlertDescription>
+    </Alert>
   );
 }
 ```
 
-### Attributes
+## Examples
 
-| Prop      | Type      | Default       | Description                                                 |
-| :-------- | :-------- | :------------ | :---------------------------------------------------------- |
-| `className` | `string`  | `undefined`   | Merges all optional utility styles directly. |
+### All variants
 
+```tsx
+<Alert variant="default">
+  <AlertTitle>Default</AlertTitle>
+  <AlertDescription>A neutral informational message.</AlertDescription>
+</Alert>
+
+<Alert variant="info">
+  <AlertTitle>Info</AlertTitle>
+  <AlertDescription>Here is something you should know.</AlertDescription>
+</Alert>
+
+<Alert variant="success">
+  <AlertTitle>Success</AlertTitle>
+  <AlertDescription>Your changes have been saved.</AlertDescription>
+</Alert>
+
+<Alert variant="warning">
+  <AlertTitle>Warning</AlertTitle>
+  <AlertDescription>This action cannot be undone.</AlertDescription>
+</Alert>
+
+<Alert variant="destructive">
+  <AlertTitle>Error</AlertTitle>
+  <AlertDescription>Your session has expired. Please log in again.</AlertDescription>
+</Alert>
+```
+
+### Without icon
+
+```tsx
+<Alert variant="info" showIcon={false}>
+  <AlertTitle>No icon</AlertTitle>
+  <AlertDescription>The built-in icon can be hidden with showIcon={false}.</AlertDescription>
+</Alert>
+```
+
+### Custom icon
+
+Pass any Lucide icon as a sibling of `AlertTitle` inside the `Alert`. When a custom icon is present, set `showIcon={false}` to avoid rendering the default icon alongside it.
+
+```tsx
+import { RocketIcon } from "lucide-react";
+
+<Alert variant="default" showIcon={false}>
+  <RocketIcon className="h-4 w-4" />
+  <AlertTitle>Custom icon</AlertTitle>
+  <AlertDescription>Pass any lucide icon as a sibling of AlertTitle.</AlertDescription>
+</Alert>
+```
+
+### Title only
+
+```tsx
+<Alert variant="success">
+  <AlertTitle>Deployment successful — all 3 services updated.</AlertTitle>
+</Alert>
+```
+
+### Real-world: session expiry
+
+```tsx
+<Alert variant="warning">
+  <AlertTitle>Session expiring soon</AlertTitle>
+  <AlertDescription>
+    Your session expires in 5 minutes. Save your work or{" "}
+    <a href="/auth/refresh" className="underline font-medium">extend your session</a>.
+  </AlertDescription>
+</Alert>
+```
+
+### Real-world: deprecation notice
+
+```tsx
+<Alert variant="warning">
+  <AlertTitle>Deprecation notice</AlertTitle>
+  <AlertDescription>
+    This API will be removed in v2.0. Migrate to{" "}
+    <code>/api/v2/generate</code> before January 2027.
+  </AlertDescription>
+</Alert>
+```
+
+## API Reference
+
+### `<Alert>`
+
+| Prop | Type | Default | Description |
+| :--- | :--- | :------ | :---------- |
+| `variant` | `"default" \| "destructive" \| "success" \| "warning" \| "info"` | `"default"` | Visual and semantic style of the alert. |
+| `showIcon` | `boolean` | `true` | Render the built-in variant icon. Set to `false` to hide it or supply a custom icon. |
+| `className` | `string` | — | Additional CSS classes on the root element. |
+
+> `role="alert"` is set for `destructive` and `warning` variants; `role="status"` for `default`, `info`, and `success` variants.
+
+### `<AlertTitle>`
+
+Renders as an `<h5>` with appropriate font-weight and spacing.
+
+| Prop | Type | Default | Description |
+| :--- | :--- | :------ | :---------- |
+| `className` | `string` | — | Additional CSS classes. |
+| `children` | `ReactNode` | — | Title text or content. |
+
+### `<AlertDescription>`
+
+Renders as a `<div>` with muted text styling.
+
+| Prop | Type | Default | Description |
+| :--- | :--- | :------ | :---------- |
+| `className` | `string` | — | Additional CSS classes. |
+| `children` | `ReactNode` | — | Body text, links, or any inline content. |
+
+## Accessibility
+
+- `role="alert"` for `destructive` and `warning` variants triggers an immediate announcement by screen readers (assertive live region).
+- `role="status"` for `default`, `info`, and `success` variants gives a polite announcement — the screen reader announces when it has finished reading the current content.
+- Icons are decorative and carry `aria-hidden="true"` to avoid redundant announcements.
+- Alerts are not interactive by default. If dismissibility is needed, add a visible close button with an `aria-label`.
 
 ## Live View
 
@@ -36,5 +157,4 @@ Here is a live contextual rendering of the component directly from our isolated 
 
 <StorybookPreview src="http://localhost:6006/iframe.html?id=feedback-alert--all-variants&viewMode=story" />
 
-> [!TIP]
-> [Open Component in Storybook ↗](http://localhost:6006/?path=/story/feedback-alert--all-variants)
+> [Open in Storybook ↗](https://designforge-storybook.vercel.app/?path=/story/feedback-alert--all-variants)

@@ -1,9 +1,9 @@
 ---
 title: "Accordion"
-description: "Documentation for the Accordion component."
+description: "A vertically stacked set of interactive headings that reveal or hide associated sections of content."
 ---
 
-The `Accordion` component represents a fundamental UI building block within the DesignForge token system.
+Built on [Radix UI Accordion](https://www.radix-ui.com/primitives/docs/components/accordion), the `Accordion` component provides accessible expand/collapse panels with smooth animations.
 
 ## Installation
 
@@ -14,21 +14,186 @@ npm install @designforge/ui
 ## Usage
 
 ```tsx
-import { Accordion } from "@designforge/ui";
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from "@designforge/ui";
 
 export default function App() {
   return (
-    <Accordion>Example Content</Accordion>
+    <Accordion type="single" collapsible>
+      <AccordionItem value="item-1">
+        <AccordionTrigger>Is it accessible?</AccordionTrigger>
+        <AccordionContent>
+          Yes. It adheres to the WAI-ARIA design pattern.
+        </AccordionContent>
+      </AccordionItem>
+    </Accordion>
   );
 }
 ```
 
-### Attributes
+## Examples
 
-| Prop      | Type      | Default       | Description                                                 |
-| :-------- | :-------- | :------------ | :---------------------------------------------------------- |
-| `className` | `string`  | `undefined`   | Merges all optional utility styles directly. |
+### Single (collapsible)
 
+Only one item can be open at a time; clicking an open item closes it.
+
+```tsx
+<Accordion type="single" collapsible>
+  <AccordionItem value="a1">
+    <AccordionTrigger>Is it accessible?</AccordionTrigger>
+    <AccordionContent>Yes — uses WAI-ARIA accordion pattern via Radix UI.</AccordionContent>
+  </AccordionItem>
+  <AccordionItem value="a2">
+    <AccordionTrigger>Is it keyboard navigable?</AccordionTrigger>
+    <AccordionContent>Tab to focus, Space/Enter to toggle, Arrow Up/Down to move between triggers.</AccordionContent>
+  </AccordionItem>
+  <AccordionItem value="a3">
+    <AccordionTrigger>Can multiple items be open at once?</AccordionTrigger>
+    <AccordionContent>Use type="multiple" on the Accordion root to allow multiple expanded items simultaneously.</AccordionContent>
+  </AccordionItem>
+</Accordion>
+```
+
+### Multiple
+
+Multiple items can be open simultaneously.
+
+```tsx
+<Accordion type="multiple">
+  <AccordionItem value="a1">
+    <AccordionTrigger>Section One</AccordionTrigger>
+    <AccordionContent>Content for section one.</AccordionContent>
+  </AccordionItem>
+  <AccordionItem value="a2">
+    <AccordionTrigger>Section Two</AccordionTrigger>
+    <AccordionContent>Content for section two.</AccordionContent>
+  </AccordionItem>
+  <AccordionItem value="a3">
+    <AccordionTrigger>Section Three</AccordionTrigger>
+    <AccordionContent>Content for section three.</AccordionContent>
+  </AccordionItem>
+</Accordion>
+```
+
+### Default open item
+
+```tsx
+<Accordion type="single" collapsible defaultValue="a1">
+  <AccordionItem value="a1">
+    <AccordionTrigger>Open by default</AccordionTrigger>
+    <AccordionContent>This panel starts expanded.</AccordionContent>
+  </AccordionItem>
+  <AccordionItem value="a2">
+    <AccordionTrigger>Closed by default</AccordionTrigger>
+    <AccordionContent>This panel starts collapsed.</AccordionContent>
+  </AccordionItem>
+</Accordion>
+```
+
+### Controlled
+
+```tsx
+const [value, setValue] = useState<string>("");
+
+<Accordion type="single" value={value} onValueChange={setValue} collapsible>
+  <AccordionItem value="a1">
+    <AccordionTrigger>Controlled item</AccordionTrigger>
+    <AccordionContent>Managed from parent state.</AccordionContent>
+  </AccordionItem>
+  <AccordionItem value="a2">
+    <AccordionTrigger>Another controlled item</AccordionTrigger>
+    <AccordionContent>Open state is driven externally.</AccordionContent>
+  </AccordionItem>
+</Accordion>
+```
+
+### Nested content
+
+Rich content — code snippets, links, or any React nodes — can be placed inside `AccordionContent`.
+
+```tsx
+<Accordion type="single" collapsible>
+  <AccordionItem value="install">
+    <AccordionTrigger>Installation</AccordionTrigger>
+    <AccordionContent>
+      <div className="flex flex-col gap-2">
+        <p>Install via pnpm:</p>
+        <pre className="bg-muted rounded-sm px-3 py-2 text-sm overflow-x-auto">
+          pnpm add @designforge/ui
+        </pre>
+        <p className="text-sm text-muted-foreground">
+          Requires React 19+ as a peer dependency.
+        </p>
+      </div>
+    </AccordionContent>
+  </AccordionItem>
+  <AccordionItem value="usage">
+    <AccordionTrigger>Usage</AccordionTrigger>
+    <AccordionContent>
+      <p>Import any component from the package entry point.</p>
+    </AccordionContent>
+  </AccordionItem>
+  <AccordionItem value="theming">
+    <AccordionTrigger>Theming</AccordionTrigger>
+    <AccordionContent>
+      Override any <code>--df-*</code> CSS variable to customise the theme.
+    </AccordionContent>
+  </AccordionItem>
+</Accordion>
+```
+
+## API Reference
+
+### `<Accordion>`
+
+Inherits all props from [Radix UI Accordion.Root](https://www.radix-ui.com/primitives/docs/components/accordion#root).
+
+| Prop | Type | Default | Description |
+| :--- | :--- | :------ | :---------- |
+| `type` | `"single" \| "multiple"` | — | Whether one or many items can be open. **Required.** |
+| `collapsible` | `boolean` | `false` | When `type="single"`, allows closing the currently open item by clicking its trigger again. |
+| `defaultValue` | `string \| string[]` | — | Initially open item value(s) (uncontrolled). |
+| `value` | `string \| string[]` | — | Controlled open value(s). |
+| `onValueChange` | `(value: string \| string[]) => void` | — | Called when the open state changes. |
+| `disabled` | `boolean` | `false` | Prevents all items from being toggled. |
+| `className` | `string` | — | Additional CSS classes on the root element. |
+
+### `<AccordionItem>`
+
+| Prop | Type | Default | Description |
+| :--- | :--- | :------ | :---------- |
+| `value` | `string` | — | **Required.** Unique identifier for this item within the accordion. |
+| `disabled` | `boolean` | `false` | Prevents this specific item from being toggled. |
+| `className` | `string` | — | Additional CSS classes. |
+
+### `<AccordionTrigger>`
+
+Renders as a `<button>` inside an `<h3>`. `aria-expanded` is managed automatically by Radix UI.
+
+| Prop | Type | Default | Description |
+| :--- | :--- | :------ | :---------- |
+| `className` | `string` | — | Additional CSS classes. |
+| `children` | `ReactNode` | — | Trigger label content. |
+
+### `<AccordionContent>`
+
+The panel that expands and collapses. Uses a CSS height animation driven by the `data-state` attribute.
+
+| Prop | Type | Default | Description |
+| :--- | :--- | :------ | :---------- |
+| `className` | `string` | — | Additional CSS classes. |
+| `children` | `ReactNode` | — | Content to show when the item is expanded. |
+
+## Accessibility
+
+- Trigger elements render as `<button>` elements with `aria-expanded` managed automatically by Radix UI.
+- Each content panel uses `role="region"` and `aria-labelledby` pointing to its trigger.
+- Full keyboard navigation: **Tab** to reach a trigger, **Enter** or **Space** to toggle, **Arrow Up / Arrow Down** to move between triggers, **Home** / **End** to jump to the first / last trigger.
+- Works correctly with screen readers — NVDA, JAWS, and VoiceOver all announce expand/collapse state changes.
 
 ## Live View
 
@@ -36,5 +201,4 @@ Here is a live contextual rendering of the component directly from our isolated 
 
 <StorybookPreview src="http://localhost:6006/iframe.html?id=data-display-accordion--single&viewMode=story" />
 
-> [!TIP]
-> [Open Component in Storybook ↗](http://localhost:6006/?path=/story/data-display-accordion--single)
+> [Open in Storybook ↗](https://designforge-storybook.vercel.app/?path=/story/data-display-accordion--single)

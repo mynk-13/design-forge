@@ -1,9 +1,9 @@
 ---
 title: "Box"
-description: "A polymorphic generic wrapper component for applying styles natively."
+description: "Polymorphic layout primitive — the foundation of the DesignForge layout system."
 ---
 
-The `Box` component serves as a foundational building block for constructing layouts. By default, it renders as a `div`, but you can cleanly substitute its underlying tag using the `asChild` prop or polymorphic parameters.
+`Box` is a zero-opinion layout primitive that renders as a `<div>` by default. Its single `as` prop lets you swap the underlying HTML element to any valid tag (`section`, `article`, `main`, `aside`, `header`, etc.) without changing the component name or losing ref forwarding. All other layout components in DesignForge (`Flex`, `Grid`, `Stack`, `Container`) build on top of `Box`.
 
 ## Installation
 
@@ -18,20 +18,255 @@ import { Box } from "@designforge/ui";
 
 export default function App() {
   return (
-    <Box className="bg-primary text-primary-foreground p-4 rounded-md">
-      Natively styled container
+    <Box className="p-4 bg-muted rounded-md">
+      Hello from Box
     </Box>
   );
 }
 ```
 
-### Attributes
+## Examples
 
-| Prop      | Type      | Default       | Description                                                 |
-| :-------- | :-------- | :------------ | :---------------------------------------------------------- |
-| `asChild` | `boolean` | `false`       | Merges all styles directly onto the first provided element. |
-| `ref`     | `Ref`     | `undefined`   | Forwards standard DOM references reliably.                  |
+### Default — renders as `<div>`
 
+Without any `as` prop, `Box` renders a plain `<div>`. Use `className` to apply Tailwind or any CSS utility.
+
+```tsx
+import { Box } from "@designforge/ui";
+
+export default function DefaultBox() {
+  return (
+    <Box className="p-4 bg-muted rounded-md text-sm">
+      I am a div by default.
+    </Box>
+  );
+}
+```
+
+### As `<section>`
+
+Swap to a `<section>` element to add semantic meaning to a content region.
+
+```tsx
+import { Box } from "@designforge/ui";
+
+export default function AsSection() {
+  return (
+    <Box
+      as="section"
+      className="p-4 border rounded-md"
+      aria-labelledby="features-heading"
+    >
+      <h2 id="features-heading">Features</h2>
+      <p>Content for this section goes here.</p>
+    </Box>
+  );
+}
+```
+
+### As `<article>`
+
+Use `article` for self-contained pieces of content — blog posts, news items, card content.
+
+```tsx
+import { Box } from "@designforge/ui";
+
+export default function AsArticle() {
+  return (
+    <Box as="article" className="p-6 bg-card rounded-lg shadow-sm">
+      <h2 className="text-xl font-semibold">DesignForge v1.0 Released</h2>
+      <p className="mt-2 text-muted-foreground text-sm">
+        33 components, full dark mode, and an AI-powered generator.
+      </p>
+    </Box>
+  );
+}
+```
+
+### As `<main>`
+
+Wrap the primary page content in a semantic `<main>` landmark.
+
+```tsx
+import { Box } from "@designforge/ui";
+
+export default function Layout({ children }: { children: React.ReactNode }) {
+  return (
+    <Box as="main" className="mx-auto max-w-5xl px-4 py-8">
+      {children}
+    </Box>
+  );
+}
+```
+
+### As `<aside>`
+
+Use `aside` for supplemental content — sidebars, callout boxes, related links.
+
+```tsx
+import { Box } from "@designforge/ui";
+
+export default function Sidebar() {
+  return (
+    <Box as="aside" className="w-64 shrink-0 border-r p-4">
+      <h3 className="text-sm font-semibold mb-2">On this page</h3>
+      <nav>{/* table-of-contents links */}</nav>
+    </Box>
+  );
+}
+```
+
+### As `<header>`
+
+Render a semantic `<header>` element with the same polymorphic API.
+
+```tsx
+import { Box } from "@designforge/ui";
+
+export default function SiteHeader() {
+  return (
+    <Box
+      as="header"
+      className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur"
+    >
+      <div className="mx-auto max-w-7xl flex h-14 items-center px-4 gap-4">
+        <span className="font-bold">DesignForge</span>
+        <nav className="ml-auto flex gap-4 text-sm">{/* nav links */}</nav>
+      </div>
+    </Box>
+  );
+}
+```
+
+### As `<footer>`
+
+```tsx
+import { Box } from "@designforge/ui";
+
+export default function SiteFooter() {
+  return (
+    <Box as="footer" className="border-t py-6 text-center text-xs text-muted-foreground">
+      © 2026 DesignForge. MIT License.
+    </Box>
+  );
+}
+```
+
+### As `<nav>`
+
+```tsx
+import { Box } from "@designforge/ui";
+
+export default function PrimaryNav() {
+  return (
+    <Box as="nav" aria-label="Primary navigation" className="flex gap-4 text-sm">
+      <a href="/">Home</a>
+      <a href="/docs">Docs</a>
+      <a href="/storybook">Storybook</a>
+    </Box>
+  );
+}
+```
+
+### Nested boxes
+
+Box elements can be nested freely to build complex layout hierarchies without introducing additional abstraction layers.
+
+```tsx
+import { Box } from "@designforge/ui";
+
+export default function Nested() {
+  return (
+    <Box className="p-6 bg-muted rounded-lg">
+      <Box className="p-4 bg-background rounded-md">
+        <Box className="p-3 bg-accent rounded-sm text-sm">
+          Innermost box
+        </Box>
+      </Box>
+    </Box>
+  );
+}
+```
+
+### With a forwarded ref
+
+`Box` supports `ref` forwarding using React 19's native ref prop on function components.
+
+```tsx
+import { useRef } from "react";
+import { Box } from "@designforge/ui";
+
+export default function WithRef() {
+  const ref = useRef<HTMLElement>(null);
+
+  return (
+    <Box
+      ref={ref}
+      as="section"
+      className="p-4 border rounded-md"
+      onClick={() => ref.current?.scrollIntoView({ behavior: "smooth" })}
+    >
+      Click to scroll to this section
+    </Box>
+  );
+}
+```
+
+### Building a page layout
+
+Combine several `Box` elements to structure a complete page layout with semantic HTML.
+
+```tsx
+import { Box } from "@designforge/ui";
+
+export default function PageLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <Box className="flex min-h-screen flex-col">
+      <Box as="header" className="sticky top-0 z-50 border-b bg-background px-4 h-14 flex items-center">
+        <span className="font-bold">DesignForge</span>
+      </Box>
+
+      <Box className="flex flex-1">
+        <Box as="aside" className="hidden md:block w-64 shrink-0 border-r p-4">
+          Sidebar
+        </Box>
+        <Box as="main" className="flex-1 p-6">
+          {children}
+        </Box>
+      </Box>
+
+      <Box as="footer" className="border-t py-4 text-center text-xs text-muted-foreground">
+        © 2026 DesignForge
+      </Box>
+    </Box>
+  );
+}
+```
+
+## API Reference
+
+### `<Box>`
+
+Renders the element specified by `as` (defaults to `<div>`). Accepts all standard HTML attributes for the rendered element type.
+
+| Prop | Type | Default | Description |
+| :--- | :--- | :------ | :---------- |
+| `as` | `ElementType` | `"div"` | The HTML element or React component to render. Accepts any valid HTML tag string (`"section"`, `"article"`, `"main"`, `"aside"`, `"header"`, `"footer"`, `"nav"`, `"span"`, `"p"`, etc.) or a React component. |
+| `ref` | `Ref<HTMLElement>` | — | A React ref forwarded to the underlying DOM node. Typed as `Ref<HTMLElement>` for compatibility with all element types. |
+| `className` | `string` | — | CSS classes applied to the rendered element via `cn()`. |
+| `children` | `ReactNode` | — | Content rendered inside the element. |
+
+All other HTML attributes (event handlers, `id`, `style`, ARIA attributes, `data-*`, etc.) are spread onto the rendered element.
+
+> **Tip:** `Box` does not apply any default styles — no margin, padding, background, or display value. It is intentionally unstyled so you have full control via `className` or `style`.
+
+## Accessibility
+
+- Using the `as` prop to render semantic HTML elements (`section`, `article`, `main`, `aside`, `header`, `footer`, `nav`) produces correct landmark regions that screen readers can navigate with shortcut keys.
+- When using `as="section"` or `as="aside"`, provide an `aria-labelledby` or `aria-label` so the landmark has an accessible name (required by WCAG 2.1 SC 1.3.1).
+- `Box as="main"` should appear only once per page. Multiple `<main>` elements are invalid HTML.
+- `Box as="nav"` should carry an `aria-label` to differentiate it from other navigation landmarks on the same page (e.g., `aria-label="Primary navigation"` vs `aria-label="Breadcrumb"`).
+- `Box as="header"` and `Box as="footer"` become `banner` and `contentinfo` landmarks respectively only when they are direct children of `<body>`. Inside other elements they lose their implicit landmark role.
 
 ## Live View
 
@@ -39,5 +274,4 @@ Here is a live contextual rendering of the component directly from our isolated 
 
 <StorybookPreview src="http://localhost:6006/iframe.html?id=layout-box--default&viewMode=story" />
 
-> [!TIP]
-> [Open Component in Storybook ↗](http://localhost:6006/?path=/story/layout-box--default)
+> [Open in Storybook ↗](https://designforge-storybook.vercel.app/?path=/story/layout-box--default)

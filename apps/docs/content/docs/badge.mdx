@@ -1,9 +1,9 @@
 ---
 title: "Badge"
-description: "Documentation for the Badge component."
+description: "Small status labels for categorizing or labeling UI elements."
 ---
 
-The `Badge` component represents a fundamental UI building block within the DesignForge token system.
+`Badge` is a non-interactive inline label built on a `<div>` with five semantic color variants. Use it for status indicators, category tags, version labels, and count displays. For clickable badges, use a `Button` instead.
 
 ## Installation
 
@@ -17,18 +17,203 @@ npm install @designforge/ui
 import { Badge } from "@designforge/ui";
 
 export default function App() {
+  return <Badge>New</Badge>;
+}
+```
+
+## Examples
+
+### All variants
+
+Five semantic variants cover the most common label needs. `default` uses your primary brand color; `secondary` is muted; `outline` has no fill; `destructive` signals errors or removal; `success` signals active or confirmed states.
+
+```tsx
+import { Badge } from "@designforge/ui";
+
+export default function AllVariants() {
   return (
-    <Badge>Example Content</Badge>
+    <div className="flex flex-wrap gap-2 items-center">
+      <Badge variant="default">Default</Badge>
+      <Badge variant="secondary">Secondary</Badge>
+      <Badge variant="outline">Outline</Badge>
+      <Badge variant="destructive">Destructive</Badge>
+      <Badge variant="success">Success</Badge>
+    </div>
   );
 }
 ```
 
-### Attributes
+### Status badges
 
-| Prop      | Type      | Default       | Description                                                 |
-| :-------- | :-------- | :------------ | :---------------------------------------------------------- |
-| `className` | `string`  | `undefined`   | Merges all optional utility styles directly. |
+Map application states to semantic variants so color carries consistent meaning throughout your UI.
 
+```tsx
+import { Badge } from "@designforge/ui";
+
+export default function StatusBadges() {
+  return (
+    <div className="flex flex-wrap gap-2">
+      <Badge variant="success">Active</Badge>
+      <Badge variant="secondary">Pending</Badge>
+      <Badge variant="destructive">Failed</Badge>
+      <Badge variant="outline">Draft</Badge>
+      <Badge variant="default">Published</Badge>
+    </div>
+  );
+}
+```
+
+### Inline with text
+
+Badges sit naturally beside headings, list items, and nav links.
+
+```tsx
+import { Badge } from "@designforge/ui";
+
+export default function InContext() {
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex items-center gap-2">
+        <span className="font-semibold">@designforge/ui</span>
+        <Badge>v1.0</Badge>
+        <Badge variant="success">Stable</Badge>
+      </div>
+      <div className="flex items-center gap-2">
+        <span>AI Generator</span>
+        <Badge variant="secondary">Beta</Badge>
+      </div>
+      <div className="flex items-center gap-2">
+        <span>DatePicker</span>
+        <Badge variant="destructive">Removed in v1</Badge>
+      </div>
+      <div className="flex items-center gap-2">
+        <span>TypeScript</span>
+        <Badge variant="outline">5.x</Badge>
+      </div>
+    </div>
+  );
+}
+```
+
+### Tag list from array
+
+Map over a data array to render a dynamic set of category tags.
+
+```tsx
+import { Badge } from "@designforge/ui";
+
+const tags = ["React", "TypeScript", "Tailwind", "Radix UI", "CVA"];
+
+export default function TagList() {
+  return (
+    <div className="flex flex-wrap gap-2">
+      {tags.map((tag) => (
+        <Badge key={tag} variant="secondary">
+          {tag}
+        </Badge>
+      ))}
+    </div>
+  );
+}
+```
+
+### With icons
+
+Prepend a Lucide icon inside the badge to reinforce meaning visually.
+
+```tsx
+import { Badge } from "@designforge/ui";
+import { CheckCircle2, XCircle, Clock } from "lucide-react";
+
+export default function WithIcons() {
+  return (
+    <div className="flex flex-wrap gap-2 items-center">
+      <Badge variant="success">
+        <CheckCircle2 className="h-3 w-3 mr-1" />
+        Active
+      </Badge>
+      <Badge variant="destructive">
+        <XCircle className="h-3 w-3 mr-1" />
+        Deprecated
+      </Badge>
+      <Badge variant="secondary">
+        <Clock className="h-3 w-3 mr-1" />
+        Pending
+      </Badge>
+    </div>
+  );
+}
+```
+
+### Notification counter overlay
+
+Override sizing via `className` to create a compact counter badge that overlays an icon button.
+
+```tsx
+import { Badge } from "@designforge/ui";
+import { Button } from "@designforge/ui";
+import { BellIcon } from "lucide-react";
+
+export default function NotificationCounter() {
+  return (
+    <div className="relative inline-flex">
+      <Button variant="outline" size="icon" aria-label="Notifications, 3 unread">
+        <BellIcon className="h-4 w-4" />
+      </Button>
+      <Badge className="absolute -top-1 -right-1 h-4 min-w-4 px-1 text-[10px]">
+        3
+      </Badge>
+    </div>
+  );
+}
+```
+
+### Count badges in navigation
+
+Display counts alongside sidebar navigation items or tab labels.
+
+```tsx
+import { Badge } from "@designforge/ui";
+
+export default function NavCounts() {
+  return (
+    <div className="flex gap-6 items-center text-sm">
+      <div className="flex items-center gap-1.5">
+        Notifications <Badge>12</Badge>
+      </div>
+      <div className="flex items-center gap-1.5">
+        Errors <Badge variant="destructive">3</Badge>
+      </div>
+      <div className="flex items-center gap-1.5">
+        Pull Requests <Badge variant="secondary">7</Badge>
+      </div>
+    </div>
+  );
+}
+```
+
+## API Reference
+
+### `<Badge>`
+
+Renders a `<div>` element. Accepts all standard HTML `div` attributes in addition to the props listed below.
+
+| Prop | Type | Default | Description |
+| :--- | :--- | :------ | :---------- |
+| `variant` | `"default" \| "secondary" \| "destructive" \| "outline" \| "success"` | `"default"` | Controls the background color and text color of the badge. |
+| `className` | `string` | — | Additional CSS classes merged with default styles via `cn()`. |
+| `children` | `ReactNode` | — | Badge label content — text, icons, or any inline React nodes. |
+
+All other props (`id`, `style`, `aria-*`, `data-*`, etc.) are forwarded to the underlying `<div>` element.
+
+> **Note:** `Badge` renders as a non-interactive `<div>`. If you need a clickable badge (e.g., for filter chips), wrap it in a `<button>` or `<a>`, or use `<Button variant="outline">` directly.
+
+## Accessibility
+
+- `Badge` renders as a `<div>` with no implicit ARIA role. Screen readers announce it as generic content within its surrounding text.
+- Because it is non-interactive, do not attach `onClick` directly to a `Badge`. Wrap it in a `<button>` or `<a>` to make the entire target focusable and keyboard-operable.
+- Color alone should never be the sole differentiator. Always include a readable text label so meaning is conveyed without relying on color perception.
+- When using `Badge` as a notification counter overlaying another element, incorporate the count into the parent button's `aria-label` (e.g., `aria-label="Notifications, 3 unread"`).
 
 ## Live View
 
@@ -36,5 +221,4 @@ Here is a live contextual rendering of the component directly from our isolated 
 
 <StorybookPreview src="http://localhost:6006/iframe.html?id=data-display-badge--all-variants&viewMode=story" />
 
-> [!TIP]
-> [Open Component in Storybook ↗](http://localhost:6006/?path=/story/data-display-badge--all-variants)
+> [Open in Storybook ↗](https://designforge-storybook.vercel.app/?path=/story/data-display-badge--all-variants)

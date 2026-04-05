@@ -1,42 +1,181 @@
 ---
-title: "Container"
-description: "A constrained layout wrapper centering content universally."
+title: Container
+description: A centered max-width wrapper component with responsive horizontal padding. Use Container to constrain page content to a readable width across all screen sizes.
 ---
-
-The `Container` component limits the maximum expansion width of nested elements. It correctly applies central margins automatically to force the element tree to align seamlessly.
 
 ## Installation
 
 ```bash
-npm install @designforge/ui
+# Container is part of the local UI package — no extra dependencies required.
+npm install
 ```
 
 ## Usage
 
 ```tsx
-import { Container } from "@designforge/ui";
+import { Container, containerVariants } from "@/components/ui/container";
+```
 
-export default function App() {
+## Examples
+
+### Default (xl) Container
+
+Without specifying a `size`, the container defaults to `xl` (1280px max-width) with `px-4` on mobile, `px-6` on small screens, and `px-8` on large screens.
+
+```tsx
+import { Container } from "@/components/ui/container";
+
+export function DefaultContainer() {
   return (
-    <Container size="md">
-      Constrained middle content segment.
+    <Container>
+      <p className="text-sm text-muted-foreground">
+        This content is constrained to 1280px and centered on the page.
+      </p>
     </Container>
   );
 }
 ```
 
-### Attributes
+### All Size Variants
 
-| Prop       | Type                                                                       | Default     | Description                                                     |
-| :--------- | :------------------------------------------------------------------------- | :---------- | :-------------------------------------------------------------- |
-| `size`     | `sm` \| `md` \| `lg` \| `xl` \| `2xl` \| `full`                            | `"xl"`      | Restricts maximum breakpoint dimensions symmetrically mapping to standard breakpoint numbers (`640px` to `1536px`). |
+The `size` prop maps to a fixed `max-width`. Use `full` to stretch edge-to-edge while keeping the horizontal padding.
 
+```tsx
+import { Container } from "@/components/ui/container";
+
+const sizes = ["sm", "md", "lg", "xl", "2xl", "full"] as const;
+
+export function AllSizes() {
+  return (
+    <div className="space-y-4">
+      {sizes.map((size) => (
+        <Container key={size} size={size} className="bg-muted rounded py-3">
+          <p className="text-sm font-mono">size="{size}"</p>
+        </Container>
+      ))}
+    </div>
+  );
+}
+```
+
+| Size   | Max-width |
+| ------ | --------- |
+| `sm`   | 640px     |
+| `md`   | 768px     |
+| `lg`   | 1024px    |
+| `xl`   | 1280px    |
+| `2xl`  | 1536px    |
+| `full` | 100%      |
+
+### Nested Containers
+
+Nest containers to create inner regions with narrower constraints — for example, a wide hero section inside an `xl` page container that contains a narrower `md` copy block.
+
+```tsx
+import { Container } from "@/components/ui/container";
+
+export function NestedContainers() {
+  return (
+    <Container size="xl" className="bg-muted/40 py-8 rounded-lg">
+      <p className="text-sm text-muted-foreground mb-4">
+        Outer container (xl — 1280px)
+      </p>
+      <Container size="md" className="bg-background border rounded-lg py-6">
+        <p className="text-sm text-muted-foreground">
+          Inner container (md — 768px). Use this pattern to center editorial
+          text within a wider layout shell.
+        </p>
+      </Container>
+    </Container>
+  );
+}
+```
+
+### Page Layout with Container and Stack
+
+A realistic page layout that uses `Container` for width control and a vertical stack for spacing between sections.
+
+```tsx
+import { Container } from "@/components/ui/container";
+import { Stack } from "@/components/ui/stack";
+
+export function PageLayout() {
+  return (
+    <>
+      {/* Full-width hero band */}
+      <section className="bg-primary text-primary-foreground py-16">
+        <Container size="xl">
+          <h1 className="text-4xl font-bold">Welcome to DesignForge</h1>
+          <p className="mt-2 text-lg opacity-90">
+            A production-ready React design system.
+          </p>
+        </Container>
+      </section>
+
+      {/* Narrow editorial content */}
+      <main className="py-12">
+        <Container size="md">
+          <Stack gap={6}>
+            <h2 className="text-2xl font-semibold">Getting started</h2>
+            <p className="text-muted-foreground leading-relaxed">
+              Install the package, import any component, and start building.
+              Every component ships with Tailwind classes and full TypeScript
+              types.
+            </p>
+            <p className="text-muted-foreground leading-relaxed">
+              The Container component handles horizontal padding automatically,
+              so you never need to add <code>px-*</code> utilities to your
+              page wrappers manually.
+            </p>
+          </Stack>
+        </Container>
+      </main>
+    </>
+  );
+}
+```
+
+## API Reference
+
+### Container
+
+| Prop        | Type                                                   | Default | Description                                                      |
+| ----------- | ------------------------------------------------------ | ------- | ---------------------------------------------------------------- |
+| `size`      | `"sm" \| "md" \| "lg" \| "xl" \| "2xl" \| "full"`     | `"xl"`  | Controls the `max-width` of the container.                       |
+| `className` | `string`                                               | —       | Additional CSS classes merged with the container's base classes. |
+| `ref`       | `React.Ref<HTMLDivElement>`                            | —       | Ref forwarded to the underlying `<div>` element.                 |
+| `children`  | `React.ReactNode`                                      | —       | Content rendered inside the constrained wrapper.                 |
+
+### containerVariants
+
+`containerVariants` is the underlying `cva` variant config. Import it if you need to apply container sizing logic outside of the `Container` component itself — for example, on a custom wrapper element.
+
+```tsx
+import { containerVariants } from "@/components/ui/container";
+import { cn } from "@/lib/utils";
+
+function CustomWrapper({
+  className,
+  ...props
+}: React.ComponentProps<"section">) {
+  return (
+    <section
+      className={cn(containerVariants({ size: "lg" }), "mx-auto", className)}
+      {...props}
+    />
+  );
+}
+```
+
+## Accessibility
+
+- `Container` renders a plain `<div>` and carries no ARIA semantics of its own.
+- Use semantic HTML elements (`<main>`, `<section>`, `<article>`, etc.) inside or instead of the container when the content warrants a landmark role.
+- Avoid relying on `Container` as the sole landmark wrapper — pair it with a semantic element to ensure screen reader navigation works correctly.
+- The responsive padding built into `Container` ensures touch targets and text are never flush against the screen edge on mobile devices, supporting WCAG 1.4.10 (Reflow).
 
 ## Live View
 
-Here is a live contextual rendering of the component directly from our isolated Storybook environment.
-
 <StorybookPreview src="http://localhost:6006/iframe.html?id=layout-container--default&viewMode=story" />
 
-> [!TIP]
-> [Open Component in Storybook ↗](http://localhost:6006/?path=/story/layout-container--default)
+[Open Container in Storybook →](http://localhost:6006/?path=/story/layout-container--default)

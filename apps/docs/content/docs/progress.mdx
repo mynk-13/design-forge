@@ -1,9 +1,7 @@
 ---
-title: "Progress"
-description: "Documentation for the Progress component."
+title: Progress
+description: A linear progress indicator built on Radix UI Progress. Supports three sizes, determinate values from 0–100, and an indeterminate pulse animation when no value is provided — suitable for file uploads, multi-step flows, and loading states.
 ---
-
-The `Progress` component represents a fundamental UI building block within the DesignForge token system.
 
 ## Installation
 
@@ -14,27 +12,203 @@ npm install @designforge/ui
 ## Usage
 
 ```tsx
-import { Progress } from "@designforge/ui";
+import { Progress } from "@/components/ui/progress"
+```
 
-export default function App() {
+## Examples
+
+### All Sizes
+
+Three size variants control the height of the track and indicator bar.
+
+```tsx
+import { Progress } from "@/components/ui/progress"
+
+export function ProgressSizes() {
   return (
-    <Progress>Example Content</Progress>
-  );
+    <div className="flex flex-col gap-4 w-full max-w-sm">
+      <div className="space-y-1">
+        <p className="text-xs text-muted-foreground">Small (sm)</p>
+        <Progress value={60} size="sm" />
+      </div>
+      <div className="space-y-1">
+        <p className="text-xs text-muted-foreground">Medium (md) — default</p>
+        <Progress value={60} size="md" />
+      </div>
+      <div className="space-y-1">
+        <p className="text-xs text-muted-foreground">Large (lg)</p>
+        <Progress value={60} size="lg" />
+      </div>
+    </div>
+  )
 }
 ```
 
-### Attributes
+### Loading States
 
-| Prop      | Type      | Default       | Description                                                 |
-| :-------- | :-------- | :------------ | :---------------------------------------------------------- |
-| `className` | `string`  | `undefined`   | Merges all optional utility styles directly. |
+Show common milestone values to illustrate stepped progress.
 
+```tsx
+import { Progress } from "@/components/ui/progress"
+
+export function ProgressLoadingStates() {
+  const steps = [
+    { label: "Starting…", value: 25 },
+    { label: "Halfway there", value: 50 },
+    { label: "Almost done", value: 75 },
+    { label: "Complete", value: 100 },
+  ]
+
+  return (
+    <div className="flex flex-col gap-4 w-full max-w-sm">
+      {steps.map(({ label, value }) => (
+        <div key={value} className="space-y-1">
+          <div className="flex justify-between text-xs text-muted-foreground">
+            <span>{label}</span>
+            <span>{value}%</span>
+          </div>
+          <Progress value={value} />
+        </div>
+      ))}
+    </div>
+  )
+}
+```
+
+### Indeterminate
+
+Pass `value={null}` or omit `value` entirely to trigger the pulse animation, indicating that the duration is unknown.
+
+```tsx
+import { Progress } from "@/components/ui/progress"
+
+export function ProgressIndeterminate() {
+  return (
+    <div className="w-full max-w-sm space-y-1">
+      <p className="text-xs text-muted-foreground">Fetching data…</p>
+      <Progress value={null} />
+    </div>
+  )
+}
+```
+
+### With Label
+
+Pair the bar with an accessible label and a percentage readout.
+
+```tsx
+import { Progress } from "@/components/ui/progress"
+
+export function ProgressWithLabel() {
+  const value = 68
+
+  return (
+    <div className="w-full max-w-sm space-y-2">
+      <div className="flex items-center justify-between">
+        <label className="text-sm font-medium leading-none">
+          Profile completion
+        </label>
+        <span className="text-sm text-muted-foreground">{value}%</span>
+      </div>
+      <Progress value={value} aria-label="Profile completion progress" />
+    </div>
+  )
+}
+```
+
+### File Upload Progress
+
+Simulate a file upload with an animated value that increments over time.
+
+```tsx
+import { useEffect, useState } from "react"
+import { Progress } from "@/components/ui/progress"
+
+export function FileUploadProgress() {
+  const [progress, setProgress] = useState(0)
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setProgress((prev) => {
+        if (prev >= 100) {
+          clearInterval(timer)
+          return 100
+        }
+        return prev + 10
+      })
+    }, 400)
+    return () => clearInterval(timer)
+  }, [])
+
+  return (
+    <div className="w-full max-w-sm space-y-2">
+      <div className="flex items-center justify-between text-sm">
+        <span className="font-medium">design-tokens.zip</span>
+        <span className="text-muted-foreground">
+          {progress < 100 ? `${progress}%` : "Done"}
+        </span>
+      </div>
+      <Progress value={progress} size="sm" />
+    </div>
+  )
+}
+```
+
+### Multi-Step Progress
+
+Break total progress into named steps to communicate where the user is in a workflow.
+
+```tsx
+import { Progress } from "@/components/ui/progress"
+
+const STEPS = ["Account", "Profile", "Preferences", "Review"]
+
+export function MultiStepProgress() {
+  const currentStep = 2 // 0-indexed
+  const value = Math.round(((currentStep + 1) / STEPS.length) * 100)
+
+  return (
+    <div className="w-full max-w-sm space-y-3">
+      <Progress value={value} size="lg" aria-label="Setup progress" />
+      <div className="flex justify-between">
+        {STEPS.map((step, i) => (
+          <span
+            key={step}
+            className={`text-xs ${
+              i <= currentStep
+                ? "text-foreground font-medium"
+                : "text-muted-foreground"
+            }`}
+          >
+            {step}
+          </span>
+        ))}
+      </div>
+    </div>
+  )
+}
+```
+
+## API Reference
+
+### Progress
+
+| Prop        | Type                           | Default | Description                                                                                                                                    |
+| ----------- | ------------------------------ | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `value`     | `number \| null \| undefined`  | —       | Current progress from `0` to `100`. Pass `null` or omit to show the indeterminate pulse animation.                                             |
+| `size`      | `"sm" \| "md" \| "lg"`        | `"md"`  | Controls the height of the progress track: `sm` = `h-1.5`, `md` = `h-2.5`, `lg` = `h-4` (Tailwind height classes).                           |
+| `className` | `string`                       | —       | Additional CSS classes applied to the root track element.                                                                                      |
+| `ref`       | `React.Ref<HTMLDivElement>`    | —       | Forwarded ref attached to the root element.                                                                                                    |
+
+## Accessibility
+
+- Rendered as `role="progressbar"` via Radix UI, exposing `aria-valuenow`, `aria-valuemin`, and `aria-valuemax` automatically.
+- When `value` is `null` or `undefined`, `aria-valuenow` is omitted to correctly communicate the indeterminate state to assistive technologies.
+- Provide a meaningful `aria-label` or `aria-labelledby` when the visible label is not programmatically associated with the bar element.
+- Colour alone should not be the sole means of communicating progress state — always pair the bar with a visible text readout or label for users with colour vision deficiencies.
 
 ## Live View
 
-Here is a live contextual rendering of the component directly from our isolated Storybook environment.
+<StorybookPreview src="http://localhost:6006/iframe.html?id=feedback-progress--default&viewMode=story" />
 
-<StorybookPreview src="http://localhost:6006/iframe.html?id=feedback-progress--determinate&viewMode=story" />
-
-> [!TIP]
-> [Open Component in Storybook ↗](http://localhost:6006/?path=/story/feedback-progress--determinate)
+[Open in Storybook ↗](https://designforge-storybook.vercel.app/?path=/story/feedback-progress--default)

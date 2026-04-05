@@ -1,40 +1,380 @@
 ---
-title: "Dialog"
-description: "Documentation for the Dialog component."
+title: Dialog
+description: A modal dialog component built on Radix UI Dialog. Features animated enter and exit transitions, a close button, Escape key dismissal, and overlay click-to-close behavior.
 ---
-
-The `Dialog` component represents a fundamental UI building block within the DesignForge token system.
 
 ## Installation
 
 ```bash
-npm install @designforge/ui
+npm install @radix-ui/react-dialog
 ```
 
 ## Usage
 
 ```tsx
-import { Dialog } from "@designforge/ui";
+import {
+  Dialog,
+  DialogPortal,
+  DialogOverlay,
+  DialogTrigger,
+  DialogClose,
+  DialogContent,
+  DialogHeader,
+  DialogFooter,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+```
 
-export default function App() {
+## Examples
+
+### Basic Dialog
+
+`DialogTrigger` wraps the element that opens the modal. `DialogContent` automatically includes a close button (×) in the top-right corner and closes when the overlay or `Escape` is pressed.
+
+```tsx
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+
+export function BasicDialog() {
   return (
-    <Dialog>Example Content</Dialog>
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="outline">Open dialog</Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Are you sure?</DialogTitle>
+          <DialogDescription>
+            This action cannot be undone. Please confirm you want to continue.
+          </DialogDescription>
+        </DialogHeader>
+      </DialogContent>
+    </Dialog>
   );
 }
 ```
 
-### Attributes
+### Edit Profile Form Dialog
 
-| Prop      | Type      | Default       | Description                                                 |
-| :-------- | :-------- | :------------ | :---------------------------------------------------------- |
-| `className` | `string`  | `undefined`   | Merges all optional utility styles directly. |
+A practical pattern: a form with labeled inputs inside a dialog, with Cancel and Save actions in the footer.
 
+```tsx
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogFooter,
+  DialogTitle,
+  DialogDescription,
+  DialogClose,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+
+export function EditProfileDialog() {
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button>Edit profile</Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Edit profile</DialogTitle>
+          <DialogDescription>
+            Make changes to your profile here. Click save when you're done.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-4 py-4">
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="name" className="text-right">
+              Name
+            </Label>
+            <Input
+              id="name"
+              defaultValue="Alice Martin"
+              className="col-span-3"
+            />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="username" className="text-right">
+              Username
+            </Label>
+            <Input
+              id="username"
+              defaultValue="@alice"
+              className="col-span-3"
+            />
+          </div>
+        </div>
+        <DialogFooter>
+          <DialogClose asChild>
+            <Button variant="outline">Cancel</Button>
+          </DialogClose>
+          <Button type="submit">Save changes</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+```
+
+### Controlled Open State
+
+Use `open` and `onOpenChange` to control the dialog from outside, enabling programmatic open/close — for example, after an async operation completes or based on route state.
+
+```tsx
+import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogFooter,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+
+export function ControlledDialog() {
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  async function handleConfirm() {
+    setLoading(true);
+    await new Promise((r) => setTimeout(r, 1500)); // simulate API call
+    setLoading(false);
+    setOpen(false);
+  }
+
+  return (
+    <>
+      <Button variant="destructive" onClick={() => setOpen(true)}>
+        Delete account
+      </Button>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete account</DialogTitle>
+            <DialogDescription>
+              This will permanently delete your account and all associated data.
+              This action cannot be reversed.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setOpen(false)}
+              disabled={loading}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleConfirm}
+              disabled={loading}
+            >
+              {loading ? "Deleting…" : "Yes, delete account"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
+```
+
+### Dialog with Footer Actions
+
+Use `DialogFooter` to arrange action buttons. On mobile, buttons stack vertically; on `sm` screens they align to the right in a row.
+
+```tsx
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogFooter,
+  DialogTitle,
+  DialogDescription,
+  DialogClose,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+
+export function DialogWithFooter() {
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="outline">Publish changes</Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Publish to production?</DialogTitle>
+          <DialogDescription>
+            Your changes will be live immediately. Review the diff before
+            continuing.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="rounded-md bg-muted p-4 font-mono text-sm">
+          <p className="text-green-600">+ Added: Hero section copy</p>
+          <p className="text-red-500">- Removed: Deprecated banner</p>
+        </div>
+        <DialogFooter className="gap-2">
+          <DialogClose asChild>
+            <Button variant="ghost">Review later</Button>
+          </DialogClose>
+          <DialogClose asChild>
+            <Button variant="outline">Save draft</Button>
+          </DialogClose>
+          <Button>Publish now</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+```
+
+### Scrollable Dialog with Long Content
+
+When `DialogContent` contains more text than fits on screen, make the inner content area scroll while keeping the header and footer pinned in place.
+
+```tsx
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogFooter,
+  DialogTitle,
+  DialogDescription,
+  DialogClose,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+
+const paragraphs = Array.from(
+  { length: 12 },
+  (_, i) =>
+    `Section ${i + 1}: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.`
+);
+
+export function ScrollableDialog() {
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="outline">Read terms of service</Button>
+      </DialogTrigger>
+      <DialogContent className="flex flex-col max-h-[80vh]">
+        <DialogHeader>
+          <DialogTitle>Terms of Service</DialogTitle>
+          <DialogDescription>
+            Last updated January 1, 2026. Please read carefully.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="overflow-y-auto flex-1 pr-1">
+          <div className="space-y-4 text-sm text-muted-foreground">
+            {paragraphs.map((text, i) => (
+              <p key={i}>{text}</p>
+            ))}
+          </div>
+        </div>
+        <DialogFooter className="mt-4">
+          <DialogClose asChild>
+            <Button variant="outline">Decline</Button>
+          </DialogClose>
+          <DialogClose asChild>
+            <Button>Accept</Button>
+          </DialogClose>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+```
+
+## API Reference
+
+### Dialog
+
+Root component. Manages the open state and provides context to all child primitives.
+
+| Prop           | Type                      | Default | Description                                                     |
+| -------------- | ------------------------- | ------- | --------------------------------------------------------------- |
+| `open`         | `boolean`                 | —       | Controlled open state. Use with `onOpenChange`.                 |
+| `defaultOpen`  | `boolean`                 | `false` | Initial open state for uncontrolled usage.                      |
+| `onOpenChange` | `(open: boolean) => void` | —       | Called when the open state changes.                             |
+| `modal`        | `boolean`                 | `true`  | When `true`, interaction outside the dialog is blocked.         |
+
+### DialogTrigger
+
+| Prop      | Type      | Default | Description                                                                    |
+| --------- | --------- | ------- | ------------------------------------------------------------------------------ |
+| `asChild` | `boolean` | `false` | Merges trigger behavior onto the child element instead of a wrapping `<button>`. |
+
+### DialogContent
+
+| Prop                   | Type                                    | Default | Description                                                                       |
+| ---------------------- | --------------------------------------- | ------- | --------------------------------------------------------------------------------- |
+| `className`            | `string`                                | —       | Additional CSS classes on the dialog panel.                                       |
+| `onOpenAutoFocus`      | `(event: Event) => void`                | —       | Called when auto-focus fires on open. Call `event.preventDefault()` to suppress.  |
+| `onCloseAutoFocus`     | `(event: Event) => void`                | —       | Called when focus is returned to the trigger on close.                            |
+| `onEscapeKeyDown`      | `(event: KeyboardEvent) => void`        | —       | Called when `Escape` is pressed. Call `event.preventDefault()` to prevent close.  |
+| `onPointerDownOutside` | `(event: PointerEvent) => void`         | —       | Called when clicking outside the dialog. Call `event.preventDefault()` to prevent close. |
+
+### DialogHeader
+
+Layout wrapper that stacks `DialogTitle` and `DialogDescription` vertically with consistent spacing. Accepts standard `<div>` props and `className`.
+
+### DialogFooter
+
+Layout wrapper for action buttons. On mobile, buttons stack vertically; on `sm` screens, they align to the right. Accepts standard `<div>` props and `className`.
+
+### DialogTitle
+
+| Prop        | Type     | Default | Description                                           |
+| ----------- | -------- | ------- | ----------------------------------------------------- |
+| `className` | `string` | —       | Additional CSS classes. Renders as a styled `<h2>`.   |
+
+### DialogDescription
+
+| Prop        | Type     | Default | Description                                                       |
+| ----------- | -------- | ------- | ----------------------------------------------------------------- |
+| `className` | `string` | —       | Additional CSS classes. Renders as a muted `<p>` element.         |
+
+### DialogClose
+
+| Prop      | Type      | Default | Description                                                              |
+| --------- | --------- | ------- | ------------------------------------------------------------------------ |
+| `asChild` | `boolean` | `false` | Merges close behavior onto the child element. Commonly used with `<Button>`. |
+
+### DialogOverlay
+
+Renders the translucent backdrop behind the dialog panel. Included automatically inside `DialogContent` but exported for custom dialog layouts.
+
+### DialogPortal
+
+Renders its children in a portal appended to `document.body`. Included automatically inside `DialogContent` but exported for custom dialog layouts.
+
+## Accessibility
+
+- `DialogContent` is given `role="dialog"` and `aria-modal="true"` by Radix, correctly conveying modal semantics to screen readers.
+- `DialogTitle` is linked to the dialog via `aria-labelledby`. Always include a `DialogTitle` — omitting it will trigger a Radix console warning and constitutes an accessibility violation (WCAG 4.1.2).
+- `DialogDescription` is linked via `aria-describedby`. Include it whenever additional context beyond the title is needed. To intentionally omit it, pass `aria-describedby={undefined}` to `DialogContent`.
+- On open, focus is automatically moved into the dialog. On close, focus returns to the trigger element.
+- `Escape` closes the dialog by default, satisfying the modal keyboard interaction pattern defined in the [ARIA Authoring Practices Guide](https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/).
+- Focus is trapped inside the dialog while it is open. Users cannot Tab to content behind the overlay.
+- The close button (×) rendered inside `DialogContent` includes `aria-label="Close"` applied automatically by the component.
+- Avoid nesting dialogs unless absolutely necessary. Stacked modals create confusing focus management and should be replaced with multi-step flows in a single dialog.
 
 ## Live View
 
-Here is a live contextual rendering of the component directly from our isolated Storybook environment.
-
 <StorybookPreview src="http://localhost:6006/iframe.html?id=overlay-dialog--default&viewMode=story" />
 
-> [!TIP]
-> [Open Component in Storybook ↗](http://localhost:6006/?path=/story/overlay-dialog--default)
+[Open Dialog in Storybook →](http://localhost:6006/?path=/story/overlay-dialog--default)

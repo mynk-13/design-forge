@@ -1,9 +1,7 @@
 ---
-title: "Switch"
-description: "Documentation for the Switch component."
+title: Switch
+description: An accessible toggle control built on Radix UI Switch, with animated thumb translation, keyboard support, and full form integration.
 ---
-
-The `Switch` component represents a fundamental UI building block within the DesignForge token system.
 
 ## Installation
 
@@ -15,26 +13,237 @@ npm install @designforge/ui
 
 ```tsx
 import { Switch } from "@designforge/ui";
+```
 
-export default function App() {
+## Examples
+
+### Basic Switch
+
+An uncontrolled Switch with a default off state.
+
+```tsx
+import { Switch } from "@designforge/ui";
+
+export default function BasicSwitch() {
+  return <Switch aria-label="Toggle feature" />;
+}
+```
+
+### With Label
+
+Associate a visible label using an `id` and `htmlFor` pairing so clicking the label also toggles the switch.
+
+```tsx
+import { Switch } from "@designforge/ui";
+
+export default function SwitchWithLabel() {
   return (
-    <Switch>Example Content</Switch>
+    <div className="flex items-center gap-3">
+      <Switch id="notifications" />
+      <label
+        htmlFor="notifications"
+        className="text-sm font-medium cursor-pointer select-none"
+      >
+        Enable notifications
+      </label>
+    </div>
   );
 }
 ```
 
-### Attributes
+### Controlled Switch
 
-| Prop      | Type      | Default       | Description                                                 |
-| :-------- | :-------- | :------------ | :---------------------------------------------------------- |
-| `className` | `string`  | `undefined`   | Merges all optional utility styles directly. |
+Drive the Switch state externally with `checked` and `onCheckedChange`.
 
+```tsx
+import { useState } from "react";
+import { Switch } from "@designforge/ui";
+
+export default function ControlledSwitch() {
+  const [enabled, setEnabled] = useState(false);
+
+  return (
+    <div className="flex items-center gap-3">
+      <Switch
+        id="airplane-mode"
+        checked={enabled}
+        onCheckedChange={setEnabled}
+      />
+      <label htmlFor="airplane-mode" className="text-sm font-medium cursor-pointer select-none">
+        Airplane mode
+      </label>
+      <span className="text-sm text-muted-foreground">
+        ({enabled ? "On" : "Off"})
+      </span>
+    </div>
+  );
+}
+```
+
+### Disabled Switch
+
+Set `disabled` to prevent interaction. Both the checked and unchecked states can be disabled.
+
+```tsx
+import { Switch } from "@designforge/ui";
+
+export default function DisabledSwitch() {
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex items-center gap-3">
+        <Switch id="disabled-off" disabled />
+        <label htmlFor="disabled-off" className="text-sm text-muted-foreground cursor-not-allowed select-none">
+          Disabled (off)
+        </label>
+      </div>
+      <div className="flex items-center gap-3">
+        <Switch id="disabled-on" disabled defaultChecked />
+        <label htmlFor="disabled-on" className="text-sm text-muted-foreground cursor-not-allowed select-none">
+          Disabled (on)
+        </label>
+      </div>
+    </div>
+  );
+}
+```
+
+### Form with Multiple Switches
+
+Use `name` and `value` to include Switch fields in a native HTML form submission.
+
+```tsx
+import { Switch } from "@designforge/ui";
+
+export default function FormWithSwitches() {
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const data = new FormData(e.currentTarget);
+    console.log(Object.fromEntries(data.entries()));
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="w-72 space-y-5">
+      <h3 className="font-semibold text-base">Email Preferences</h3>
+
+      <div className="flex items-center justify-between">
+        <label htmlFor="marketing" className="text-sm">Marketing emails</label>
+        <Switch id="marketing" name="marketing" value="on" defaultChecked />
+      </div>
+
+      <div className="flex items-center justify-between">
+        <label htmlFor="product-updates" className="text-sm">Product updates</label>
+        <Switch id="product-updates" name="product-updates" value="on" defaultChecked />
+      </div>
+
+      <div className="flex items-center justify-between">
+        <label htmlFor="security-alerts" className="text-sm">Security alerts</label>
+        <Switch id="security-alerts" name="security-alerts" value="on" required />
+      </div>
+
+      <button
+        type="submit"
+        className="w-full py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium"
+      >
+        Save preferences
+      </button>
+    </form>
+  );
+}
+```
+
+### Settings Toggle List
+
+A vertically stacked settings list where each row contains a label, description, and Switch.
+
+```tsx
+import { useState } from "react";
+import { Switch } from "@designforge/ui";
+
+const settings = [
+  {
+    id: "dark-mode",
+    label: "Dark mode",
+    description: "Switch the interface to a dark colour scheme.",
+    default: false,
+  },
+  {
+    id: "auto-save",
+    label: "Auto-save",
+    description: "Automatically save changes as you work.",
+    default: true,
+  },
+  {
+    id: "analytics",
+    label: "Usage analytics",
+    description: "Share anonymous usage data to help improve the product.",
+    default: false,
+  },
+  {
+    id: "beta-features",
+    label: "Beta features",
+    description: "Get early access to features still in testing.",
+    default: false,
+  },
+];
+
+export default function SettingsToggleList() {
+  const [state, setState] = useState<Record<string, boolean>>(
+    Object.fromEntries(settings.map((s) => [s.id, s.default]))
+  );
+
+  return (
+    <div className="w-96 border rounded-xl divide-y">
+      {settings.map((setting) => (
+        <div key={setting.id} className="flex items-start justify-between gap-4 px-5 py-4">
+          <div className="space-y-0.5 flex-1">
+            <label
+              htmlFor={setting.id}
+              className="text-sm font-medium cursor-pointer"
+            >
+              {setting.label}
+            </label>
+            <p className="text-xs text-muted-foreground">{setting.description}</p>
+          </div>
+          <Switch
+            id={setting.id}
+            checked={state[setting.id]}
+            onCheckedChange={(checked) =>
+              setState((prev) => ({ ...prev, [setting.id]: checked }))
+            }
+          />
+        </div>
+      ))}
+    </div>
+  );
+}
+```
+
+## API Reference
+
+| Prop              | Type                          | Default | Description                                                                                  |
+| ----------------- | ----------------------------- | ------- | -------------------------------------------------------------------------------------------- |
+| `checked`         | `boolean`                     | —       | Controlled checked state. Use with `onCheckedChange` for controlled usage.                   |
+| `defaultChecked`  | `boolean`                     | `false` | Uncontrolled initial checked state.                                                          |
+| `onCheckedChange` | `(checked: boolean) => void`  | —       | Callback fired when the checked state changes.                                               |
+| `disabled`        | `boolean`                     | `false` | Prevents interaction and applies muted visual styling.                                       |
+| `required`        | `boolean`                     | `false` | Marks the switch as required in a form context.                                              |
+| `name`            | `string`                      | —       | Name submitted with form data. Required for native form integration.                         |
+| `value`           | `string`                      | `"on"`  | Value submitted with form data when the switch is checked.                                   |
+| `id`              | `string`                      | —       | HTML `id` used to associate a `<label>` element with the switch via `htmlFor`.               |
+| `className`       | `string`                      | —       | Additional Tailwind or custom classes applied to the switch root element.                    |
+| `ref`             | `React.Ref<HTMLButtonElement>` | —      | Forwarded ref to the underlying `<button>` element.                                          |
+
+## Accessibility
+
+- Switch renders as a `<button>` with `role="switch"` and `aria-checked` set to `"true"` or `"false"` to reflect the current state, ensuring compatibility with all major screen readers.
+- Pressing **Space** toggles the switch when it is focused. **Enter** does not toggle the switch (consistent with ARIA switch widget specification).
+- Always pair each Switch with a visible label using `id` and `htmlFor`, or provide `aria-label` / `aria-labelledby` when a visible label is not present.
+- The animated thumb translation is driven by CSS `transform`, which does not interfere with the accessibility tree. Users who prefer reduced motion can suppress it via the `prefers-reduced-motion` media query.
+- When `disabled`, the switch receives `aria-disabled="true"` and pointer events are blocked, but it remains in the tab order as a read-only interactive widget per ARIA best practices. If the switch should be completely unreachable, add `tabIndex={-1}` explicitly.
+- Setting `required` exposes `aria-required="true"` to assistive technology, communicating to screen reader users that the switch must be turned on before form submission.
 
 ## Live View
 
-Here is a live contextual rendering of the component directly from our isolated Storybook environment.
-
 <StorybookPreview src="http://localhost:6006/iframe.html?id=form-switch--default&viewMode=story" />
 
-> [!TIP]
-> [Open Component in Storybook ↗](http://localhost:6006/?path=/story/form-switch--default)
+[Open in Storybook ↗](https://designforge-storybook.vercel.app/?path=/story/form-switch--default)

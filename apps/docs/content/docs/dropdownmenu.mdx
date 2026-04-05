@@ -1,40 +1,502 @@
 ---
-title: "DropdownMenu"
-description: "Documentation for the DropdownMenu component."
+title: DropdownMenu
+description: A radix-based dropdown menu component that displays a list of actions or options triggered by a button. Supports submenus, checkbox items, radio groups, keyboard shortcuts, and full keyboard navigation.
 ---
-
-The `DropdownMenu` component represents a fundamental UI building block within the DesignForge token system.
 
 ## Installation
 
 ```bash
-npm install @designforge/ui
+npm install @radix-ui/react-dropdown-menu
 ```
 
 ## Usage
 
 ```tsx
-import { DropdownMenu } from "@designforge/ui";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuCheckboxItem,
+  DropdownMenuRadioItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuGroup,
+  DropdownMenuPortal,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuRadioGroup,
+} from "@/components/ui/dropdown-menu";
+```
 
-export default function App() {
+## Examples
+
+### Basic Menu
+
+```tsx
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+export function BasicMenu() {
   return (
-    <DropdownMenu>Example Content</DropdownMenu>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline">Open Menu</Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent>
+        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem>Profile</DropdownMenuItem>
+        <DropdownMenuItem>Settings</DropdownMenuItem>
+        <DropdownMenuItem>Help</DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem>Log out</DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 ```
 
-### Attributes
+### With Icons
 
-| Prop      | Type      | Default       | Description                                                 |
-| :-------- | :-------- | :------------ | :---------------------------------------------------------- |
-| `className` | `string`  | `undefined`   | Merges all optional utility styles directly. |
+```tsx
+import { User, Settings, HelpCircle, LogOut } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
+export function MenuWithIcons() {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline">My Account</Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="w-48">
+        <DropdownMenuLabel>My Account</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem>
+          <User className="mr-2 h-4 w-4" />
+          Profile
+        </DropdownMenuItem>
+        <DropdownMenuItem>
+          <Settings className="mr-2 h-4 w-4" />
+          Settings
+        </DropdownMenuItem>
+        <DropdownMenuItem>
+          <HelpCircle className="mr-2 h-4 w-4" />
+          Help
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem className="text-red-600">
+          <LogOut className="mr-2 h-4 w-4" />
+          Log out
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+```
+
+### With Keyboard Shortcuts
+
+```tsx
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+export function MenuWithShortcuts() {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline">Edit</Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="w-56">
+        <DropdownMenuLabel>Edit</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem>
+          Undo
+          <DropdownMenuShortcut>⌘Z</DropdownMenuShortcut>
+        </DropdownMenuItem>
+        <DropdownMenuItem>
+          Redo
+          <DropdownMenuShortcut>⇧⌘Z</DropdownMenuShortcut>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem>
+          Cut
+          <DropdownMenuShortcut>⌘X</DropdownMenuShortcut>
+        </DropdownMenuItem>
+        <DropdownMenuItem>
+          Copy
+          <DropdownMenuShortcut>⌘C</DropdownMenuShortcut>
+        </DropdownMenuItem>
+        <DropdownMenuItem>
+          Paste
+          <DropdownMenuShortcut>⌘V</DropdownMenuShortcut>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+```
+
+### Submenu
+
+```tsx
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuPortal,
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+export function MenuWithSubmenu() {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline">Options</Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="w-56">
+        <DropdownMenuLabel>Options</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem>New File</DropdownMenuItem>
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger>Share</DropdownMenuSubTrigger>
+          <DropdownMenuPortal>
+            <DropdownMenuSubContent>
+              <DropdownMenuItem>Email</DropdownMenuItem>
+              <DropdownMenuItem>Slack</DropdownMenuItem>
+              <DropdownMenuItem>Copy Link</DropdownMenuItem>
+            </DropdownMenuSubContent>
+          </DropdownMenuPortal>
+        </DropdownMenuSub>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem>Delete</DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+```
+
+### Checkbox Items
+
+```tsx
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+export function MenuWithCheckboxes() {
+  const [showStatusBar, setShowStatusBar] = useState(true);
+  const [showActivityBar, setShowActivityBar] = useState(false);
+  const [showPanel, setShowPanel] = useState(false);
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline">View</Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="w-56">
+        <DropdownMenuLabel>Appearance</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuCheckboxItem
+          checked={showStatusBar}
+          onCheckedChange={setShowStatusBar}
+        >
+          Status Bar
+        </DropdownMenuCheckboxItem>
+        <DropdownMenuCheckboxItem
+          checked={showActivityBar}
+          onCheckedChange={setShowActivityBar}
+        >
+          Activity Bar
+        </DropdownMenuCheckboxItem>
+        <DropdownMenuCheckboxItem
+          checked={showPanel}
+          onCheckedChange={setShowPanel}
+        >
+          Panel
+        </DropdownMenuCheckboxItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+```
+
+### Radio Group
+
+```tsx
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+export function MenuWithRadioGroup() {
+  const [position, setPosition] = useState("bottom");
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline">Position</Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="w-56">
+        <DropdownMenuLabel>Panel Position</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuRadioGroup value={position} onValueChange={setPosition}>
+          <DropdownMenuRadioItem value="top">Top</DropdownMenuRadioItem>
+          <DropdownMenuRadioItem value="bottom">Bottom</DropdownMenuRadioItem>
+          <DropdownMenuRadioItem value="right">Right</DropdownMenuRadioItem>
+        </DropdownMenuRadioGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+```
+
+### User Profile Menu
+
+```tsx
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+export function UserProfileMenu() {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Avatar className="cursor-pointer">
+          <AvatarImage src="https://github.com/shadcn.png" alt="User" />
+          <AvatarFallback>MK</AvatarFallback>
+        </Avatar>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="w-56" align="end">
+        <DropdownMenuLabel className="font-normal">
+          <div className="flex flex-col space-y-1">
+            <p className="text-sm font-medium leading-none">Mayank Kumar</p>
+            <p className="text-xs leading-none text-muted-foreground">
+              mayank@example.com
+            </p>
+          </div>
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuGroup>
+          <DropdownMenuItem>
+            Profile
+            <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
+          </DropdownMenuItem>
+          <DropdownMenuItem>
+            Billing
+            <DropdownMenuShortcut>⌘B</DropdownMenuShortcut>
+          </DropdownMenuItem>
+          <DropdownMenuItem>
+            Settings
+            <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem className="text-red-600">
+          Log out
+          <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+```
+
+## API Reference
+
+### DropdownMenu
+
+The root component that manages open/close state.
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `open` | `boolean` | — | Controlled open state. |
+| `defaultOpen` | `boolean` | `false` | Initial open state (uncontrolled). |
+| `onOpenChange` | `(open: boolean) => void` | — | Callback fired when open state changes. |
+| `modal` | `boolean` | `true` | Whether the menu blocks interaction with the rest of the page. |
+
+### DropdownMenuTrigger
+
+The element that opens the dropdown when activated.
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `asChild` | `boolean` | `false` | Merges props onto the child element instead of rendering a `<button>`. |
+
+### DropdownMenuContent
+
+The floating panel that contains menu items.
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `sideOffset` | `number` | `4` | Distance in px between the panel and the trigger. |
+| `align` | `"start" \| "center" \| "end"` | `"center"` | Horizontal alignment relative to the trigger. |
+| `side` | `"top" \| "right" \| "bottom" \| "left"` | `"bottom"` | Preferred side on which to render the panel. |
+| `className` | `string` | — | Additional CSS classes. |
+
+### DropdownMenuItem
+
+A single interactive menu item.
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `inset` | `boolean` | `false` | Adds left padding to align with icon-prefixed items. |
+| `disabled` | `boolean` | `false` | Prevents interaction and dims the item. |
+| `onSelect` | `(event: Event) => void` | — | Callback fired when the item is selected. |
+| `className` | `string` | — | Additional CSS classes. |
+
+### DropdownMenuCheckboxItem
+
+A menu item with a toggleable checkbox indicator.
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `checked` | `boolean` | — | Controlled checked state. |
+| `onCheckedChange` | `(checked: boolean) => void` | — | Callback fired when the checked state changes. |
+| `disabled` | `boolean` | `false` | Prevents interaction. |
+
+### DropdownMenuRadioItem
+
+A selectable menu item that participates in a radio group.
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `value` | `string` | — | The value this item represents within its radio group. |
+| `disabled` | `boolean` | `false` | Prevents interaction. |
+
+### DropdownMenuRadioGroup
+
+Container that manages mutual exclusion across child `DropdownMenuRadioItem` elements.
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `value` | `string` | — | The currently selected value. |
+| `onValueChange` | `(value: string) => void` | — | Callback fired when the selection changes. |
+
+### DropdownMenuLabel
+
+A non-interactive label used to describe a group of items.
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `inset` | `boolean` | `false` | Adds left padding to align with inset items. |
+| `className` | `string` | — | Additional CSS classes. |
+
+### DropdownMenuShortcut
+
+A styled `<span>` for displaying keyboard shortcut hints alongside an item.
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `className` | `string` | — | Additional CSS classes. |
+
+### DropdownMenuSub
+
+Wraps a submenu trigger and its content to create a nested menu level.
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `open` | `boolean` | — | Controlled open state. |
+| `defaultOpen` | `boolean` | `false` | Initial open state. |
+| `onOpenChange` | `(open: boolean) => void` | — | Callback fired when the submenu opens or closes. |
+
+### DropdownMenuSubTrigger
+
+The item inside a `DropdownMenuSub` that opens the nested submenu on hover or focus.
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `inset` | `boolean` | `false` | Adds left padding. |
+| `className` | `string` | — | Additional CSS classes. |
+
+### DropdownMenuSubContent
+
+The floating panel rendered for a nested submenu.
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `className` | `string` | — | Additional CSS classes. |
+
+### DropdownMenuGroup
+
+A semantic grouping wrapper for related menu items. Renders no visible UI of its own.
+
+### DropdownMenuSeparator
+
+A horizontal rule that visually divides groups of items.
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `className` | `string` | — | Additional CSS classes. |
+
+### DropdownMenuPortal
+
+Renders its children into `document.body` to avoid z-index and overflow clipping issues.
+
+## Accessibility
+
+- Built on Radix UI's `DropdownMenu` primitive, which fully implements the [WAI-ARIA Menu Button pattern](https://www.w3.org/WAI/ARIA/apg/patterns/menu-button/).
+- The trigger receives `aria-haspopup="menu"` and `aria-expanded` automatically.
+- The menu panel has `role="menu"`; items carry `role="menuitem"`, `role="menuitemcheckbox"`, or `role="menuitemradio"` as appropriate.
+- **Keyboard navigation**: `Enter` / `Space` opens the menu and selects an item; `ArrowDown` / `ArrowUp` move focus between items; `ArrowRight` opens a submenu; `ArrowLeft` / `Escape` closes the current level; `Home` / `End` jump to the first / last item.
+- Disabled items are visually muted and carry `aria-disabled="true"` so they are skipped during keyboard navigation.
+- Focus is trapped within the open menu and returns to the trigger on close.
+- Keyboard shortcuts shown with `DropdownMenuShortcut` are purely decorative — wire up actual shortcut handling separately (e.g., a `useEffect` + `keydown` listener).
 
 ## Live View
 
-Here is a live contextual rendering of the component directly from our isolated Storybook environment.
-
 <StorybookPreview src="http://localhost:6006/iframe.html?id=overlay-dropdownmenu--default&viewMode=story" />
 
-> [!TIP]
-> [Open Component in Storybook ↗](http://localhost:6006/?path=/story/overlay-dropdownmenu--default)
+[Open in Storybook ↗](https://designforge-storybook.vercel.app/?path=/story/overlay-dropdownmenu--default)

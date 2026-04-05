@@ -35,8 +35,12 @@ if (typeof window !== "undefined") {
   });
 
   // Respond to explicit height requests from the parent
+  // Also sync dark/light theme from the parent docs site
   window.addEventListener("message", (event) => {
     if (event.data?.type === "REQUEST_HEIGHT") postHeight();
+    if (event.data?.type === "THEME_CHANGE") {
+      document.documentElement.classList.toggle("dark", event.data.theme === "dark");
+    }
   });
 }
 // ─────────────────────────────────────────────────────────────────────────────

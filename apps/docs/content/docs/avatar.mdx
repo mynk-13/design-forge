@@ -1,9 +1,9 @@
 ---
 title: "Avatar"
-description: "Documentation for the Avatar component."
+description: "A user profile image with automatic fallback initials when the image fails to load."
 ---
 
-The `Avatar` component represents a fundamental UI building block within the DesignForge token system.
+`Avatar` wraps [Radix UI Avatar](https://www.radix-ui.com/primitives/docs/components/avatar) with four size variants and an automatic uppercase fallback. When the image at the given `src` fails to load — or no `AvatarImage` is provided — the `AvatarFallback` renders instead, typically showing initials or an icon.
 
 ## Installation
 
@@ -14,27 +14,174 @@ npm install @designforge/ui
 ## Usage
 
 ```tsx
-import { Avatar } from "@designforge/ui";
+import { Avatar, AvatarImage, AvatarFallback } from "@designforge/ui";
 
 export default function App() {
   return (
-    <Avatar>Example Content</Avatar>
+    <Avatar>
+      <AvatarImage src="/user.jpg" alt="Jane Doe" />
+      <AvatarFallback>JD</AvatarFallback>
+    </Avatar>
   );
 }
 ```
 
-### Attributes
+## Examples
 
-| Prop      | Type      | Default       | Description                                                 |
-| :-------- | :-------- | :------------ | :---------------------------------------------------------- |
-| `className` | `string`  | `undefined`   | Merges all optional utility styles directly. |
+### All sizes
 
+```tsx
+<div className="flex items-center gap-4">
+  <Avatar size="sm">
+    <AvatarImage src="/user.jpg" alt="Small" />
+    <AvatarFallback>SM</AvatarFallback>
+  </Avatar>
+
+  <Avatar size="md">
+    <AvatarImage src="/user.jpg" alt="Medium" />
+    <AvatarFallback>MD</AvatarFallback>
+  </Avatar>
+
+  <Avatar size="lg">
+    <AvatarImage src="/user.jpg" alt="Large" />
+    <AvatarFallback>LG</AvatarFallback>
+  </Avatar>
+
+  <Avatar size="xl">
+    <AvatarImage src="/user.jpg" alt="XL" />
+    <AvatarFallback>XL</AvatarFallback>
+  </Avatar>
+</div>
+```
+
+### Fallback only (no image)
+
+When no `AvatarImage` is rendered, or when the image fails to load, the `AvatarFallback` is shown immediately.
+
+```tsx
+<Avatar size="lg">
+  <AvatarFallback>AB</AvatarFallback>
+</Avatar>
+```
+
+### Avatar group
+
+Stack avatars horizontally using negative margin and a `ring` to create separation between them.
+
+```tsx
+<div className="flex -space-x-2">
+  {["Alice", "Bob", "Carol", "David", "Emma"].map((name, i) => (
+    <Avatar
+      key={name}
+      size="md"
+      style={{ zIndex: 5 - i }}
+      className="ring-2 ring-background"
+    >
+      <AvatarFallback>{name.slice(0, 2).toUpperCase()}</AvatarFallback>
+    </Avatar>
+  ))}
+  <Avatar size="md" className="ring-2 ring-background">
+    <AvatarFallback className="text-xs">+3</AvatarFallback>
+  </Avatar>
+</div>
+```
+
+### With online indicator
+
+Overlay a status dot using `relative` positioning on a wrapper element.
+
+```tsx
+<div className="relative inline-flex">
+  <Avatar size="lg">
+    <AvatarImage src="/user.jpg" alt="Online user" />
+    <AvatarFallback>JD</AvatarFallback>
+  </Avatar>
+  <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 ring-2 ring-background" />
+</div>
+```
+
+### With name and role
+
+Combine `Avatar` with text to build a user identity row common in sidebars, comment threads, and data tables.
+
+```tsx
+<div className="flex flex-col gap-3">
+  {[
+    { initials: "JD", name: "Jane Doe", role: "Product Designer" },
+    { initials: "MK", name: "Mayank Kumar", role: "Senior Frontend Engineer" },
+    { initials: "AW", name: "Anna White", role: "Engineering Manager" },
+  ].map(({ initials, name, role }) => (
+    <div key={name} className="flex items-center gap-3">
+      <Avatar>
+        <AvatarFallback>{initials}</AvatarFallback>
+      </Avatar>
+      <div>
+        <p className="text-sm font-medium">{name}</p>
+        <p className="text-xs text-muted-foreground">{role}</p>
+      </div>
+    </div>
+  ))}
+</div>
+```
+
+### With real image source
+
+```tsx
+<Avatar size="xl">
+  <AvatarImage
+    src="https://avatars.githubusercontent.com/u/124599?v=4"
+    alt="GitHub user"
+  />
+  <AvatarFallback>GH</AvatarFallback>
+</Avatar>
+```
+
+## API Reference
+
+### `<Avatar>`
+
+| Prop | Type | Default | Description |
+| :--- | :--- | :------ | :---------- |
+| `size` | `"sm" \| "md" \| "lg" \| "xl"` | `"md"` | Controls the avatar's width and height. |
+| `className` | `string` | — | Additional CSS classes on the root element. |
+
+| Size | Dimensions |
+| :--- | :--------- |
+| `sm` | 32 × 32 px |
+| `md` | 40 × 40 px |
+| `lg` | 56 × 56 px |
+| `xl` | 80 × 80 px |
+
+### `<AvatarImage>`
+
+Renders the image. When the image fails to load, Radix UI automatically switches to `AvatarFallback`.
+
+| Prop | Type | Default | Description |
+| :--- | :--- | :------ | :---------- |
+| `src` | `string` | — | Image URL. |
+| `alt` | `string` | — | Accessible alt text. **Required** when an image is rendered. |
+| `className` | `string` | — | Additional CSS classes. |
+
+### `<AvatarFallback>`
+
+Renders when the image is absent or has failed to load. Accepts any `ReactNode` — typically 1–2 uppercase initials.
+
+| Prop | Type | Default | Description |
+| :--- | :--- | :------ | :---------- |
+| `className` | `string` | — | Additional CSS classes. |
+| `children` | `ReactNode` | — | Initials, an icon, or any short content to display. |
+| `delayMs` | `number` | `600` | Milliseconds to wait before showing the fallback (prevents flash on fast connections). |
+
+## Accessibility
+
+- Always provide a meaningful `alt` prop on `AvatarImage` so screen readers can describe the image.
+- When the avatar represents a user and the name is visible elsewhere on the page, use `alt=""` to mark the image as decorative and avoid duplicate announcements.
+- `AvatarFallback` initials are read by screen readers when the image is absent. Ensure the initials are enough context, or add a visually hidden full name alongside.
 
 ## Live View
 
 Here is a live contextual rendering of the component directly from our isolated Storybook environment.
 
-<StorybookPreview src="http://localhost:6006/iframe.html?id=data-display-avatar--with-image&viewMode=story" />
+<StorybookPreview src="http://localhost:6006/iframe.html?id=data-display-avatar--all-sizes&viewMode=story" />
 
-> [!TIP]
-> [Open Component in Storybook ↗](http://localhost:6006/?path=/story/data-display-avatar--with-image)
+> [Open in Storybook ↗](https://designforge-storybook.vercel.app/?path=/story/data-display-avatar--all-sizes)

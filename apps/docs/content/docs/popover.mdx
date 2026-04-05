@@ -1,9 +1,7 @@
 ---
-title: "Popover"
-description: "Documentation for the Popover component."
+title: Popover
+description: A non-modal floating panel built on Radix UI Popover that appears relative to a trigger element. Supports controlled and uncontrolled open state, configurable alignment, side placement, and offset — suitable for tooltips, inline forms, pickers, and settings panels.
 ---
-
-The `Popover` component represents a fundamental UI building block within the DesignForge token system.
 
 ## Installation
 
@@ -14,27 +12,311 @@ npm install @designforge/ui
 ## Usage
 
 ```tsx
-import { Popover } from "@designforge/ui";
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverAnchor,
+  PopoverContent,
+} from "@/components/ui/popover"
+```
 
-export default function App() {
+## Examples
+
+### Basic Popover
+
+A minimal popover that opens when the trigger button is clicked.
+
+```tsx
+import { Button } from "@/components/ui/button"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+
+export function BasicPopover() {
   return (
-    <Popover>Example Content</Popover>
-  );
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button variant="outline">Open Popover</Button>
+      </PopoverTrigger>
+      <PopoverContent>
+        <p className="text-sm text-muted-foreground">
+          This is a simple popover with some descriptive text.
+        </p>
+      </PopoverContent>
+    </Popover>
+  )
 }
 ```
 
-### Attributes
+### Form Inside Popover
 
-| Prop      | Type      | Default       | Description                                                 |
-| :-------- | :-------- | :------------ | :---------------------------------------------------------- |
-| `className` | `string`  | `undefined`   | Merges all optional utility styles directly. |
+Embed a form directly inside the popover content for compact inline editing flows.
 
+```tsx
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+
+export function PopoverForm() {
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button variant="outline">Edit Profile</Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-72">
+        <div className="grid gap-4">
+          <div className="space-y-1">
+            <h4 className="font-medium leading-none">Profile</h4>
+            <p className="text-sm text-muted-foreground">
+              Update your display name and username.
+            </p>
+          </div>
+          <div className="grid gap-2">
+            <div className="grid grid-cols-3 items-center gap-4">
+              <Label htmlFor="display-name">Name</Label>
+              <Input
+                id="display-name"
+                defaultValue="Mayank"
+                className="col-span-2 h-8"
+              />
+            </div>
+            <div className="grid grid-cols-3 items-center gap-4">
+              <Label htmlFor="username">Username</Label>
+              <Input
+                id="username"
+                defaultValue="@mayank_dev"
+                className="col-span-2 h-8"
+              />
+            </div>
+          </div>
+          <Button size="sm">Save changes</Button>
+        </div>
+      </PopoverContent>
+    </Popover>
+  )
+}
+```
+
+### Date Range Picker Style
+
+Use `align="start"` to anchor the popover to the leading edge of the trigger — the natural position for a date-range picker.
+
+```tsx
+import { CalendarIcon } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+
+export function DateRangePopover() {
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          className="w-[260px] justify-start text-left font-normal"
+        >
+          <CalendarIcon className="mr-2 h-4 w-4" />
+          <span className="text-muted-foreground">Pick a date range</span>
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent align="start" className="w-auto p-0">
+        <div className="p-4 text-sm text-muted-foreground">
+          Calendar placeholder — wire up your preferred date picker here.
+        </div>
+      </PopoverContent>
+    </Popover>
+  )
+}
+```
+
+### Color Picker
+
+Place a color swatch grid inside the popover for quick palette selection.
+
+```tsx
+import { Button } from "@/components/ui/button"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+
+const COLORS = [
+  "#ef4444", "#f97316", "#eab308", "#22c55e",
+  "#06b6d4", "#3b82f6", "#8b5cf6", "#ec4899",
+  "#6b7280", "#1f2937",
+]
+
+export function ColorPickerPopover() {
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button variant="outline">Pick a color</Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-auto">
+        <div className="grid grid-cols-5 gap-2 p-1">
+          {COLORS.map((color) => (
+            <button
+              key={color}
+              className="h-7 w-7 rounded-md border border-border focus:outline-none focus:ring-2 focus:ring-ring"
+              style={{ backgroundColor: color }}
+              aria-label={color}
+            />
+          ))}
+        </div>
+      </PopoverContent>
+    </Popover>
+  )
+}
+```
+
+### Settings Panel
+
+Use `side="bottom"` with `align="end"` to anchor a settings popover to the trailing edge of a toolbar button.
+
+```tsx
+import { Settings2 } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Label } from "@/components/ui/label"
+import { Switch } from "@/components/ui/switch"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+
+export function SettingsPopover() {
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button size="icon" variant="ghost" aria-label="Open settings">
+          <Settings2 className="h-4 w-4" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent side="bottom" align="end" className="w-72">
+        <div className="space-y-3">
+          <h4 className="font-medium text-sm">Display Settings</h4>
+          <div className="flex items-center justify-between">
+            <Label htmlFor="compact-mode" className="text-sm">
+              Compact mode
+            </Label>
+            <Switch id="compact-mode" />
+          </div>
+          <div className="flex items-center justify-between">
+            <Label htmlFor="show-hints" className="text-sm">
+              Show hints
+            </Label>
+            <Switch id="show-hints" defaultChecked />
+          </div>
+        </div>
+      </PopoverContent>
+    </Popover>
+  )
+}
+```
+
+### Controlled Open State
+
+Manage open state externally to programmatically show or hide the popover.
+
+```tsx
+import { useState } from "react"
+import { Button } from "@/components/ui/button"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+
+export function ControlledPopover() {
+  const [open, setOpen] = useState(false)
+
+  return (
+    <div className="flex items-center gap-4">
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <Button variant="outline">
+            {open ? "Close" : "Open"} Popover
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent>
+          <p className="text-sm">
+            This popover is controlled by external state.
+          </p>
+          <Button
+            size="sm"
+            variant="ghost"
+            className="mt-2"
+            onClick={() => setOpen(false)}
+          >
+            Dismiss
+          </Button>
+        </PopoverContent>
+      </Popover>
+      <Button variant="secondary" onClick={() => setOpen(true)}>
+        Open via external button
+      </Button>
+    </div>
+  )
+}
+```
+
+## API Reference
+
+### Popover
+
+The root component that manages open/close state.
+
+| Prop           | Type                      | Default | Description                                          |
+| -------------- | ------------------------- | ------- | ---------------------------------------------------- |
+| `open`         | `boolean`                 | —       | Controlled open state.                               |
+| `onOpenChange` | `(open: boolean) => void` | —       | Callback fired when the open state changes.          |
+| `defaultOpen`  | `boolean`                 | `false` | Initial open state when uncontrolled.                |
+
+### PopoverTrigger
+
+Wraps the element that toggles the popover. Use `asChild` to forward rendering to a custom element.
+
+| Prop      | Type      | Default | Description                                                              |
+| --------- | --------- | ------- | ------------------------------------------------------------------------ |
+| `asChild` | `boolean` | `false` | Merges props onto the immediate child element instead of a `<button>`.   |
+
+### PopoverAnchor
+
+An optional positioning anchor separate from the trigger. Useful when the trigger and the visual anchor point differ.
+
+### PopoverContent
+
+The floating panel rendered inside a portal.
+
+| Prop         | Type                                          | Default    | Description                                                      |
+| ------------ | --------------------------------------------- | ---------- | ---------------------------------------------------------------- |
+| `align`      | `"start" \| "center" \| "end"`               | `"center"` | Alignment of the content relative to the trigger.               |
+| `side`       | `"top" \| "right" \| "bottom" \| "left"`     | `"bottom"` | Preferred side to render the content on.                        |
+| `sideOffset` | `number`                                      | `4`        | Pixel distance between the trigger and the content.             |
+| `className`  | `string`                                      | —          | Additional CSS classes. Default width is `w-72` (288px).        |
+
+## Accessibility
+
+- Follows the [WAI-ARIA Dialog (Non-Modal)](https://www.w3.org/WAI/ARIA/apg/patterns/dialogmodal/) pattern via Radix UI.
+- The trigger element receives `aria-expanded` and `aria-controls` automatically.
+- Focus is moved into the popover content on open and returned to the trigger on close.
+- Pressing `Escape` closes the popover and returns focus to the trigger.
+- Clicking outside the popover dismisses it.
+- Use `asChild` on `PopoverTrigger` to ensure the accessible role and keyboard behaviour of the trigger element is preserved.
 
 ## Live View
 
-Here is a live contextual rendering of the component directly from our isolated Storybook environment.
-
 <StorybookPreview src="http://localhost:6006/iframe.html?id=overlay-popover--default&viewMode=story" />
 
-> [!TIP]
-> [Open Component in Storybook ↗](http://localhost:6006/?path=/story/overlay-popover--default)
+[Open in Storybook ↗](https://designforge-storybook.vercel.app/?path=/story/overlay-popover--default)

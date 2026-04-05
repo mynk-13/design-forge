@@ -1,9 +1,7 @@
 ---
-title: "Slider"
-description: "Documentation for the Slider component."
+title: Slider
+description: An accessible range input built on Radix UI Slider, supporting single-thumb and dual-thumb range selection with keyboard navigation.
 ---
-
-The `Slider` component represents a fundamental UI building block within the DesignForge token system.
 
 ## Installation
 
@@ -15,26 +13,275 @@ npm install @designforge/ui
 
 ```tsx
 import { Slider } from "@designforge/ui";
+```
 
-export default function App() {
+## Examples
+
+### Basic Slider
+
+A simple uncontrolled slider with a default starting value.
+
+```tsx
+import { Slider } from "@designforge/ui";
+
+export default function BasicSlider() {
   return (
-    <Slider>Example Content</Slider>
+    <Slider
+      defaultValue={[40]}
+      min={0}
+      max={100}
+      step={1}
+      aria-label="Basic slider"
+      className="w-72"
+    />
   );
 }
 ```
 
-### Attributes
+### With Label and Value Display
 
-| Prop      | Type      | Default       | Description                                                 |
-| :-------- | :-------- | :------------ | :---------------------------------------------------------- |
-| `className` | `string`  | `undefined`   | Merges all optional utility styles directly. |
+Show the current value alongside a label by driving the slider as a controlled component.
 
+```tsx
+import { useState } from "react";
+import { Slider } from "@designforge/ui";
+
+export default function LabeledSlider() {
+  const [value, setValue] = useState([50]);
+
+  return (
+    <div className="w-72 space-y-3">
+      <div className="flex items-center justify-between">
+        <label htmlFor="brightness" className="text-sm font-medium">
+          Brightness
+        </label>
+        <span className="text-sm text-muted-foreground tabular-nums">{value[0]}%</span>
+      </div>
+      <Slider
+        id="brightness"
+        value={value}
+        onValueChange={setValue}
+        min={0}
+        max={100}
+        step={1}
+        aria-label="Brightness"
+        className="w-full"
+      />
+    </div>
+  );
+}
+```
+
+### Range Slider (Two Thumbs)
+
+Pass an array of two values to create a dual-thumb range selector.
+
+```tsx
+import { useState } from "react";
+import { Slider } from "@designforge/ui";
+
+export default function RangeSlider() {
+  const [range, setRange] = useState([20, 80]);
+
+  return (
+    <div className="w-72 space-y-3">
+      <div className="flex items-center justify-between">
+        <label className="text-sm font-medium">Price Range</label>
+        <span className="text-sm text-muted-foreground tabular-nums">
+          ${range[0]} — ${range[1]}
+        </span>
+      </div>
+      <Slider
+        value={range}
+        onValueChange={setRange}
+        min={0}
+        max={200}
+        step={5}
+        aria-label="Price range"
+        className="w-full"
+      />
+    </div>
+  );
+}
+```
+
+### Step Variants
+
+Control the increment granularity with the `step` prop.
+
+```tsx
+import { Slider } from "@designforge/ui";
+
+export default function StepVariants() {
+  return (
+    <div className="w-72 space-y-6">
+      <div className="space-y-2">
+        <p className="text-sm font-medium">Step: 1 (default)</p>
+        <Slider defaultValue={[30]} step={1} aria-label="Step 1" />
+      </div>
+      <div className="space-y-2">
+        <p className="text-sm font-medium">Step: 10</p>
+        <Slider defaultValue={[30]} step={10} aria-label="Step 10" />
+      </div>
+      <div className="space-y-2">
+        <p className="text-sm font-medium">Step: 25</p>
+        <Slider defaultValue={[25]} step={25} aria-label="Step 25" />
+      </div>
+    </div>
+  );
+}
+```
+
+### Disabled Slider
+
+Set `disabled` to prevent interaction and apply muted visual styles.
+
+```tsx
+import { Slider } from "@designforge/ui";
+
+export default function DisabledSlider() {
+  return (
+    <Slider
+      defaultValue={[60]}
+      disabled
+      aria-label="Disabled slider"
+      className="w-72"
+    />
+  );
+}
+```
+
+### Volume Control with Icon
+
+Pair the slider with icons for a polished volume or media control UI.
+
+```tsx
+import { useState } from "react";
+import { Slider } from "@designforge/ui";
+import { Volume2, VolumeX } from "lucide-react";
+
+export default function VolumeControl() {
+  const [volume, setVolume] = useState([70]);
+  const isMuted = volume[0] === 0;
+
+  return (
+    <div className="flex items-center gap-3 w-64">
+      <button
+        onClick={() => setVolume(isMuted ? [70] : [0])}
+        className="text-muted-foreground hover:text-foreground transition-colors"
+        aria-label={isMuted ? "Unmute" : "Mute"}
+      >
+        {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+      </button>
+      <Slider
+        value={volume}
+        onValueChange={setVolume}
+        min={0}
+        max={100}
+        step={1}
+        aria-label="Volume"
+        className="flex-1"
+      />
+      <span className="text-sm text-muted-foreground w-8 text-right tabular-nums">
+        {volume[0]}
+      </span>
+    </div>
+  );
+}
+```
+
+### In a Settings Panel
+
+Sliders integrate cleanly into preference panels alongside other form controls.
+
+```tsx
+import { useState } from "react";
+import { Slider } from "@designforge/ui";
+
+export default function SettingsPanel() {
+  const [fontSize, setFontSize] = useState([16]);
+  const [lineHeight, setLineHeight] = useState([150]);
+  const [opacity, setOpacity] = useState([80]);
+
+  return (
+    <div className="w-80 border rounded-xl p-5 space-y-6">
+      <h3 className="font-semibold text-base">Display Settings</h3>
+
+      <div className="space-y-2">
+        <div className="flex justify-between">
+          <label className="text-sm font-medium">Font Size</label>
+          <span className="text-sm text-muted-foreground">{fontSize[0]}px</span>
+        </div>
+        <Slider
+          value={fontSize}
+          onValueChange={setFontSize}
+          min={12}
+          max={24}
+          step={1}
+          aria-label="Font size"
+        />
+      </div>
+
+      <div className="space-y-2">
+        <div className="flex justify-between">
+          <label className="text-sm font-medium">Line Height</label>
+          <span className="text-sm text-muted-foreground">{lineHeight[0]}%</span>
+        </div>
+        <Slider
+          value={lineHeight}
+          onValueChange={setLineHeight}
+          min={100}
+          max={200}
+          step={10}
+          aria-label="Line height"
+        />
+      </div>
+
+      <div className="space-y-2">
+        <div className="flex justify-between">
+          <label className="text-sm font-medium">Background Opacity</label>
+          <span className="text-sm text-muted-foreground">{opacity[0]}%</span>
+        </div>
+        <Slider
+          value={opacity}
+          onValueChange={setOpacity}
+          min={0}
+          max={100}
+          step={5}
+          aria-label="Background opacity"
+        />
+      </div>
+    </div>
+  );
+}
+```
+
+## API Reference
+
+| Prop               | Type                           | Default  | Description                                                                                         |
+| ------------------ | ------------------------------ | -------- | --------------------------------------------------------------------------------------------------- |
+| `value`            | `[number]` or `[number, number]` | —      | Controlled value. Single-element array for one thumb; two-element array for range selection.        |
+| `defaultValue`     | `[number]` or `[number, number]` | —      | Uncontrolled initial value. Same array format as `value`.                                           |
+| `onValueChange`    | `(value: number[]) => void`    | —        | Callback fired on every thumb movement, receives the updated value array.                           |
+| `min`              | `number`                       | `0`      | Minimum selectable value.                                                                           |
+| `max`              | `number`                       | `100`    | Maximum selectable value.                                                                           |
+| `step`             | `number`                       | `1`      | Increment between each selectable value.                                                            |
+| `disabled`         | `boolean`                      | `false`  | Disables interaction and applies muted styling.                                                     |
+| `aria-label`       | `string`                       | —        | Accessible label for the slider. Required when no visible label references the slider via `aria-labelledby`. |
+| `aria-labelledby`  | `string`                       | —        | ID of the element that labels the slider. Use instead of `aria-label` when a visible label exists.  |
+| `className`        | `string`                       | —        | Additional Tailwind or custom classes applied to the root element.                                  |
+| `ref`              | `React.Ref<HTMLSpanElement>`   | —        | Forwarded ref to the underlying Radix Slider root element.                                          |
+
+## Accessibility
+
+- Each thumb renders as a focusable element with `role="slider"` and exposes `aria-valuenow`, `aria-valuemin`, `aria-valuemax`, and `aria-valuetext` automatically via Radix UI.
+- Always provide either `aria-label` or `aria-labelledby` so screen readers can announce what the slider controls.
+- Keyboard navigation is fully supported: **Arrow Left / Arrow Down** decreases the value by one step; **Arrow Right / Arrow Up** increases it. **Home** jumps to `min`; **End** jumps to `max`. **Page Down / Page Up** moves by a larger increment (10 steps by default).
+- When disabled, the slider receives `aria-disabled="true"` and all keyboard interaction is blocked.
+- For range sliders with two thumbs, each thumb gets its own accessible label derived from the parent `aria-label` suffixed with its index.
 
 ## Live View
 
-Here is a live contextual rendering of the component directly from our isolated Storybook environment.
-
 <StorybookPreview src="http://localhost:6006/iframe.html?id=form-slider--default&viewMode=story" />
 
-> [!TIP]
-> [Open Component in Storybook ↗](http://localhost:6006/?path=/story/form-slider--default)
+[Open in Storybook ↗](https://designforge-storybook.vercel.app/?path=/story/form-slider--default)

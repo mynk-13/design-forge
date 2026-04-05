@@ -1,9 +1,7 @@
 ---
-title: "Input"
-description: "Documentation for the Input component."
+title: Input
+description: An enhanced input component that wraps the native HTML input with support for a visible label, helper description, error message, and left/right icon slots. Accessibility wiring (id, aria-describedby, aria-invalid) is handled automatically via React's useId hook.
 ---
-
-The `Input` component represents a fundamental UI building block within the DesignForge token system.
 
 ## Installation
 
@@ -14,27 +12,270 @@ npm install @designforge/ui
 ## Usage
 
 ```tsx
-import { Input } from "@designforge/ui";
+import { Input } from "@/components/ui/input";
+```
 
-export default function App() {
+## Examples
+
+### Basic
+
+```tsx
+import { Input } from "@/components/ui/input";
+
+export function BasicInput() {
+  return <Input placeholder="Enter text…" />;
+}
+```
+
+### With Label and Description
+
+```tsx
+import { Input } from "@/components/ui/input";
+
+export function WithLabelAndDescription() {
   return (
-    <Input>Example Content</Input>
+    <Input
+      label="Username"
+      description="Only letters, numbers, and underscores are allowed."
+      placeholder="e.g. mayank_dev"
+    />
   );
 }
 ```
 
-### Attributes
+### Error State
 
-| Prop      | Type      | Default       | Description                                                 |
-| :-------- | :-------- | :------------ | :---------------------------------------------------------- |
-| `className` | `string`  | `undefined`   | Merges all optional utility styles directly. |
+```tsx
+import { Input } from "@/components/ui/input";
 
+export function ErrorState() {
+  return (
+    <Input
+      label="Email address"
+      type="email"
+      defaultValue="not-an-email"
+      error="Please enter a valid email address."
+    />
+  );
+}
+```
+
+### Left Icon
+
+```tsx
+import { Mail } from "lucide-react";
+import { Input } from "@/components/ui/input";
+
+export function LeftIconInput() {
+  return (
+    <Input
+      label="Email"
+      type="email"
+      placeholder="you@example.com"
+      leftIcon={<Mail className="h-4 w-4" />}
+    />
+  );
+}
+```
+
+### Right Icon
+
+```tsx
+import { Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
+
+export function RightIconInput() {
+  return (
+    <Input
+      placeholder="Search components…"
+      rightIcon={<Search className="h-4 w-4" />}
+    />
+  );
+}
+```
+
+### Password Toggle
+
+```tsx
+import { useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
+import { Input } from "@/components/ui/input";
+
+export function PasswordToggle() {
+  const [visible, setVisible] = useState(false);
+
+  return (
+    <Input
+      label="Password"
+      type={visible ? "text" : "password"}
+      placeholder="Enter your password"
+      rightIcon={
+        <button
+          type="button"
+          onClick={() => setVisible((v) => !v)}
+          className="text-muted-foreground hover:text-foreground"
+          aria-label={visible ? "Hide password" : "Show password"}
+        >
+          {visible ? (
+            <EyeOff className="h-4 w-4" />
+          ) : (
+            <Eye className="h-4 w-4" />
+          )}
+        </button>
+      }
+    />
+  );
+}
+```
+
+### Search Input
+
+```tsx
+import { Search, X } from "lucide-react";
+import { useState } from "react";
+import { Input } from "@/components/ui/input";
+
+export function SearchInput() {
+  const [value, setValue] = useState("");
+
+  return (
+    <Input
+      placeholder="Search…"
+      value={value}
+      onChange={(e) => setValue(e.target.value)}
+      leftIcon={<Search className="h-4 w-4" />}
+      rightIcon={
+        value ? (
+          <button
+            type="button"
+            onClick={() => setValue("")}
+            className="text-muted-foreground hover:text-foreground"
+            aria-label="Clear search"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        ) : null
+      }
+    />
+  );
+}
+```
+
+### Disabled
+
+```tsx
+import { Input } from "@/components/ui/input";
+
+export function DisabledInput() {
+  return (
+    <Input
+      label="Account ID"
+      value="acc_1A2B3C4D5E"
+      disabled
+      description="Your account ID cannot be changed."
+    />
+  );
+}
+```
+
+### Form with Validation
+
+```tsx
+import { useState } from "react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+
+interface FormErrors {
+  name?: string;
+  email?: string;
+}
+
+export function FormWithValidation() {
+  const [values, setValues] = useState({ name: "", email: "" });
+  const [errors, setErrors] = useState<FormErrors>({});
+
+  function validate(): FormErrors {
+    const errs: FormErrors = {};
+    if (!values.name.trim()) errs.name = "Name is required.";
+    if (!values.email.includes("@")) errs.email = "Enter a valid email address.";
+    return errs;
+  }
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    const errs = validate();
+    if (Object.keys(errs).length > 0) {
+      setErrors(errs);
+      return;
+    }
+    setErrors({});
+    alert("Form submitted!");
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4 w-80">
+      <Input
+        label="Full Name"
+        placeholder="Mayank Kumar"
+        value={values.name}
+        onChange={(e) => setValues((v) => ({ ...v, name: e.target.value }))}
+        error={errors.name}
+        required
+      />
+      <Input
+        label="Email"
+        type="email"
+        placeholder="you@example.com"
+        value={values.email}
+        onChange={(e) => setValues((v) => ({ ...v, email: e.target.value }))}
+        error={errors.email}
+        required
+      />
+      <Button type="submit" className="w-full">
+        Submit
+      </Button>
+    </form>
+  );
+}
+```
+
+## API Reference
+
+### Input
+
+Extends all standard HTML `<input>` attributes. The following props are added by the component.
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `label` | `string` | — | Visible `<label>` text rendered above the input. Automatically linked via the auto-generated `id`. |
+| `description` | `string` | — | Helper text rendered below the input. Added to `aria-describedby` automatically. |
+| `error` | `string` | — | Error message rendered below the input (replaces `description`). Sets `aria-invalid="true"` and `aria-describedby` on the input. |
+| `leftIcon` | `ReactNode` | — | Node rendered inside the input on the leading (left) side. The input gains left padding to avoid overlap. |
+| `rightIcon` | `ReactNode` | — | Node rendered inside the input on the trailing (right) side. The input gains right padding to avoid overlap. |
+| `wrapperClassName` | `string` | — | Additional CSS classes applied to the outer wrapper `<div>` that contains the label, input, and helper text. |
+| `className` | `string` | — | Additional CSS classes applied directly to the `<input>` element. |
+
+**Automatically managed attributes**
+
+| Attribute | Behaviour |
+|-----------|-----------|
+| `id` | Auto-generated with React's `useId` hook. Override by passing a manual `id`. |
+| `aria-describedby` | Set to the `id` of the description or error element when either is present. |
+| `aria-invalid` | Set to `"true"` when `error` is non-empty. |
+
+All other props (`type`, `placeholder`, `value`, `onChange`, `disabled`, `required`, `autoComplete`, etc.) are forwarded directly to the underlying `<input>` element.
+
+## Accessibility
+
+- The `label` prop renders a real `<label>` element associated with the input via matching `id` / `htmlFor` attributes, ensuring screen readers announce the label when the input receives focus.
+- When `description` or `error` is provided, the input's `aria-describedby` is set automatically so assistive technologies read the supplementary text after the label.
+- An `error` prop also sets `aria-invalid="true"`, which communicates an invalid state to screen readers without relying solely on colour.
+- Error messages are visually styled in red and programmatically associated — never convey errors through colour alone.
+- Use `disabled` for read-only locked fields. Disabled inputs are removed from the tab order; if the value must remain readable and focusable, use `readOnly` instead.
+- Icon slots accept arbitrary `ReactNode`. When an icon carries meaning (e.g., a clear button), ensure it has an accessible `aria-label` or visually hidden text.
 
 ## Live View
 
-Here is a live contextual rendering of the component directly from our isolated Storybook environment.
-
 <StorybookPreview src="http://localhost:6006/iframe.html?id=form-input--default&viewMode=story" />
 
-> [!TIP]
-> [Open Component in Storybook ↗](http://localhost:6006/?path=/story/form-input--default)
+[Open in Storybook ↗](https://designforge-storybook.vercel.app/?path=/story/form-input--default)

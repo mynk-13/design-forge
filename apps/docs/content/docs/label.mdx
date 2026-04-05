@@ -1,9 +1,7 @@
 ---
-title: "Label"
-description: "Documentation for the Label component."
+title: Label
+description: An accessible label component built on Radix UI Label that associates text with form controls via htmlFor or by wrapping the control element. Supports peer-disabled styling to visually mute the label when its paired input is disabled.
 ---
-
-The `Label` component represents a fundamental UI building block within the DesignForge token system.
 
 ## Installation
 
@@ -14,27 +12,122 @@ npm install @designforge/ui
 ## Usage
 
 ```tsx
-import { Label } from "@designforge/ui";
+import { Label } from "@/components/ui/label"
+```
 
-export default function App() {
+## Examples
+
+### Basic Label
+
+A simple label rendered as a standalone element.
+
+```tsx
+<Label>Email address</Label>
+```
+
+### With Input via htmlFor
+
+Use the `htmlFor` prop to associate the label with an input by matching the input's `id`.
+
+```tsx
+import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input"
+
+export function LabelWithInput() {
   return (
-    <Label>Example Content</Label>
-  );
+    <div className="flex flex-col gap-1.5">
+      <Label htmlFor="email">Email address</Label>
+      <Input id="email" type="email" placeholder="you@example.com" />
+    </div>
+  )
 }
 ```
 
-### Attributes
+### Wrapping a Checkbox
 
-| Prop      | Type      | Default       | Description                                                 |
-| :-------- | :-------- | :------------ | :---------------------------------------------------------- |
-| `className` | `string`  | `undefined`   | Merges all optional utility styles directly. |
+Wrap the control element directly inside the label to create an implicit association without needing `htmlFor` or `id`.
 
+```tsx
+import { Label } from "@/components/ui/label"
+import { Checkbox } from "@/components/ui/checkbox"
+
+export function LabelWrappingCheckbox() {
+  return (
+    <Label className="flex items-center gap-2 cursor-pointer">
+      <Checkbox />
+      Accept terms and conditions
+    </Label>
+  )
+}
+```
+
+### Disabled State
+
+When the paired input is disabled, the `peer-disabled` utility makes the label appear visually muted, signalling that the field is not interactive.
+
+```tsx
+import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input"
+
+export function LabelDisabledState() {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <Label htmlFor="disabled-input">Username</Label>
+      <Input
+        id="disabled-input"
+        disabled
+        defaultValue="mayank_dev"
+        className="peer"
+      />
+    </div>
+  )
+}
+```
+
+### Required Indicator
+
+Add a visual asterisk to communicate that a field is required.
+
+```tsx
+import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input"
+
+export function LabelRequired() {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <Label htmlFor="full-name">
+        Full name <span className="text-destructive">*</span>
+      </Label>
+      <Input id="full-name" placeholder="Jane Doe" required />
+    </div>
+  )
+}
+```
+
+## API Reference
+
+### Label
+
+Renders a `<label>` element with accessible styling. Accepts a forwarded `ref` and all standard HTML label attributes.
+
+| Prop        | Type                          | Default | Description                                                              |
+| ----------- | ----------------------------- | ------- | ------------------------------------------------------------------------ |
+| `htmlFor`   | `string`                      | —       | The `id` of the form control this label describes.                       |
+| `className` | `string`                      | —       | Additional CSS classes merged via `cn`.                                  |
+| `ref`       | `React.Ref<HTMLLabelElement>` | —       | Forwarded ref attached to the underlying `<label>` element.              |
+
+All other standard HTML `<label>` attributes (e.g., `onClick`, `style`, `aria-*`) are forwarded to the underlying element.
+
+## Accessibility
+
+- Rendered as a native `<label>` element, giving it full browser and assistive-technology support out of the box.
+- When `htmlFor` matches a control's `id`, clicking the label focuses the control — this behaviour is provided by the browser natively.
+- Wrapping the control inside the label creates an implicit association, which is equally valid and avoids the need for matching `id`/`htmlFor` pairs.
+- The `peer-disabled:cursor-not-allowed peer-disabled:opacity-70` classes visually communicate the disabled state so that users who rely on visual cues understand the field is not interactive, without hiding it from screen readers.
+- Always provide a label for every form control. Do not rely solely on `placeholder` text as a substitute for a visible label.
 
 ## Live View
 
-Here is a live contextual rendering of the component directly from our isolated Storybook environment.
+<StorybookPreview src="http://localhost:6006/iframe.html?id=form-label--default&viewMode=story" />
 
-<StorybookPreview src="http://localhost:6006/iframe.html?id=components-label--default&viewMode=story" />
-
-> [!TIP]
-> [Open Component in Storybook ↗](http://localhost:6006/?path=/story/components-label--default)
+[Open in Storybook ↗](https://designforge-storybook.vercel.app/?path=/story/form-label--default)

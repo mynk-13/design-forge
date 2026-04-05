@@ -1,9 +1,7 @@
 ---
-title: "Tooltip"
-description: "Documentation for the Tooltip component."
+title: Tooltip
+description: A portal-based floating label that appears on hover or focus. Built on Radix UI Tooltip with animation, configurable delay, and side/alignment control.
 ---
-
-The `Tooltip` component represents a fundamental UI building block within the DesignForge token system.
 
 ## Installation
 
@@ -14,27 +12,338 @@ npm install @designforge/ui
 ## Usage
 
 ```tsx
-import { Tooltip } from "@designforge/ui";
+import {
+  TooltipProvider,
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@designforge/ui";
 
-export default function App() {
+export default function Example() {
   return (
-    <Tooltip>Example Content</Tooltip>
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger>Hover me</TooltipTrigger>
+        <TooltipContent>This is a tooltip</TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 }
 ```
 
-### Attributes
+> **Note:** `TooltipProvider` must wrap any component that uses tooltips. Place it once near the root of your application rather than around every individual tooltip. See the [App-Level Provider Setup](#app-level-provider-setup) example.
 
-| Prop      | Type      | Default       | Description                                                 |
-| :-------- | :-------- | :------------ | :---------------------------------------------------------- |
-| `className` | `string`  | `undefined`   | Merges all optional utility styles directly. |
+## Examples
 
+### Basic
+
+A tooltip attached to a button that appears with the default 700 ms hover delay.
+
+```tsx
+import {
+  TooltipProvider,
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@designforge/ui";
+import { Button } from "@designforge/ui";
+
+export default function BasicTooltip() {
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button variant="outline">Save</Button>
+        </TooltipTrigger>
+        <TooltipContent>Save your changes (Ctrl+S)</TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+}
+```
+
+### All Sides
+
+Use the `side` prop to position the tooltip above, below, to the left, or to the right of the trigger.
+
+```tsx
+import {
+  TooltipProvider,
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@designforge/ui";
+import { Button } from "@designforge/ui";
+
+const sides = ["top", "right", "bottom", "left"] as const;
+
+export default function AllSidesTooltip() {
+  return (
+    <TooltipProvider>
+      <div className="flex flex-wrap items-center justify-center gap-8 p-12">
+        {sides.map((side) => (
+          <Tooltip key={side}>
+            <TooltipTrigger asChild>
+              <Button variant="outline" className="capitalize">
+                {side}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side={side}>Tooltip on the {side}</TooltipContent>
+          </Tooltip>
+        ))}
+      </div>
+    </TooltipProvider>
+  );
+}
+```
+
+### Delay Control
+
+Override the provider's default delay with `delayDuration` on an individual `Tooltip`. Set it to `0` for an instant tooltip.
+
+```tsx
+import {
+  TooltipProvider,
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@designforge/ui";
+import { Button } from "@designforge/ui";
+
+export default function DelayTooltip() {
+  return (
+    <TooltipProvider>
+      <div className="flex gap-4">
+        <Tooltip delayDuration={0}>
+          <TooltipTrigger asChild>
+            <Button variant="outline">Instant</Button>
+          </TooltipTrigger>
+          <TooltipContent>No delay</TooltipContent>
+        </Tooltip>
+
+        <Tooltip delayDuration={300}>
+          <TooltipTrigger asChild>
+            <Button variant="outline">300 ms</Button>
+          </TooltipTrigger>
+          <TooltipContent>Short delay</TooltipContent>
+        </Tooltip>
+
+        <Tooltip delayDuration={1200}>
+          <TooltipTrigger asChild>
+            <Button variant="outline">1.2 s</Button>
+          </TooltipTrigger>
+          <TooltipContent>Long delay</TooltipContent>
+        </Tooltip>
+      </div>
+    </TooltipProvider>
+  );
+}
+```
+
+### With Icon Button
+
+Tooltips are especially useful for icon-only buttons where the label is not visible on screen.
+
+```tsx
+import { Trash2, Copy, Share2 } from "lucide-react";
+import {
+  TooltipProvider,
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@designforge/ui";
+import { Button } from "@designforge/ui";
+
+const actions = [
+  { icon: Copy, label: "Copy to clipboard" },
+  { icon: Share2, label: "Share link" },
+  { icon: Trash2, label: "Delete item" },
+];
+
+export default function IconButtonTooltips() {
+  return (
+    <TooltipProvider>
+      <div className="flex gap-2">
+        {actions.map(({ icon: Icon, label }) => (
+          <Tooltip key={label}>
+            <TooltipTrigger asChild>
+              <Button variant="ghost" size="icon" aria-label={label}>
+                <Icon className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>{label}</TooltipContent>
+          </Tooltip>
+        ))}
+      </div>
+    </TooltipProvider>
+  );
+}
+```
+
+### Disabled Button Tooltip
+
+Disabled buttons block pointer events, so the tooltip never fires. The workaround is to wrap the disabled button in a `<span>` with `tabIndex={0}` and `pointer-events-none` on the button itself, allowing hover events to reach the wrapper.
+
+```tsx
+import {
+  TooltipProvider,
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@designforge/ui";
+import { Button } from "@designforge/ui";
+
+export default function DisabledButtonTooltip() {
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        {/* Wrap the disabled button so pointer events can reach the trigger */}
+        <TooltipTrigger asChild>
+          <span tabIndex={0} className="inline-flex cursor-not-allowed">
+            <Button disabled className="pointer-events-none">
+              Publish
+            </Button>
+          </span>
+        </TooltipTrigger>
+        <TooltipContent>
+          You need editor permissions to publish.
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+}
+```
+
+### Custom Content
+
+`TooltipContent` accepts any React children, so you can render rich markup, icons, or formatted text inside the floating panel.
+
+```tsx
+import { Info } from "lucide-react";
+import {
+  TooltipProvider,
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@designforge/ui";
+
+export default function CustomContentTooltip() {
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button className="rounded-full p-1 text-muted-foreground hover:text-foreground transition-colors">
+            <Info className="h-4 w-4" />
+            <span className="sr-only">More information</span>
+          </button>
+        </TooltipTrigger>
+        <TooltipContent className="max-w-[220px] text-center" sideOffset={6}>
+          <p className="font-semibold mb-1">Pro feature</p>
+          <p className="text-xs text-muted-foreground">
+            Upgrade your plan to unlock advanced analytics.
+          </p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+}
+```
+
+### App-Level Provider Setup
+
+Place `TooltipProvider` once in your layout so every tooltip across the application shares the same context and delay settings.
+
+```tsx
+// app/layout.tsx (Next.js App Router)
+import { TooltipProvider } from "@designforge/ui";
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en">
+      <body>
+        {/* All tooltips in the app inherit this provider */}
+        <TooltipProvider delayDuration={700}>
+          {children}
+        </TooltipProvider>
+      </body>
+    </html>
+  );
+}
+```
+
+```tsx
+// Any component — no need to wrap in TooltipProvider again
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@designforge/ui";
+import { Button } from "@designforge/ui";
+
+export function SaveButton() {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button>Save</Button>
+      </TooltipTrigger>
+      <TooltipContent>Save your changes</TooltipContent>
+    </Tooltip>
+  );
+}
+```
+
+## API Reference
+
+### TooltipProvider
+
+Provides shared context for all tooltips in its subtree. Place once at or near the application root.
+
+| Prop            | Type     | Default | Description                                                           |
+| --------------- | -------- | ------- | --------------------------------------------------------------------- |
+| `delayDuration` | `number` | `700`   | Default hover delay (ms) before any tooltip in this provider appears. |
+| `skipDelayDuration` | `number` | `300` | How long after closing a tooltip before the delay applies again.    |
+
+### Tooltip
+
+The root component for an individual tooltip. Manages open state for a trigger/content pair.
+
+| Prop            | Type                      | Default | Description                                              |
+| --------------- | ------------------------- | ------- | -------------------------------------------------------- |
+| `open`          | `boolean`                 | —       | Controlled open state.                                   |
+| `defaultOpen`   | `boolean`                 | `false` | Initial open state (uncontrolled).                       |
+| `onOpenChange`  | `(open: boolean) => void` | —       | Callback when the tooltip opens or closes.               |
+| `delayDuration` | `number`                  | `700`   | Hover delay (ms) for this tooltip, overriding the provider. |
+
+### TooltipTrigger
+
+The element that triggers the tooltip on hover or focus. Use `asChild` to forward props to a custom element rather than wrapping it in an extra DOM node.
+
+| Prop      | Type      | Default | Description                                                    |
+| --------- | --------- | ------- | -------------------------------------------------------------- |
+| `asChild` | `boolean` | `false` | Merge trigger props onto the immediate child element.          |
+
+### TooltipContent
+
+The floating tooltip panel. Rendered in a portal, animated, and positioned automatically relative to the trigger.
+
+| Prop          | Type                                      | Default  | Description                                                    |
+| ------------- | ----------------------------------------- | -------- | -------------------------------------------------------------- |
+| `side`        | `"top" \| "right" \| "bottom" \| "left"` | `"top"`  | The preferred side of the trigger to render the tooltip on.    |
+| `sideOffset`  | `number`                                  | `4`      | Distance (px) between the tooltip and the trigger.             |
+| `align`       | `"start" \| "center" \| "end"`           | `"center"` | Alignment of the tooltip relative to the trigger.            |
+| `className`   | `string`                                  | —        | Additional class names for the tooltip panel.                  |
+
+## Accessibility
+
+- Built on **Radix UI Tooltip**, which follows the [ARIA Tooltip pattern](https://www.w3.org/WAI/ARIA/apg/patterns/tooltip/).
+- `TooltipContent` receives `role="tooltip"` and its `id` is linked to the trigger via `aria-describedby` automatically.
+- Tooltips appear on both hover and keyboard focus, ensuring keyboard-only users receive the same information.
+- The tooltip is dismissed when the user moves focus away, presses `Escape`, or moves the pointer off the trigger.
+- For icon-only buttons, also set `aria-label` on the button itself — the tooltip supplements the label but is not a substitute for it.
+- **Disabled button caveat:** disabled elements cannot receive focus or pointer events. Wrap them in a focusable `<span>` with `pointer-events-none` on the button to restore tooltip functionality (see the [Disabled Button Tooltip](#disabled-button-tooltip) example).
 
 ## Live View
 
-Here is a live contextual rendering of the component directly from our isolated Storybook environment.
-
 <StorybookPreview src="http://localhost:6006/iframe.html?id=overlay-tooltip--default&viewMode=story" />
 
-> [!TIP]
-> [Open Component in Storybook ↗](http://localhost:6006/?path=/story/overlay-tooltip--default)
+[Open in Storybook ↗](https://designforge-storybook.vercel.app/?path=/story/overlay-tooltip--default)

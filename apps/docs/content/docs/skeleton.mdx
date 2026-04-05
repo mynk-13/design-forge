@@ -1,9 +1,7 @@
 ---
-title: "Skeleton"
-description: "Documentation for the Skeleton component."
+title: Skeleton
+description: A pulsing placeholder used to represent loading content before data is available, with text, circular, and rectangular variants.
 ---
-
-The `Skeleton` component represents a fundamental UI building block within the DesignForge token system.
 
 ## Installation
 
@@ -14,27 +12,187 @@ npm install @designforge/ui
 ## Usage
 
 ```tsx
+import { Skeleton, skeletonVariants } from "@designforge/ui";
+```
+
+## Examples
+
+### Text Variant
+
+The `text` variant renders a full-width bar sized to match a line of body text (`h-4 w-full rounded`). Stack multiple instances to simulate a paragraph.
+
+```tsx
 import { Skeleton } from "@designforge/ui";
 
-export default function App() {
+export default function TextSkeletonExample() {
   return (
-    <Skeleton>Example Content</Skeleton>
+    <div className="space-y-2 w-72">
+      <Skeleton variant="text" />
+      <Skeleton variant="text" />
+      <Skeleton variant="text" className="w-3/4" />
+    </div>
   );
 }
 ```
 
-### Attributes
+### Circular Variant (Avatar Placeholder)
 
-| Prop      | Type      | Default       | Description                                                 |
-| :-------- | :-------- | :------------ | :---------------------------------------------------------- |
-| `className` | `string`  | `undefined`   | Merges all optional utility styles directly. |
+Use the `circular` variant to represent avatars or profile pictures. It renders as `rounded-full`.
 
+```tsx
+import { Skeleton } from "@designforge/ui";
+
+export default function CircularSkeletonExample() {
+  return (
+    <div className="flex items-center gap-3">
+      <Skeleton variant="circular" className="h-10 w-10" />
+      <div className="space-y-2">
+        <Skeleton variant="text" className="w-32" />
+        <Skeleton variant="text" className="w-20" />
+      </div>
+    </div>
+  );
+}
+```
+
+### Rectangular Variant (Image / Card Placeholder)
+
+The default `rectangular` variant uses `rounded-md` and is suited for images, thumbnails, and card body placeholders.
+
+```tsx
+import { Skeleton } from "@designforge/ui";
+
+export default function RectangularSkeletonExample() {
+  return (
+    <Skeleton variant="rectangular" className="h-48 w-full" />
+  );
+}
+```
+
+### Composed Loading Card
+
+Combine multiple skeleton variants to approximate the visual layout of a real card before data loads.
+
+```tsx
+import { Skeleton } from "@designforge/ui";
+
+export default function LoadingCard() {
+  return (
+    <div className="w-72 border rounded-xl overflow-hidden shadow-sm p-4 space-y-4">
+      <Skeleton variant="rectangular" className="h-40 w-full" />
+      <div className="space-y-2">
+        <Skeleton variant="text" className="w-3/4" />
+        <Skeleton variant="text" />
+        <Skeleton variant="text" className="w-1/2" />
+      </div>
+      <div className="flex items-center gap-3 pt-2">
+        <Skeleton variant="circular" className="h-8 w-8" />
+        <Skeleton variant="text" className="w-28" />
+      </div>
+    </div>
+  );
+}
+```
+
+### Table Loading State
+
+Replicate a data table's loading state by mapping over rows and columns.
+
+```tsx
+import { Skeleton } from "@designforge/ui";
+
+export default function TableSkeleton() {
+  return (
+    <div className="w-full space-y-3">
+      {/* Header */}
+      <div className="flex gap-4 pb-2 border-b">
+        {["w-1/4", "w-1/3", "w-1/4", "w-1/6"].map((w, i) => (
+          <Skeleton key={i} variant="text" className={w} />
+        ))}
+      </div>
+      {/* Rows */}
+      {Array.from({ length: 5 }).map((_, row) => (
+        <div key={row} className="flex gap-4 items-center">
+          {["w-1/4", "w-1/3", "w-1/4", "w-1/6"].map((w, col) => (
+            <Skeleton key={col} variant="text" className={w} />
+          ))}
+        </div>
+      ))}
+    </div>
+  );
+}
+```
+
+### Full Page Skeleton
+
+Assemble a complete page skeleton that mirrors a typical dashboard layout.
+
+```tsx
+import { Skeleton } from "@designforge/ui";
+
+export default function FullPageSkeleton() {
+  return (
+    <div className="p-6 space-y-6 max-w-4xl mx-auto">
+      {/* Page title */}
+      <Skeleton variant="text" className="w-48 h-6" />
+
+      {/* Stat cards row */}
+      <div className="grid grid-cols-3 gap-4">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div key={i} className="border rounded-lg p-4 space-y-3">
+            <Skeleton variant="text" className="w-1/2" />
+            <Skeleton variant="text" className="h-8 w-3/4" />
+          </div>
+        ))}
+      </div>
+
+      {/* Chart area */}
+      <Skeleton variant="rectangular" className="h-56 w-full" />
+
+      {/* Recent activity list */}
+      <div className="space-y-3">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="flex items-center gap-4">
+            <Skeleton variant="circular" className="h-9 w-9 shrink-0" />
+            <div className="flex-1 space-y-1.5">
+              <Skeleton variant="text" className="w-1/3" />
+              <Skeleton variant="text" className="w-2/3" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+```
+
+## API Reference
+
+| Prop        | Type                                        | Default         | Description                                                                    |
+| ----------- | ------------------------------------------- | --------------- | ------------------------------------------------------------------------------ |
+| `variant`   | `"text" \| "circular" \| "rectangular"`     | `"rectangular"` | Controls the shape of the skeleton placeholder.                                |
+| `className` | `string`                                    | —               | Additional Tailwind or custom classes for sizing, width, or other overrides.   |
+| `ref`       | `React.Ref<HTMLDivElement>`                 | —               | Forwarded ref to the underlying `<div>` element.                               |
+
+**Variant styles applied automatically:**
+
+| Variant       | Applied classes                        |
+| ------------- | -------------------------------------- |
+| `text`        | `h-4 w-full rounded`                   |
+| `circular`    | `rounded-full`                         |
+| `rectangular` | `rounded-md`                           |
+
+All variants include `animate-pulse` and `aria-hidden="true"` by default.
+
+## Accessibility
+
+- Every Skeleton instance renders with `aria-hidden="true"`, which removes it from the accessibility tree entirely. Screen readers will not announce skeleton placeholders.
+- When data finishes loading and real content replaces the skeleton, ensure the new content is properly focusable and labelled for keyboard and screen reader users.
+- If the loading state is prolonged, consider pairing the skeleton with a visually hidden live region (`aria-live="polite"`) that announces "Loading…" and later "Content loaded" to keep assistive technology users informed without disrupting the sighted experience.
+- Never place interactive elements (buttons, links) inside a Skeleton container.
 
 ## Live View
 
-Here is a live contextual rendering of the component directly from our isolated Storybook environment.
+<StorybookPreview src="http://localhost:6006/iframe.html?id=feedback-skeleton--default&viewMode=story" />
 
-<StorybookPreview src="http://localhost:6006/iframe.html?id=feedback-skeleton--card-loader&viewMode=story" />
-
-> [!TIP]
-> [Open Component in Storybook ↗](http://localhost:6006/?path=/story/feedback-skeleton--card-loader)
+[Open in Storybook ↗](https://designforge-storybook.vercel.app/?path=/story/feedback-skeleton--default)

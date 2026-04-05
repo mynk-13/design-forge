@@ -1,9 +1,7 @@
 ---
-title: "Flex"
-description: "A flexible container component for arranging children seamlessly."
+title: Flex
+description: A composable flexbox layout primitive that maps common CSS flex properties to concise props. Use it to build rows, columns, centered layouts, and responsive wrapping patterns without writing utility classes by hand.
 ---
-
-The `Flex` component abstracts the standard CSS flexbox model into simple configurable properties, minimizing the need for manual class utilities in common grid arrangements.
 
 ## Installation
 
@@ -14,34 +12,205 @@ npm install @designforge/ui
 ## Usage
 
 ```tsx
-import { Flex } from "@designforge/ui";
+import { Flex, flexVariants } from "@/components/ui/flex";
+```
 
-export default function App() {
+## Examples
+
+### Basic Row
+
+```tsx
+import { Flex } from "@/components/ui/flex";
+
+export function BasicRow() {
   return (
-    <Flex direction="row" align="center" justify="between" gap="4">
-      <div>Left Content</div>
-      <div>Right Content</div>
+    <Flex direction="row" gap="4">
+      <div className="rounded bg-muted p-4">Item 1</div>
+      <div className="rounded bg-muted p-4">Item 2</div>
+      <div className="rounded bg-muted p-4">Item 3</div>
     </Flex>
   );
 }
 ```
 
-### Attributes
+### Vertical Column
 
-| Prop        | Type                                                                     | Default     | Description                                    |
-| :---------- | :----------------------------------------------------------------------- | :---------- | :--------------------------------------------- |
-| `direction` | `row` \| `col` \| `row-reverse` \| `col-reverse`                         | `"row"`     | The flex-direction CSS mapping.                |
-| `align`     | `start` \| `center` \| `end` \| `stretch` \| `baseline`                  | `undefined` | The align-items CSS mapping.                   |
-| `justify`   | `start` \| `center` \| `end` \| `between` \| `around` \| `evenly`        | `undefined` | The justify-content CSS mapping.               |
-| `gap`       | `0` \| `1` \| `2` \| `3` \| `4` \| `5` \| `6` \| `8` \| `10` \| `12`     | `undefined` | The flex grid gap token mapped to the token CSS. |
-| `inline`    | `boolean`                                                                | `false`     | Determines if display is `inline-flex`.        |
+```tsx
+import { Flex } from "@/components/ui/flex";
 
+export function VerticalColumn() {
+  return (
+    <Flex direction="col" gap="3">
+      <div className="rounded bg-muted p-4">First</div>
+      <div className="rounded bg-muted p-4">Second</div>
+      <div className="rounded bg-muted p-4">Third</div>
+    </Flex>
+  );
+}
+```
+
+### Centered Layout
+
+```tsx
+import { Flex } from "@/components/ui/flex";
+
+export function CenteredLayout() {
+  return (
+    <Flex align="center" justify="center" className="h-40 rounded border">
+      <p className="text-muted-foreground">Perfectly centred content</p>
+    </Flex>
+  );
+}
+```
+
+### Space Between
+
+```tsx
+import { Flex } from "@/components/ui/flex";
+
+export function SpaceBetween() {
+  return (
+    <Flex justify="between" align="center" className="rounded border px-4 py-2">
+      <span className="font-medium">Logo</span>
+      <nav className="flex gap-4 text-sm text-muted-foreground">
+        <a href="#">Docs</a>
+        <a href="#">Blog</a>
+        <a href="#">GitHub</a>
+      </nav>
+    </Flex>
+  );
+}
+```
+
+### Responsive Wrap
+
+```tsx
+import { Flex } from "@/components/ui/flex";
+
+export function ResponsiveWrap() {
+  return (
+    <Flex wrap="wrap" gap="4">
+      {Array.from({ length: 8 }).map((_, i) => (
+        <div
+          key={i}
+          className="w-32 rounded bg-muted p-4 text-center text-sm"
+        >
+          Card {i + 1}
+        </div>
+      ))}
+    </Flex>
+  );
+}
+```
+
+### Inline Flex
+
+```tsx
+import { Flex } from "@/components/ui/flex";
+
+export function InlineFlex() {
+  return (
+    <p>
+      Status:{" "}
+      <Flex inline align="center" gap="1" className="text-green-600">
+        <span className="h-2 w-2 rounded-full bg-green-500" />
+        Online
+      </Flex>
+    </p>
+  );
+}
+```
+
+### Gap Variants
+
+```tsx
+import { Flex } from "@/components/ui/flex";
+
+const gaps = ["0", "1", "2", "4", "6", "8", "10", "12"] as const;
+
+export function GapVariants() {
+  return (
+    <Flex direction="col" gap="6">
+      {gaps.map((gap) => (
+        <Flex key={gap} gap={gap} align="center">
+          <span className="w-12 text-xs text-muted-foreground">gap-{gap}</span>
+          <div className="h-6 w-10 rounded bg-primary/20" />
+          <div className="h-6 w-10 rounded bg-primary/40" />
+          <div className="h-6 w-10 rounded bg-primary/60" />
+        </Flex>
+      ))}
+    </Flex>
+  );
+}
+```
+
+### Card Row Layout
+
+```tsx
+import { Flex } from "@/components/ui/flex";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+export function CardRowLayout() {
+  const cards = [
+    { title: "Revenue", value: "$12,400" },
+    { title: "Users", value: "3,280" },
+    { title: "Conversions", value: "8.1%" },
+  ];
+
+  return (
+    <Flex gap="4" wrap="wrap">
+      {cards.map((card) => (
+        <Card key={card.title} className="flex-1 min-w-[160px]">
+          <CardHeader>
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              {card.title}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-bold">{card.value}</p>
+          </CardContent>
+        </Card>
+      ))}
+    </Flex>
+  );
+}
+```
+
+## API Reference
+
+### Flex
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `direction` | `"row" \| "col" \| "row-reverse" \| "col-reverse"` | `"row"` | Maps to the CSS `flex-direction` property. |
+| `align` | `"start" \| "center" \| "end" \| "stretch" \| "baseline"` | — | Maps to the CSS `align-items` property. |
+| `justify` | `"start" \| "center" \| "end" \| "between" \| "around" \| "evenly"` | — | Maps to the CSS `justify-content` property. |
+| `wrap` | `"wrap" \| "nowrap" \| "wrap-reverse"` | — | Maps to the CSS `flex-wrap` property. |
+| `gap` | `"0" \| "1" \| "2" \| "3" \| "4" \| "5" \| "6" \| "8" \| "10" \| "12"` | — | Uniform gap between all flex children using Tailwind spacing tokens. |
+| `inline` | `boolean` | `false` | Switches the display to `inline-flex`. |
+| `className` | `string` | — | Additional CSS classes merged onto the root element. |
+| `ref` | `React.Ref<HTMLDivElement>` | — | Forwarded ref to the underlying `<div>`. |
+
+All other props are forwarded to the underlying `<div>` element.
+
+### flexVariants
+
+`flexVariants` is the `cva` variant definition exported for use in custom components that need to compose Flex's class logic programmatically.
+
+```tsx
+import { flexVariants } from "@/components/ui/flex";
+
+const classes = flexVariants({ direction: "col", gap: "4", align: "center" });
+```
+
+## Accessibility
+
+- `Flex` renders a plain `<div>` with no implicit ARIA role. Add an appropriate `role` (e.g., `role="list"`) and label when the layout carries semantic meaning.
+- Use `direction="col"` in combination with a natural DOM order that matches the visual order so screen readers and keyboard users encounter content in a logical sequence.
+- Avoid relying solely on visual position (e.g., `justify="end"`) to convey meaning — supplement with visible labels or `aria-label` where necessary.
 
 ## Live View
 
-Here is a live contextual rendering of the component directly from our isolated Storybook environment.
+<StorybookPreview src="http://localhost:6006/iframe.html?id=layout-flex--default&viewMode=story" />
 
-<StorybookPreview src="http://localhost:6006/iframe.html?id=layout-flex--row&viewMode=story" />
-
-> [!TIP]
-> [Open Component in Storybook ↗](http://localhost:6006/?path=/story/layout-flex--row)
+[Open in Storybook ↗](https://designforge-storybook.vercel.app/?path=/story/layout-flex--default)

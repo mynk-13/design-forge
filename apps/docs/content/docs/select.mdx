@@ -1,9 +1,7 @@
 ---
-title: "Select"
-description: "Documentation for the Select component."
+title: Select
+description: A fully accessible dropdown select built on Radix UI Select. Supports grouped options, disabled items, controlled and uncontrolled state, custom placeholder text, and a large-list scrollable variant with up/down scroll buttons — suitable for forms, filters, and settings.
 ---
-
-The `Select` component represents a fundamental UI building block within the DesignForge token system.
 
 ## Installation
 
@@ -14,27 +12,449 @@ npm install @designforge/ui
 ## Usage
 
 ```tsx
-import { Select } from "@designforge/ui";
+import {
+  Select,
+  SelectGroup,
+  SelectValue,
+  SelectTrigger,
+  SelectContent,
+  SelectLabel,
+  SelectItem,
+  SelectSeparator,
+  SelectScrollUpButton,
+  SelectScrollDownButton,
+} from "@/components/ui/select"
+```
 
-export default function App() {
+## Examples
+
+### Basic Select
+
+A minimal select with a default selected value.
+
+```tsx
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+
+export function BasicSelect() {
   return (
-    <Select>Example Content</Select>
-  );
+    <Select defaultValue="react">
+      <SelectTrigger className="w-[200px]">
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="react">React</SelectItem>
+        <SelectItem value="vue">Vue</SelectItem>
+        <SelectItem value="svelte">Svelte</SelectItem>
+        <SelectItem value="angular">Angular</SelectItem>
+      </SelectContent>
+    </Select>
+  )
 }
 ```
 
-### Attributes
+### With Placeholder
 
-| Prop      | Type      | Default       | Description                                                 |
-| :-------- | :-------- | :------------ | :---------------------------------------------------------- |
-| `className` | `string`  | `undefined`   | Merges all optional utility styles directly. |
+Use `SelectValue` with a `placeholder` prop to show hint text when no option is selected.
 
+```tsx
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+
+export function SelectWithPlaceholder() {
+  return (
+    <Select>
+      <SelectTrigger className="w-[220px]">
+        <SelectValue placeholder="Select a timezone…" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="utc">UTC</SelectItem>
+        <SelectItem value="ist">IST (UTC+5:30)</SelectItem>
+        <SelectItem value="est">EST (UTC-5)</SelectItem>
+        <SelectItem value="pst">PST (UTC-8)</SelectItem>
+      </SelectContent>
+    </Select>
+  )
+}
+```
+
+### Grouped Options
+
+Use `SelectGroup` and `SelectLabel` to organise related options under named headings, with `SelectSeparator` between groups.
+
+```tsx
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectSeparator,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+
+export function SelectGrouped() {
+  return (
+    <Select>
+      <SelectTrigger className="w-[240px]">
+        <SelectValue placeholder="Select a font…" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectGroup>
+          <SelectLabel>Sans-serif</SelectLabel>
+          <SelectItem value="inter">Inter</SelectItem>
+          <SelectItem value="geist">Geist</SelectItem>
+          <SelectItem value="dm-sans">DM Sans</SelectItem>
+        </SelectGroup>
+        <SelectSeparator />
+        <SelectGroup>
+          <SelectLabel>Serif</SelectLabel>
+          <SelectItem value="lora">Lora</SelectItem>
+          <SelectItem value="merriweather">Merriweather</SelectItem>
+        </SelectGroup>
+        <SelectSeparator />
+        <SelectGroup>
+          <SelectLabel>Monospace</SelectLabel>
+          <SelectItem value="jetbrains-mono">JetBrains Mono</SelectItem>
+          <SelectItem value="fira-code">Fira Code</SelectItem>
+        </SelectGroup>
+      </SelectContent>
+    </Select>
+  )
+}
+```
+
+### Disabled Option
+
+Mark individual options as unavailable with the `disabled` prop on `SelectItem`.
+
+```tsx
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+
+export function SelectDisabledOption() {
+  return (
+    <Select defaultValue="monthly">
+      <SelectTrigger className="w-[200px]">
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="monthly">Monthly</SelectItem>
+        <SelectItem value="quarterly">Quarterly</SelectItem>
+        <SelectItem value="yearly">Yearly</SelectItem>
+        <SelectItem value="lifetime" disabled>
+          Lifetime — sold out
+        </SelectItem>
+      </SelectContent>
+    </Select>
+  )
+}
+```
+
+### Disabled Select
+
+Set `disabled` on the root `Select` component to prevent all interaction.
+
+```tsx
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+
+export function SelectDisabled() {
+  return (
+    <Select defaultValue="pro" disabled>
+      <SelectTrigger className="w-[200px]">
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="free">Free</SelectItem>
+        <SelectItem value="pro">Pro</SelectItem>
+        <SelectItem value="team">Team</SelectItem>
+      </SelectContent>
+    </Select>
+  )
+}
+```
+
+### Controlled
+
+Manage selected value with React state to synchronise with other parts of the UI.
+
+```tsx
+import { useState } from "react"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+
+const THEMES = ["light", "dark", "system"] as const
+
+export function ControlledSelect() {
+  const [theme, setTheme] = useState<string>("system")
+
+  return (
+    <div className="space-y-2">
+      <Select value={theme} onValueChange={setTheme}>
+        <SelectTrigger className="w-[180px]">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {THEMES.map((t) => (
+            <SelectItem key={t} value={t} className="capitalize">
+              {t}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <p className="text-sm text-muted-foreground">
+        Active theme:{" "}
+        <span className="font-medium text-foreground capitalize">{theme}</span>
+      </p>
+    </div>
+  )
+}
+```
+
+### In a Form
+
+Integrate with a submit handler and label for a complete accessible form field.
+
+```tsx
+import { FormEvent, useState } from "react"
+import { Button } from "@/components/ui/button"
+import { Label } from "@/components/ui/label"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+
+export function SelectInForm() {
+  const [country, setCountry] = useState("")
+  const [submitted, setSubmitted] = useState(false)
+
+  function handleSubmit(e: FormEvent) {
+    e.preventDefault()
+    setSubmitted(true)
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4 w-[280px]">
+      <div className="space-y-1.5">
+        <Label htmlFor="country-select">Country</Label>
+        <Select value={country} onValueChange={setCountry}>
+          <SelectTrigger id="country-select">
+            <SelectValue placeholder="Select your country…" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="in">India</SelectItem>
+            <SelectItem value="us">United States</SelectItem>
+            <SelectItem value="gb">United Kingdom</SelectItem>
+            <SelectItem value="de">Germany</SelectItem>
+            <SelectItem value="jp">Japan</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      <Button type="submit" disabled={!country}>
+        Submit
+      </Button>
+      {submitted && (
+        <p className="text-sm text-muted-foreground">
+          Selected:{" "}
+          <span className="font-medium text-foreground">
+            {country.toUpperCase()}
+          </span>
+        </p>
+      )}
+    </form>
+  )
+}
+```
+
+### Large List with Scroll
+
+`SelectScrollUpButton` and `SelectScrollDownButton` appear automatically when the list overflows. The default `position="popper"` constrains height to the viewport.
+
+```tsx
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectScrollDownButton,
+  SelectScrollUpButton,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+
+const TIMEZONES = [
+  {
+    region: "Americas",
+    zones: [
+      "America/New_York",
+      "America/Chicago",
+      "America/Denver",
+      "America/Los_Angeles",
+      "America/Anchorage",
+      "America/Halifax",
+      "America/Sao_Paulo",
+    ],
+  },
+  {
+    region: "Europe",
+    zones: [
+      "Europe/London",
+      "Europe/Paris",
+      "Europe/Berlin",
+      "Europe/Madrid",
+      "Europe/Rome",
+      "Europe/Helsinki",
+      "Europe/Moscow",
+    ],
+  },
+  {
+    region: "Asia / Pacific",
+    zones: [
+      "Asia/Kolkata",
+      "Asia/Tokyo",
+      "Asia/Shanghai",
+      "Asia/Singapore",
+      "Asia/Dubai",
+      "Asia/Seoul",
+      "Australia/Sydney",
+    ],
+  },
+]
+
+export function SelectLargeList() {
+  return (
+    <Select>
+      <SelectTrigger className="w-[260px]">
+        <SelectValue placeholder="Select timezone…" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectScrollUpButton />
+        {TIMEZONES.map(({ region, zones }) => (
+          <SelectGroup key={region}>
+            <SelectLabel>{region}</SelectLabel>
+            {zones.map((tz) => (
+              <SelectItem key={tz} value={tz}>
+                {tz.replace(/_/g, " ")}
+              </SelectItem>
+            ))}
+          </SelectGroup>
+        ))}
+        <SelectScrollDownButton />
+      </SelectContent>
+    </Select>
+  )
+}
+```
+
+## API Reference
+
+### Select
+
+The root component that manages open/close and selected-value state.
+
+| Prop            | Type                      | Default | Description                                                    |
+| --------------- | ------------------------- | ------- | -------------------------------------------------------------- |
+| `value`         | `string`                  | —       | Controlled selected value.                                     |
+| `defaultValue`  | `string`                  | —       | Initial selected value for uncontrolled usage.                 |
+| `onValueChange` | `(value: string) => void` | —       | Callback fired when the selection changes.                     |
+| `disabled`      | `boolean`                 | `false` | Disables the entire select.                                    |
+| `open`          | `boolean`                 | —       | Controlled open state of the dropdown.                         |
+| `onOpenChange`  | `(open: boolean) => void` | —       | Callback fired when the dropdown opens or closes.              |
+
+### SelectTrigger
+
+The button that opens the dropdown.
+
+| Prop        | Type     | Default | Description                                                              |
+| ----------- | -------- | ------- | ------------------------------------------------------------------------ |
+| `className` | `string` | —       | Additional CSS classes. Use to set a fixed width (e.g., `w-[200px]`).   |
+
+### SelectValue
+
+Renders the label of the selected item, or placeholder text when nothing is selected.
+
+| Prop          | Type     | Default | Description                               |
+| ------------- | -------- | ------- | ----------------------------------------- |
+| `placeholder` | `string` | —       | Text shown when no value is selected.     |
+
+### SelectContent
+
+The floating dropdown panel.
+
+| Prop        | Type                    | Default    | Description                                                                                                          |
+| ----------- | ----------------------- | ---------- | -------------------------------------------------------------------------------------------------------------------- |
+| `position`  | `"popper" \| "fixed"`  | `"popper"` | `popper` anchors to the trigger and constrains height to the viewport. `fixed` uses fixed CSS positioning.           |
+| `className` | `string`                | —          | Additional CSS classes applied to the content panel.                                                                 |
+
+### SelectItem
+
+An individual selectable option.
+
+| Prop        | Type      | Default | Description                                                     |
+| ----------- | --------- | ------- | --------------------------------------------------------------- |
+| `value`     | `string`  | —       | **Required.** The value submitted when this item is selected.   |
+| `disabled`  | `boolean` | `false` | Prevents this item from being selected.                         |
+| `className` | `string`  | —       | Additional CSS classes.                                         |
+
+### SelectGroup
+
+Groups related `SelectItem` elements. Should always contain a sibling `SelectLabel` for an accessible group name.
+
+### SelectLabel
+
+A non-interactive heading rendered inside a `SelectGroup`.
+
+### SelectSeparator
+
+A visual horizontal divider between groups or items.
+
+### SelectScrollUpButton / SelectScrollDownButton
+
+Scroll affordance buttons that appear automatically when the list content overflows the available height.
+
+## Accessibility
+
+- Built on the WAI-ARIA [Listbox pattern](https://www.w3.org/WAI/ARIA/apg/patterns/listbox/) via Radix UI; the trigger has `role="combobox"` and the list has `role="listbox"`.
+- `aria-expanded` on the trigger reflects open/closed state; `aria-activedescendant` tracks the focused option.
+- Arrow keys navigate between options; `Enter` and `Space` confirm a selection; `Escape` closes the dropdown without changing the value.
+- Type-ahead: typing characters while the list is open focuses the first matching option.
+- Associate a visible `<Label>` with the `SelectTrigger` via matching `htmlFor`/`id` so screen readers announce the field name.
+- `SelectGroup` + `SelectLabel` produces a labelled option group (`role="group"` with `aria-labelledby`) so assistive technologies announce the group heading.
+- Disabled items have `aria-disabled="true"` and are skipped during keyboard navigation.
 
 ## Live View
 
-Here is a live contextual rendering of the component directly from our isolated Storybook environment.
-
 <StorybookPreview src="http://localhost:6006/iframe.html?id=form-select--default&viewMode=story" />
 
-> [!TIP]
-> [Open Component in Storybook ↗](http://localhost:6006/?path=/story/form-select--default)
+[Open in Storybook ↗](https://designforge-storybook.vercel.app/?path=/story/form-select--default)

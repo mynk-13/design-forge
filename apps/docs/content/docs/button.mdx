@@ -1,9 +1,9 @@
 ---
 title: "Button"
-description: "Documentation for the Button component."
+description: "Primary interaction trigger with five variants, four sizes, loading state, and polymorphic asChild support."
 ---
 
-The `Button` component represents a fundamental UI building block within the DesignForge token system.
+`Button` is the primary action trigger in DesignForge. It ships with five semantic variants, four size options, a built-in loading spinner, and `asChild` polymorphism via Radix UI Slot — so it can render as an `<a>`, Next.js `<Link>`, or any other component while keeping all button styles and accessibility attributes.
 
 ## Installation
 
@@ -17,24 +17,279 @@ npm install @designforge/ui
 import { Button } from "@designforge/ui";
 
 export default function App() {
+  return <Button>Save changes</Button>;
+}
+```
+
+## Examples
+
+### All variants
+
+Five variants cover every common action type. `default` is your primary CTA; `destructive` for dangerous or irreversible actions; `outline` for secondary actions; `ghost` for low-emphasis actions in dense UIs; `link` for navigation-style actions that should look like hyperlinks.
+
+```tsx
+import { Button } from "@designforge/ui";
+
+export default function AllVariants() {
   return (
-    <Button>Example Content</Button>
+    <div className="flex flex-wrap gap-3 items-center">
+      <Button variant="default">Default</Button>
+      <Button variant="destructive">Destructive</Button>
+      <Button variant="outline">Outline</Button>
+      <Button variant="ghost">Ghost</Button>
+      <Button variant="link">Link</Button>
+    </div>
   );
 }
 ```
 
-### Attributes
+### All sizes
 
-| Prop      | Type      | Default       | Description                                                 |
-| :-------- | :-------- | :------------ | :---------------------------------------------------------- |
-| `className` | `string`  | `undefined`   | Merges all optional utility styles directly. |
+Four sizes from compact (`sm`) to prominent (`lg`) plus an `icon` variant for square icon-only buttons.
 
+```tsx
+import { Button } from "@designforge/ui";
+import { Plus } from "lucide-react";
+
+export default function AllSizes() {
+  return (
+    <div className="flex items-center gap-3">
+      <Button size="sm">Small</Button>
+      <Button size="md">Medium</Button>
+      <Button size="lg">Large</Button>
+      <Button size="icon" aria-label="Add item">
+        <Plus />
+      </Button>
+    </div>
+  );
+}
+```
+
+### With icons
+
+Icons can be placed before or after the label text. `Button` automatically sizes `<svg>` children to `16×16` via `[&_svg]:size-4`.
+
+```tsx
+import { Button } from "@designforge/ui";
+import { Mail, Trash2, Plus, Download } from "lucide-react";
+
+export default function WithIcons() {
+  return (
+    <div className="flex flex-wrap gap-3">
+      <Button>
+        <Mail />
+        Send email
+      </Button>
+      <Button variant="destructive">
+        <Trash2 />
+        Delete
+      </Button>
+      <Button variant="outline">
+        <Plus />
+        Add item
+      </Button>
+      <Button variant="ghost">
+        <Download />
+        Export
+      </Button>
+    </div>
+  );
+}
+```
+
+### Loading state
+
+Pass `loading={true}` to replace the content with an animated spinner and automatically disable the button. The spinner uses `aria-hidden="true"` and the button receives `aria-disabled` so screen readers announce the loading state correctly.
+
+```tsx
+import { Button } from "@designforge/ui";
+
+export default function Loading() {
+  return (
+    <div className="flex gap-3">
+      <Button loading>Saving...</Button>
+      <Button loading variant="outline">
+        Loading
+      </Button>
+      <Button loading variant="destructive">
+        Deleting...
+      </Button>
+    </div>
+  );
+}
+```
+
+> When `loading` is `true`, `disabled` is also implicitly set to `true` — you do not need to pass both.
+
+### Disabled state
+
+Use `disabled` for buttons whose action is unavailable in the current context. Disabled buttons are non-interactive and visually dimmed via `disabled:opacity-50`.
+
+```tsx
+import { Button } from "@designforge/ui";
+
+export default function Disabled() {
+  return (
+    <div className="flex gap-3">
+      <Button disabled>Disabled</Button>
+      <Button disabled variant="outline">
+        Disabled outline
+      </Button>
+      <Button disabled variant="ghost">
+        Disabled ghost
+      </Button>
+    </div>
+  );
+}
+```
+
+### As a link — `asChild`
+
+Use `asChild` with Radix UI Slot to render the button as an `<a>` element (or any other component) while keeping all button styles, sizes, and variants. The button's `<button>` wrapper is replaced by the child element.
+
+```tsx
+import { Button } from "@designforge/ui";
+
+export default function AsLink() {
+  return (
+    <Button asChild>
+      <a href="https://designforge-storybook.vercel.app" target="_blank" rel="noreferrer">
+        View Storybook →
+      </a>
+    </Button>
+  );
+}
+```
+
+### As a Next.js Link
+
+```tsx
+import Link from "next/link";
+import { Button } from "@designforge/ui";
+
+export default function AsNextLink() {
+  return (
+    <Button variant="outline" asChild>
+      <Link href="/docs/installation">
+        Get started
+      </Link>
+    </Button>
+  );
+}
+```
+
+### Icon-only button
+
+Use `size="icon"` for a perfectly square button. Always provide an `aria-label` so screen reader users understand the button's purpose.
+
+```tsx
+import { Button } from "@designforge/ui";
+import { Settings, Share2, Bookmark } from "lucide-react";
+
+export default function IconButtons() {
+  return (
+    <div className="flex gap-2">
+      <Button size="icon" variant="ghost" aria-label="Settings">
+        <Settings />
+      </Button>
+      <Button size="icon" variant="outline" aria-label="Share">
+        <Share2 />
+      </Button>
+      <Button size="icon" aria-label="Bookmark">
+        <Bookmark />
+      </Button>
+    </div>
+  );
+}
+```
+
+### Form submit button with loading
+
+Combine `loading` with controlled state to give users feedback during form submission.
+
+```tsx
+import { useState } from "react";
+import { Button } from "@designforge/ui";
+
+export default function FormSubmit() {
+  const [loading, setLoading] = useState(false);
+
+  async function handleSubmit() {
+    setLoading(true);
+    await new Promise((res) => setTimeout(res, 2000)); // simulate API call
+    setLoading(false);
+  }
+
+  return (
+    <Button loading={loading} onClick={handleSubmit}>
+      {loading ? "Saving..." : "Save changes"}
+    </Button>
+  );
+}
+```
+
+### Destructive confirmation
+
+Pair `destructive` with a confirmation dialog (see `AlertDialog`) to prevent accidental irreversible actions.
+
+```tsx
+import { Button } from "@designforge/ui";
+import { Trash2 } from "lucide-react";
+
+export default function DestructiveAction() {
+  return (
+    <div className="flex gap-3">
+      <Button variant="outline">Cancel</Button>
+      <Button variant="destructive">
+        <Trash2 />
+        Delete account
+      </Button>
+    </div>
+  );
+}
+```
+
+## API Reference
+
+### `<Button>`
+
+Renders a `<button>` element by default. When `asChild={true}`, renders the first child element instead, merging all props and styles onto it via Radix UI Slot.
+
+| Prop | Type | Default | Description |
+| :--- | :--- | :------ | :---------- |
+| `variant` | `"default" \| "destructive" \| "outline" \| "ghost" \| "link"` | `"default"` | Controls the visual style of the button. |
+| `size` | `"sm" \| "md" \| "lg" \| "icon"` | `"md"` | Controls the height, padding, and font size of the button. `"icon"` produces a `40×40` square for icon-only buttons. |
+| `loading` | `boolean` | `false` | When `true`, replaces the button content with an animated `Loader2` spinner and sets the button to `disabled`. Use alongside descriptive loading text for best UX. |
+| `asChild` | `boolean` | `false` | When `true`, uses Radix UI Slot to merge all button props and styles onto the single child element. Use this to render the button as an `<a>`, `Link`, or other component. |
+| `disabled` | `boolean` | `false` | Prevents interaction. Pointer events are removed and opacity is reduced to 50%. |
+| `ref` | `Ref<HTMLButtonElement>` | — | A React ref forwarded to the underlying `<button>` DOM node. |
+| `className` | `string` | — | Additional CSS classes merged with the variant/size styles via `cn()`. |
+| `children` | `ReactNode` | — | Button label content. Can include text, icons, or any React nodes. |
+
+All other native `<button>` attributes (`type`, `form`, `formAction`, `onClick`, `onFocus`, `aria-*`, `data-*`, etc.) are forwarded to the underlying element.
+
+**Size reference:**
+
+| Size | Height | Padding | Font size |
+| :--- | :----- | :------ | :-------- |
+| `sm` | 36px (`h-9`) | `px-3` | `text-xs` (12px) |
+| `md` | 40px (`h-10`) | `px-4 py-2` | `text-sm` (14px) |
+| `lg` | 44px (`h-11`) | `px-8` | `text-base` (16px) |
+| `icon` | 40×40px | — | — |
+
+## Accessibility
+
+- `Button` renders as a native `<button type="button">` — it is keyboard-focusable and operable via **Enter** or **Space** out of the box.
+- When `loading={true}`, `aria-disabled` is set on the button so screen readers announce the disabled state, while `disabled` prevents pointer interaction. The spinner icon is `aria-hidden="true"` to avoid being announced separately.
+- Icon-only buttons (`size="icon"`) must include an `aria-label` — the icon alone provides no text for assistive technologies.
+- When using `asChild` with an `<a>` element, ensure the rendered anchor has an `href` attribute; otherwise it will not be keyboard-focusable in all browsers.
+- Focus styles use `focus-visible:ring-2` — they only appear on keyboard navigation, not on mouse click, following the `:focus-visible` CSS spec.
+- Avoid placing interactive elements inside a `Button` — nested interactive content creates invalid HTML and keyboard navigation issues.
 
 ## Live View
 
 Here is a live contextual rendering of the component directly from our isolated Storybook environment.
 
-<StorybookPreview src="http://localhost:6006/iframe.html?id=form-button--default&viewMode=story" />
+<StorybookPreview src="http://localhost:6006/iframe.html?id=form-button--all-variants&viewMode=story" />
 
-> [!TIP]
-> [Open Component in Storybook ↗](http://localhost:6006/?path=/story/form-button--default)
+> [Open in Storybook ↗](https://designforge-storybook.vercel.app/?path=/story/form-button--all-variants)

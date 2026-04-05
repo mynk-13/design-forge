@@ -1,9 +1,7 @@
 ---
-title: "Grid"
-description: "A two-dimensional grid layout primitive for structural mapping."
+title: Grid
+description: A CSS grid layout primitive that maps column counts, row counts, gap tokens, alignment, and flow options to concise props. Use it to build two-dimensional layouts ranging from simple card grids to complex asymmetric compositions.
 ---
-
-The `Grid` component abstracts the standard CSS grid definition into straightforward numeric tokens for columns, rows, spans, and responsive flow.
 
 ## Installation
 
@@ -14,38 +12,200 @@ npm install @designforge/ui
 ## Usage
 
 ```tsx
-import { Grid } from "@designforge/ui";
+import { Grid, gridVariants } from "@/components/ui/grid";
+```
 
-export default function App() {
+## Examples
+
+### Two Columns
+
+```tsx
+import { Grid } from "@/components/ui/grid";
+
+export function TwoColumns() {
   return (
-    <Grid cols={3} gap="4">
-      <div>Item 1</div>
-      <div>Item 2</div>
-      <div>Item 3</div>
+    <Grid cols={2} gap="4">
+      <div className="rounded bg-muted p-6">Left</div>
+      <div className="rounded bg-muted p-6">Right</div>
     </Grid>
   );
 }
 ```
 
-### Attributes
+### Three Columns
 
-| Prop       | Type                                                                       | Default     | Description                                                     |
-| :--------- | :------------------------------------------------------------------------- | :---------- | :-------------------------------------------------------------- |
-| `cols`     | `1` \| `2` \| `3` \| `4` \| `5` \| `6` \| `7` \| `8` \| `9` \| `10` \| `11` \| `12` | `undefined` | Defines the number of grid column tracks mapping to CSS counts. |
-| `rows`     | `1` \| `2` \| `3` \| `4` \| `5` \| `6`                                     | `undefined` | Defines the number of explicit grid rows natively wrapped.      |
-| `gap`      | `0` \| `1` \| `2` \| `3` \| `4` \| `5` \| `6` \| `8` \| `10` \| `12`       | `undefined` | The grid gap magnitude across X and Y axes unified.             |
-| `gapX`     | `0` \| `1` \| `2` \| `3` \| `4` \| `6` \| `8`                              | `undefined` | Exclusive Y axis cross gap padding definitions.                 |
-| `gapY`     | `0` \| `1` \| `2` \| `3` \| `4` \| `6` \| `8`                              | `undefined` | Exclusive X axis parallel gap padding margins.                  |
-| `align`    | `start` \| `center` \| `end` \| `stretch`                                  | `undefined` | Row-aligned items mapped linearly.                              |
-| `justify`  | `start` \| `center` \| `end` \| `stretch`                                  | `undefined` | Column-aligned items cross mapped logically.                    |
-| `flow`     | `row` \| `col` \| `dense` \| `row-dense` \| `col-dense`                    | `undefined` | Flow interpolation pattern to auto-fit blank dense holes.       |
+```tsx
+import { Grid } from "@/components/ui/grid";
 
+export function ThreeColumns() {
+  return (
+    <Grid cols={3} gap="4">
+      <div className="rounded bg-muted p-4">Card 1</div>
+      <div className="rounded bg-muted p-4">Card 2</div>
+      <div className="rounded bg-muted p-4">Card 3</div>
+      <div className="rounded bg-muted p-4">Card 4</div>
+      <div className="rounded bg-muted p-4">Card 5</div>
+      <div className="rounded bg-muted p-4">Card 6</div>
+    </Grid>
+  );
+}
+```
+
+### Four Columns
+
+```tsx
+import { Grid } from "@/components/ui/grid";
+
+export function FourColumns() {
+  return (
+    <Grid cols={4} gap="4">
+      {Array.from({ length: 8 }).map((_, i) => (
+        <div key={i} className="rounded bg-muted p-4 text-sm">
+          Item {i + 1}
+        </div>
+      ))}
+    </Grid>
+  );
+}
+```
+
+### Asymmetric Layout with colSpan
+
+```tsx
+import { Grid } from "@/components/ui/grid";
+
+export function AsymmetricLayout() {
+  return (
+    <Grid cols={3} gap="4">
+      {/* Sidebar spans 1 column, main content spans 2 */}
+      <div className="rounded bg-muted p-4">Sidebar</div>
+      <div className="col-span-2 rounded bg-muted p-4">Main Content</div>
+      {/* Full-width footer */}
+      <div className="col-span-3 rounded bg-muted p-4">Footer</div>
+    </Grid>
+  );
+}
+```
+
+### Gap Variants
+
+```tsx
+import { Grid } from "@/components/ui/grid";
+
+const gaps = ["0", "1", "2", "4", "6", "8", "10", "12"] as const;
+
+export function GapVariants() {
+  return (
+    <Grid cols={1} gap="6">
+      {gaps.map((gap) => (
+        <div key={gap}>
+          <p className="mb-1 text-xs text-muted-foreground">gap-{gap}</p>
+          <Grid cols={4} gap={gap}>
+            {[1, 2, 3, 4].map((n) => (
+              <div key={n} className="h-10 rounded bg-primary/30" />
+            ))}
+          </Grid>
+        </div>
+      ))}
+    </Grid>
+  );
+}
+```
+
+### Auto-fill Pattern
+
+```tsx
+import { Grid } from "@/components/ui/grid";
+
+export function AutoFill() {
+  return (
+    /* Use flow="dense" so Tailwind fills empty holes automatically */
+    <Grid cols={4} gap="4" flow="dense">
+      <div className="col-span-2 rounded bg-primary/20 p-4">Wide</div>
+      <div className="rounded bg-muted p-4">A</div>
+      <div className="rounded bg-muted p-4">B</div>
+      <div className="rounded bg-muted p-4">C</div>
+      <div className="col-span-2 rounded bg-primary/20 p-4">Wide again</div>
+      <div className="rounded bg-muted p-4">D</div>
+    </Grid>
+  );
+}
+```
+
+### Responsive Grid
+
+```tsx
+import { Grid } from "@/components/ui/grid";
+
+export function ResponsiveGrid() {
+  return (
+    /* Start with 1 col on mobile, override to 3 cols on md via className */
+    <Grid cols={1} gap="4" className="md:grid-cols-3">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <div key={i} className="rounded bg-muted p-4 text-sm">
+          Item {i + 1}
+        </div>
+      ))}
+    </Grid>
+  );
+}
+```
+
+### Independent gapX and gapY
+
+```tsx
+import { Grid } from "@/components/ui/grid";
+
+export function IndependentGaps() {
+  return (
+    <Grid cols={3} gapX="8" gapY="2">
+      {Array.from({ length: 9 }).map((_, i) => (
+        <div key={i} className="rounded bg-muted p-4 text-sm text-center">
+          {i + 1}
+        </div>
+      ))}
+    </Grid>
+  );
+}
+```
+
+## API Reference
+
+### Grid
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `cols` | `1 \| 2 \| 3 \| 4 \| 5 \| 6 \| 7 \| 8 \| 9 \| 10 \| 11 \| 12` | — | Number of explicit column tracks (`grid-template-columns`). |
+| `rows` | `1 \| 2 \| 3 \| 4 \| 5 \| 6` | — | Number of explicit row tracks (`grid-template-rows`). |
+| `gap` | `"0" \| "1" \| "2" \| "3" \| "4" \| "5" \| "6" \| "8" \| "10" \| "12"` | — | Uniform gap applied to both axes (`gap`). Overridden by `gapX` / `gapY` when those are set. |
+| `gapX` | `"0" \| "1" \| "2" \| "3" \| "4" \| "6" \| "8"` | — | Horizontal (column) gap only (`column-gap`). |
+| `gapY` | `"0" \| "1" \| "2" \| "3" \| "4" \| "6" \| "8"` | — | Vertical (row) gap only (`row-gap`). |
+| `align` | `"start" \| "center" \| "end" \| "stretch"` | — | Aligns grid items along the block axis (`align-items`). |
+| `justify` | `"start" \| "center" \| "end" \| "stretch"` | — | Aligns grid items along the inline axis (`justify-items`). |
+| `flow` | `"row" \| "col" \| "dense" \| "row-dense" \| "col-dense"` | — | Controls how auto-placed items flow into the grid (`grid-auto-flow`). |
+| `className` | `string` | — | Additional CSS classes merged onto the root element. |
+| `ref` | `React.Ref<HTMLDivElement>` | — | Forwarded ref to the underlying `<div>`. |
+
+All other props are forwarded to the underlying `<div>` element.
+
+### gridVariants
+
+`gridVariants` is the `cva` variant definition exported for composing Grid's class logic in custom components.
+
+```tsx
+import { gridVariants } from "@/components/ui/grid";
+
+const classes = gridVariants({ cols: 3, gap: "4", align: "start" });
+```
+
+## Accessibility
+
+- `Grid` renders a plain `<div>` with no implicit ARIA role. Add `role="list"` (with `role="listitem"` children) or another appropriate role when the grid conveys a structured list of items.
+- Ensure the visual order of grid cells matches the DOM order so keyboard focus and screen-reader reading order remain logical — especially when using `flow="dense"` which may place items visually out of sequence.
+- Do not use grid positioning alone to imply relationships between items; reinforce structure with headings, labels, or `aria-labelledby`.
 
 ## Live View
 
-Here is a live contextual rendering of the component directly from our isolated Storybook environment.
+<StorybookPreview src="http://localhost:6006/iframe.html?id=layout-grid--default&viewMode=story" />
 
-<StorybookPreview src="http://localhost:6006/iframe.html?id=layout-grid--two-columns&viewMode=story" />
-
-> [!TIP]
-> [Open Component in Storybook ↗](http://localhost:6006/?path=/story/layout-grid--two-columns)
+[Open in Storybook ↗](https://designforge-storybook.vercel.app/?path=/story/layout-grid--default)

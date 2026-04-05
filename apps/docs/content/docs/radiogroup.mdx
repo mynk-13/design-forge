@@ -1,9 +1,7 @@
 ---
-title: "RadioGroup"
-description: "Documentation for the RadioGroup component."
+title: RadioGroup
+description: An accessible single-selection radio group built on Radix UI RadioGroup. Supports vertical and horizontal orientation, controlled and uncontrolled state, per-item and group-level disabling, and card-style visual variants — suitable for preference selectors, plan pickers, and form fields.
 ---
-
-The `RadioGroup` component represents a fundamental UI building block within the DesignForge token system.
 
 ## Installation
 
@@ -14,27 +12,332 @@ npm install @designforge/ui
 ## Usage
 
 ```tsx
-import { RadioGroup } from "@designforge/ui";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+```
 
-export default function App() {
+## Examples
+
+### Basic Vertical
+
+The default orientation stacks items vertically.
+
+```tsx
+import { Label } from "@/components/ui/label"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+
+export function BasicRadioGroup() {
   return (
-    <RadioGroup>Example Content</RadioGroup>
-  );
+    <RadioGroup defaultValue="option-one">
+      <div className="flex items-center space-x-2">
+        <RadioGroupItem value="option-one" id="option-one" />
+        <Label htmlFor="option-one">Option One</Label>
+      </div>
+      <div className="flex items-center space-x-2">
+        <RadioGroupItem value="option-two" id="option-two" />
+        <Label htmlFor="option-two">Option Two</Label>
+      </div>
+      <div className="flex items-center space-x-2">
+        <RadioGroupItem value="option-three" id="option-three" />
+        <Label htmlFor="option-three">Option Three</Label>
+      </div>
+    </RadioGroup>
+  )
 }
 ```
 
-### Attributes
+### Horizontal
 
-| Prop      | Type      | Default       | Description                                                 |
-| :-------- | :-------- | :------------ | :---------------------------------------------------------- |
-| `className` | `string`  | `undefined`   | Merges all optional utility styles directly. |
+Set `orientation="horizontal"` to arrange items in a row.
 
+```tsx
+import { Label } from "@/components/ui/label"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+
+export function HorizontalRadioGroup() {
+  return (
+    <RadioGroup
+      defaultValue="sm"
+      orientation="horizontal"
+      className="flex gap-6"
+    >
+      {["sm", "md", "lg", "xl"].map((size) => (
+        <div key={size} className="flex items-center space-x-2">
+          <RadioGroupItem value={size} id={`size-${size}`} />
+          <Label htmlFor={`size-${size}`}>{size.toUpperCase()}</Label>
+        </div>
+      ))}
+    </RadioGroup>
+  )
+}
+```
+
+### With Labels and Descriptions
+
+Pair items with supporting description text for richer option context.
+
+```tsx
+import { Label } from "@/components/ui/label"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+
+const PLANS = [
+  {
+    value: "free",
+    label: "Free",
+    description: "Up to 3 projects, community support.",
+  },
+  {
+    value: "pro",
+    label: "Pro",
+    description: "Unlimited projects, priority support.",
+  },
+  {
+    value: "team",
+    label: "Team",
+    description: "Everything in Pro plus team collaboration.",
+  },
+]
+
+export function RadioGroupWithDescriptions() {
+  return (
+    <RadioGroup defaultValue="pro" className="gap-3">
+      {PLANS.map(({ value, label, description }) => (
+        <div key={value} className="flex items-start space-x-3">
+          <RadioGroupItem value={value} id={`plan-${value}`} className="mt-0.5" />
+          <div>
+            <Label htmlFor={`plan-${value}`} className="font-medium">
+              {label}
+            </Label>
+            <p className="text-sm text-muted-foreground">{description}</p>
+          </div>
+        </div>
+      ))}
+    </RadioGroup>
+  )
+}
+```
+
+### Controlled
+
+Manage the selected value via React state to sync with external logic.
+
+```tsx
+import { useState } from "react"
+import { Label } from "@/components/ui/label"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+
+export function ControlledRadioGroup() {
+  const [value, setValue] = useState("dark")
+
+  return (
+    <div className="space-y-3">
+      <RadioGroup value={value} onValueChange={setValue}>
+        {["light", "dark", "system"].map((theme) => (
+          <div key={theme} className="flex items-center space-x-2">
+            <RadioGroupItem value={theme} id={`theme-${theme}`} />
+            <Label htmlFor={`theme-${theme}`} className="capitalize">
+              {theme}
+            </Label>
+          </div>
+        ))}
+      </RadioGroup>
+      <p className="text-sm text-muted-foreground">
+        Selected theme:{" "}
+        <span className="font-medium text-foreground">{value}</span>
+      </p>
+    </div>
+  )
+}
+```
+
+### Disabled Item
+
+Disable individual items while keeping the rest of the group interactive.
+
+```tsx
+import { Label } from "@/components/ui/label"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+
+export function RadioGroupDisabledItem() {
+  return (
+    <RadioGroup defaultValue="monthly">
+      <div className="flex items-center space-x-2">
+        <RadioGroupItem value="monthly" id="monthly" />
+        <Label htmlFor="monthly">Monthly</Label>
+      </div>
+      <div className="flex items-center space-x-2">
+        <RadioGroupItem value="yearly" id="yearly" />
+        <Label htmlFor="yearly">Yearly — save 20%</Label>
+      </div>
+      <div className="flex items-center space-x-2">
+        <RadioGroupItem value="lifetime" id="lifetime" disabled />
+        <Label htmlFor="lifetime" className="text-muted-foreground line-through">
+          Lifetime — sold out
+        </Label>
+      </div>
+    </RadioGroup>
+  )
+}
+```
+
+### Disabled Group
+
+Set `disabled` on the `RadioGroup` root to disable all items at once.
+
+```tsx
+import { Label } from "@/components/ui/label"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+
+export function RadioGroupDisabled() {
+  return (
+    <RadioGroup defaultValue="read-only" disabled>
+      <div className="flex items-center space-x-2">
+        <RadioGroupItem value="read-only" id="read-only" />
+        <Label htmlFor="read-only">Read only</Label>
+      </div>
+      <div className="flex items-center space-x-2">
+        <RadioGroupItem value="edit" id="edit" />
+        <Label htmlFor="edit">Can edit</Label>
+      </div>
+    </RadioGroup>
+  )
+}
+```
+
+### In a Form
+
+Use `required` on the group and integrate with a submit handler for form validation.
+
+```tsx
+import { FormEvent, useState } from "react"
+import { Button } from "@/components/ui/button"
+import { Label } from "@/components/ui/label"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+
+export function RadioGroupInForm() {
+  const [role, setRole] = useState("")
+  const [submitted, setSubmitted] = useState(false)
+
+  function handleSubmit(e: FormEvent) {
+    e.preventDefault()
+    setSubmitted(true)
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <fieldset className="space-y-2">
+        <legend className="text-sm font-medium">Select your role</legend>
+        <RadioGroup value={role} onValueChange={setRole} required>
+          {["Designer", "Engineer", "Product Manager"].map((r) => (
+            <div key={r} className="flex items-center space-x-2">
+              <RadioGroupItem value={r} id={`role-${r}`} />
+              <Label htmlFor={`role-${r}`}>{r}</Label>
+            </div>
+          ))}
+        </RadioGroup>
+      </fieldset>
+      <Button type="submit" disabled={!role}>
+        Continue
+      </Button>
+      {submitted && (
+        <p className="text-sm text-muted-foreground">
+          Submitted role:{" "}
+          <span className="font-medium text-foreground">{role}</span>
+        </p>
+      )}
+    </form>
+  )
+}
+```
+
+### Card-Style Radio Group
+
+Wrap each item in a styled card to create a visually distinct selection UI.
+
+```tsx
+import { useState } from "react"
+import { Label } from "@/components/ui/label"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { cn } from "@/lib/utils"
+
+const OPTIONS = [
+  { value: "starter", label: "Starter", price: "$0/mo" },
+  { value: "pro", label: "Pro", price: "$12/mo" },
+  { value: "enterprise", label: "Enterprise", price: "$49/mo" },
+]
+
+export function CardRadioGroup() {
+  const [selected, setSelected] = useState("pro")
+
+  return (
+    <RadioGroup
+      value={selected}
+      onValueChange={setSelected}
+      className="grid grid-cols-3 gap-3"
+    >
+      {OPTIONS.map(({ value, label, price }) => (
+        <Label
+          key={value}
+          htmlFor={`card-${value}`}
+          className={cn(
+            "flex flex-col items-center justify-center rounded-lg border-2 p-4 cursor-pointer transition-colors",
+            selected === value
+              ? "border-primary bg-primary/5"
+              : "border-border hover:border-muted-foreground"
+          )}
+        >
+          <RadioGroupItem
+            value={value}
+            id={`card-${value}`}
+            className="sr-only"
+          />
+          <span className="font-semibold">{label}</span>
+          <span className="text-sm text-muted-foreground">{price}</span>
+        </Label>
+      ))}
+    </RadioGroup>
+  )
+}
+```
+
+## API Reference
+
+### RadioGroup
+
+The root component that manages selection state.
+
+| Prop            | Type                          | Default      | Description                                                                     |
+| --------------- | ----------------------------- | ------------ | ------------------------------------------------------------------------------- |
+| `value`         | `string`                      | —            | Controlled selected value.                                                      |
+| `defaultValue`  | `string`                      | —            | Initial selected value for uncontrolled usage.                                  |
+| `onValueChange` | `(value: string) => void`     | —            | Callback fired when the selected value changes.                                 |
+| `disabled`      | `boolean`                     | `false`      | Disables all items in the group.                                                |
+| `required`      | `boolean`                     | `false`      | Marks the group as required for form validation.                                |
+| `orientation`   | `"horizontal" \| "vertical"`  | `"vertical"` | Controls layout direction and arrow-key navigation axis.                        |
+| `className`     | `string`                      | —            | Additional CSS classes applied to the group container.                          |
+
+### RadioGroupItem
+
+An individual radio button within the group.
+
+| Prop        | Type      | Default | Description                                                           |
+| ----------- | --------- | ------- | --------------------------------------------------------------------- |
+| `value`     | `string`  | —       | **Required.** The value this item represents within the group.        |
+| `disabled`  | `boolean` | `false` | Disables this item independently of the group's disabled state.       |
+| `id`        | `string`  | —       | The `id` used to associate a `<Label>` via `htmlFor`.                 |
+| `className` | `string`  | —       | Additional CSS classes applied to the item button.                    |
+
+## Accessibility
+
+- Built on the WAI-ARIA [Radio Group pattern](https://www.w3.org/WAI/ARIA/apg/patterns/radio/) via Radix UI.
+- Arrow keys (`Up`/`Down` for vertical, `Left`/`Right` for horizontal) cycle through items within the group.
+- `Tab` moves focus into and out of the group as a single tab stop; the selected item (or first item if none selected) receives initial focus.
+- `Space` selects the focused item.
+- Always wrap the group in a `<fieldset>` with a `<legend>` in a form context so screen readers announce the group's purpose.
+- Each `RadioGroupItem` should have an associated `<Label>` linked via matching `id`/`htmlFor` — or be wrapped by the label — to ensure the item's name is announced.
+- Disabled items have `aria-disabled="true"` applied automatically; they remain focusable for discoverability but cannot be selected.
 
 ## Live View
 
-Here is a live contextual rendering of the component directly from our isolated Storybook environment.
-
 <StorybookPreview src="http://localhost:6006/iframe.html?id=form-radiogroup--default&viewMode=story" />
 
-> [!TIP]
-> [Open Component in Storybook ↗](http://localhost:6006/?path=/story/form-radiogroup--default)
+[Open in Storybook ↗](https://designforge-storybook.vercel.app/?path=/story/form-radiogroup--default)

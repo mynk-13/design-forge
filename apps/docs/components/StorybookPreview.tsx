@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useTheme } from "next-themes";
 
 const STORYBOOK_BASE =
   process.env.NEXT_PUBLIC_STORYBOOK_URL?.replace(/\/$/, "") ?? "http://localhost:6006";
@@ -77,6 +78,7 @@ export function StorybookPreview({
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [height, setHeight] = useState(() => getInitialHeight(resolvedSrc));
   const [errored, setErrored] = useState(false);
+  const { resolvedTheme } = useTheme();
 
   useEffect(() => {
     // Listen for height reports from the Storybook preview iframe
@@ -116,6 +118,24 @@ export function StorybookPreview({
       iframe?.removeEventListener("load", requestHeight);
     };
   }, []);
+
+  // Sync docs site theme to the Storybook iframe
+  useEffect(() => {
+    const theme = resolvedTheme ?? "light";
+    const sendTheme = () => {
+      iframeRef.current?.contentWindow?.postMessage(
+        { type: "THEME_CHANGE", theme },
+        "*"
+      );
+    };
+    sendTheme();
+
+    const iframe = iframeRef.current;
+    iframe?.addEventListener("load", sendTheme);
+    return () => {
+      iframe?.removeEventListener("load", sendTheme);
+    };
+  }, [resolvedTheme]);
 
   if (errored) {
     return (

@@ -1,9 +1,7 @@
 ---
-title: "Textarea"
-description: "Documentation for the Textarea component."
+title: Textarea
+description: A multi-line text input with built-in label, description, error message, and character count support. Fully accessible with automatic ARIA wiring via useId.
 ---
-
-The `Textarea` component represents a fundamental UI building block within the DesignForge token system.
 
 ## Installation
 
@@ -16,25 +14,226 @@ npm install @designforge/ui
 ```tsx
 import { Textarea } from "@designforge/ui";
 
-export default function App() {
+export default function Example() {
   return (
-    <Textarea>Example Content</Textarea>
+    <Textarea
+      label="Message"
+      description="Write anything you'd like to share."
+      placeholder="Type here..."
+    />
   );
 }
 ```
 
-### Attributes
+## Examples
 
-| Prop      | Type      | Default       | Description                                                 |
-| :-------- | :-------- | :------------ | :---------------------------------------------------------- |
-| `className` | `string`  | `undefined`   | Merges all optional utility styles directly. |
+### Basic
 
+A plain textarea with no extra wrappers or labels.
+
+```tsx
+import { Textarea } from "@designforge/ui";
+
+export default function BasicTextarea() {
+  return <Textarea placeholder="Enter your message..." rows={4} />;
+}
+```
+
+### With Label and Description
+
+Pass `label` and `description` to add a visible label and helper text beneath the field. IDs are generated automatically via `useId` so you never need to wire them up manually.
+
+```tsx
+import { Textarea } from "@designforge/ui";
+
+export default function LabeledTextarea() {
+  return (
+    <Textarea
+      label="Bio"
+      description="Tell us a little about yourself. Maximum 300 characters."
+      placeholder="I'm a frontend engineer who..."
+      rows={4}
+    />
+  );
+}
+```
+
+### Error State
+
+Set `error` to display a red error message below the field. The component automatically sets `aria-invalid="true"` and links the error text via `aria-describedby`.
+
+```tsx
+import { useState } from "react";
+import { Textarea } from "@designforge/ui";
+
+export default function ErrorTextarea() {
+  const [value, setValue] = useState("");
+
+  return (
+    <Textarea
+      label="Feedback"
+      value={value}
+      onChange={(e) => setValue(e.target.value)}
+      error={value.trim() === "" ? "Feedback cannot be empty." : undefined}
+      placeholder="Share your thoughts..."
+      rows={4}
+    />
+  );
+}
+```
+
+### Character Count
+
+Set `showCount` to display a live character count beneath the field. The count is announced to screen readers via `aria-live="polite"` as you type.
+
+```tsx
+import { Textarea } from "@designforge/ui";
+
+export default function CharacterCountTextarea() {
+  return (
+    <Textarea
+      label="Tweet"
+      showCount
+      placeholder="What's happening?"
+      rows={3}
+    />
+  );
+}
+```
+
+### Max Length with Count
+
+Combine `maxLength` and `showCount` to enforce a hard character limit and display remaining characters. The count turns red when you approach or reach the limit.
+
+```tsx
+import { Textarea } from "@designforge/ui";
+
+export default function MaxLengthTextarea() {
+  return (
+    <Textarea
+      label="Short Bio"
+      description="Appears on your public profile."
+      maxLength={160}
+      showCount
+      placeholder="Keep it concise..."
+      rows={3}
+    />
+  );
+}
+```
+
+### Disabled
+
+Pass the standard HTML `disabled` attribute to prevent interaction. The field is visually dimmed and removed from the tab order.
+
+```tsx
+import { Textarea } from "@designforge/ui";
+
+export default function DisabledTextarea() {
+  return (
+    <Textarea
+      label="Notes"
+      description="This field is currently locked."
+      defaultValue="Read-only content that cannot be edited."
+      disabled
+      rows={3}
+    />
+  );
+}
+```
+
+### Resizable Height
+
+By default the textarea is not resizable. Add a `className` to allow vertical resizing via Tailwind's `resize-y` utility.
+
+```tsx
+import { Textarea } from "@designforge/ui";
+
+export default function ResizableTextarea() {
+  return (
+    <Textarea
+      label="Notes"
+      description="Drag the bottom edge to resize."
+      placeholder="Type your notes here..."
+      className="resize-y min-h-[80px]"
+    />
+  );
+}
+```
+
+### Feedback Form
+
+A realistic example combining label, description, character limit, error validation, and a submit action.
+
+```tsx
+import { useState } from "react";
+import { Textarea } from "@designforge/ui";
+import { Button } from "@designforge/ui";
+
+export default function FeedbackForm() {
+  const [value, setValue] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+
+  const error =
+    submitted && value.trim().length < 20
+      ? "Please provide at least 20 characters of feedback."
+      : undefined;
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitted(true);
+    if (value.trim().length >= 20) {
+      alert("Feedback submitted!");
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4 max-w-md">
+      <Textarea
+        label="Your Feedback"
+        description="Help us improve by sharing your experience."
+        placeholder="What could we do better?"
+        maxLength={500}
+        showCount
+        rows={5}
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        error={error}
+      />
+      <Button type="submit">Submit Feedback</Button>
+    </form>
+  );
+}
+```
+
+## API Reference
+
+### Textarea
+
+Extends all standard HTML `<textarea>` attributes plus the following DesignForge-specific props.
+
+| Prop               | Type      | Default | Description                                                                                  |
+| ------------------ | --------- | ------- | -------------------------------------------------------------------------------------------- |
+| `label`            | `string`  | —       | Visible label rendered above the textarea. Auto-linked via generated `id`.                   |
+| `description`      | `string`  | —       | Helper text rendered below the textarea. Wired to `aria-describedby`.                        |
+| `error`            | `string`  | —       | Error message rendered below the field. Sets `aria-invalid="true"` when present.             |
+| `showCount`        | `boolean` | `false` | Displays a live character count. Announced via `aria-live="polite"`.                         |
+| `maxLength`        | `number`  | —       | Native HTML `maxlength`. When combined with `showCount`, shows `current / max` count format. |
+| `wrapperClassName` | `string`  | —       | Class names applied to the outer wrapper `div` rather than the `<textarea>` itself.          |
+| `className`        | `string`  | —       | Class names applied directly to the `<textarea>` element.                                    |
+
+All standard `<textarea>` HTML attributes (`rows`, `cols`, `disabled`, `readOnly`, `placeholder`, `value`, `onChange`, etc.) are also supported and forwarded to the underlying element.
+
+## Accessibility
+
+- A unique `id` is generated with `useId` and applied to both the `<textarea>` and its associated `<label>`, eliminating the need for manual ID management.
+- When `description` or `error` is present, their IDs are collected into `aria-describedby` so screen readers announce them after the field label.
+- When `error` is non-empty, `aria-invalid="true"` is set on the `<textarea>` automatically.
+- Character count (when `showCount` is enabled) is wrapped in a `<span aria-live="polite">` so updates are announced to screen reader users without interrupting their flow.
+- `disabled` state is fully forwarded and the field is removed from the tab order by the browser natively.
 
 ## Live View
 
-Here is a live contextual rendering of the component directly from our isolated Storybook environment.
-
 <StorybookPreview src="http://localhost:6006/iframe.html?id=form-textarea--default&viewMode=story" />
 
-> [!TIP]
-> [Open Component in Storybook ↗](http://localhost:6006/?path=/story/form-textarea--default)
+[Open in Storybook ↗](https://designforge-storybook.vercel.app/?path=/story/form-textarea--default)

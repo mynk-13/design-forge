@@ -1,40 +1,428 @@
 ---
-title: "DataTable"
-description: "Documentation for the DataTable component."
+title: DataTable
+description: A fully-featured data table component built on TanStack Table v8. Supports column sorting, global search, pagination, row selection checkboxes, and custom cell renderers out of the box.
 ---
-
-The `DataTable` component represents a fundamental UI building block within the DesignForge token system.
 
 ## Installation
 
 ```bash
-npm install @designforge/ui
+npm install @tanstack/react-table
 ```
 
 ## Usage
 
 ```tsx
-import { DataTable } from "@designforge/ui";
+import {
+  DataTable,
+  Table,
+  TableHeader,
+  TableBody,
+  TableFooter,
+  TableRow,
+  TableHead,
+  TableCell,
+  TableCaption,
+  SortableHeader,
+  createColumnHelper,
+} from "@/components/ui/data-table";
 
-export default function App() {
+// Re-exported from @tanstack/react-table
+import type { ColumnDef } from "@tanstack/react-table";
+```
+
+## Examples
+
+### Basic Table (Manual Column Definition)
+
+Define columns using the `ColumnDef` type and pass your data array directly. Each column maps an `accessorKey` to a key in your row type.
+
+```tsx
+import { DataTable } from "@/components/ui/data-table";
+import type { ColumnDef } from "@tanstack/react-table";
+
+type User = {
+  id: number;
+  name: string;
+  email: string;
+  role: string;
+};
+
+const columns: ColumnDef<User>[] = [
+  { accessorKey: "id", header: "ID" },
+  { accessorKey: "name", header: "Name" },
+  { accessorKey: "email", header: "Email" },
+  { accessorKey: "role", header: "Role" },
+];
+
+const data: User[] = [
+  { id: 1, name: "Alice Martin", email: "alice@example.com", role: "Admin" },
+  { id: 2, name: "Bob Chen", email: "bob@example.com", role: "Editor" },
+  { id: 3, name: "Carol White", email: "carol@example.com", role: "Viewer" },
+];
+
+export function BasicTable() {
+  return <DataTable columns={columns} data={data} />;
+}
+```
+
+### With createColumnHelper
+
+`createColumnHelper` provides full type inference for your row shape, making column definitions more ergonomic and safer than raw `ColumnDef` arrays.
+
+```tsx
+import { DataTable, createColumnHelper } from "@/components/ui/data-table";
+
+type Product = {
+  sku: string;
+  name: string;
+  category: string;
+  price: number;
+  stock: number;
+};
+
+const helper = createColumnHelper<Product>();
+
+const columns = [
+  helper.accessor("sku", { header: "SKU" }),
+  helper.accessor("name", { header: "Product" }),
+  helper.accessor("category", { header: "Category" }),
+  helper.accessor("price", {
+    header: "Price",
+    cell: (info) =>
+      new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+      }).format(info.getValue()),
+  }),
+  helper.accessor("stock", { header: "Stock" }),
+];
+
+const data: Product[] = [
+  { sku: "PRD-001", name: "Widget A", category: "Widgets", price: 9.99, stock: 120 },
+  { sku: "PRD-002", name: "Gadget B", category: "Gadgets", price: 24.99, stock: 45 },
+  { sku: "PRD-003", name: "Doohickey C", category: "Widgets", price: 4.49, stock: 300 },
+];
+
+export function TableWithHelper() {
+  return <DataTable columns={columns} data={data} />;
+}
+```
+
+### With Search
+
+Pass `searchable`, `searchKey`, and optionally `searchPlaceholder` to enable a text input that filters rows client-side on the specified column.
+
+```tsx
+import { DataTable, createColumnHelper } from "@/components/ui/data-table";
+
+type Employee = {
+  id: number;
+  name: string;
+  department: string;
+  title: string;
+};
+
+const helper = createColumnHelper<Employee>();
+
+const columns = [
+  helper.accessor("name", { header: "Name" }),
+  helper.accessor("department", { header: "Department" }),
+  helper.accessor("title", { header: "Title" }),
+];
+
+const data: Employee[] = [
+  { id: 1, name: "Alice Martin", department: "Engineering", title: "Senior Engineer" },
+  { id: 2, name: "Bob Chen", department: "Design", title: "Lead Designer" },
+  { id: 3, name: "Carol White", department: "Engineering", title: "Staff Engineer" },
+  { id: 4, name: "David Lee", department: "Product", title: "Product Manager" },
+];
+
+export function SearchableTable() {
   return (
-    <DataTable>Example Content</DataTable>
+    <DataTable
+      columns={columns}
+      data={data}
+      searchable
+      searchKey="name"
+      searchPlaceholder="Search by name…"
+    />
   );
 }
 ```
 
-### Attributes
+### With Pagination
 
-| Prop      | Type      | Default       | Description                                                 |
-| :-------- | :-------- | :------------ | :---------------------------------------------------------- |
-| `className` | `string`  | `undefined`   | Merges all optional utility styles directly. |
+Enable pagination with the `pagination` prop. Use `pageSize` to control how many rows appear per page (default: 10).
 
+```tsx
+import { DataTable, createColumnHelper } from "@/components/ui/data-table";
+
+type Log = {
+  timestamp: string;
+  level: "info" | "warn" | "error";
+  message: string;
+};
+
+const helper = createColumnHelper<Log>();
+
+const columns = [
+  helper.accessor("timestamp", { header: "Timestamp" }),
+  helper.accessor("level", { header: "Level" }),
+  helper.accessor("message", { header: "Message" }),
+];
+
+// Simulate 50 log entries
+const data: Log[] = Array.from({ length: 50 }, (_, i) => ({
+  timestamp: new Date(Date.now() - i * 60_000).toISOString(),
+  level: (["info", "warn", "error"] as const)[i % 3],
+  message: `Log entry ${i + 1}: operation completed`,
+}));
+
+export function PaginatedTable() {
+  return (
+    <DataTable
+      columns={columns}
+      data={data}
+      pagination
+      pageSize={5}
+    />
+  );
+}
+```
+
+### With Row Selection
+
+Pass an `onRowSelectionChange` callback to enable row checkboxes. The callback receives the current selection map (`Record<string, boolean>`).
+
+```tsx
+import { useState } from "react";
+import { DataTable, createColumnHelper } from "@/components/ui/data-table";
+
+type Order = {
+  id: string;
+  customer: string;
+  amount: number;
+  status: string;
+};
+
+const helper = createColumnHelper<Order>();
+
+const columns = [
+  helper.accessor("id", { header: "Order ID" }),
+  helper.accessor("customer", { header: "Customer" }),
+  helper.accessor("amount", {
+    header: "Amount",
+    cell: (info) => `$${info.getValue().toFixed(2)}`,
+  }),
+  helper.accessor("status", { header: "Status" }),
+];
+
+const data: Order[] = [
+  { id: "ORD-001", customer: "Alice Martin", amount: 149.99, status: "Shipped" },
+  { id: "ORD-002", customer: "Bob Chen", amount: 89.5, status: "Processing" },
+  { id: "ORD-003", customer: "Carol White", amount: 220.0, status: "Delivered" },
+  { id: "ORD-004", customer: "David Lee", amount: 35.0, status: "Pending" },
+];
+
+export function SelectableTable() {
+  const [selection, setSelection] = useState<Record<string, boolean>>({});
+
+  const selectedIds = Object.keys(selection).filter((k) => selection[k]);
+
+  return (
+    <div className="space-y-3">
+      <DataTable
+        columns={columns}
+        data={data}
+        onRowSelectionChange={setSelection}
+      />
+      <p className="text-sm text-muted-foreground">
+        Selected rows: {selectedIds.join(", ") || "none"}
+      </p>
+    </div>
+  );
+}
+```
+
+### With SortableHeader
+
+Replace the plain string `header` with a `SortableHeader` to add click-to-sort behavior on any column. Clicking the header cycles through ascending, descending, and unsorted states.
+
+```tsx
+import {
+  DataTable,
+  SortableHeader,
+  createColumnHelper,
+} from "@/components/ui/data-table";
+
+type Commit = {
+  sha: string;
+  author: string;
+  date: string;
+  message: string;
+};
+
+const helper = createColumnHelper<Commit>();
+
+const columns = [
+  helper.accessor("sha", { header: "SHA" }),
+  helper.accessor("author", {
+    header: ({ column }) => <SortableHeader column={column} label="Author" />,
+  }),
+  helper.accessor("date", {
+    header: ({ column }) => <SortableHeader column={column} label="Date" />,
+  }),
+  helper.accessor("message", { header: "Message" }),
+];
+
+const data: Commit[] = [
+  { sha: "a1b2c3d", author: "alice", date: "2025-12-01", message: "feat: add dark mode" },
+  { sha: "e4f5a6b", author: "bob", date: "2025-11-28", message: "fix: header overflow" },
+  { sha: "c7d8e9f", author: "carol", date: "2025-11-30", message: "chore: update deps" },
+];
+
+export function SortableTable() {
+  return <DataTable columns={columns} data={data} />;
+}
+```
+
+### Custom Cell Renderer
+
+The `cell` function receives a `CellContext` object. Return any React node — badges, buttons, avatars, or progress bars — to create rich cell content.
+
+```tsx
+import { DataTable, createColumnHelper } from "@/components/ui/data-table";
+import { Badge } from "@/components/ui/badge";
+
+type Task = {
+  title: string;
+  priority: "low" | "medium" | "high";
+  progress: number;
+};
+
+const helper = createColumnHelper<Task>();
+
+const priorityVariant: Record<
+  Task["priority"],
+  "default" | "secondary" | "destructive"
+> = {
+  low: "secondary",
+  medium: "default",
+  high: "destructive",
+};
+
+const columns = [
+  helper.accessor("title", { header: "Task" }),
+  helper.accessor("priority", {
+    header: "Priority",
+    cell: (info) => (
+      <Badge variant={priorityVariant[info.getValue()]}>
+        {info.getValue()}
+      </Badge>
+    ),
+  }),
+  helper.accessor("progress", {
+    header: "Progress",
+    cell: (info) => (
+      <div className="flex items-center gap-2">
+        <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
+          <div
+            className="h-full rounded-full bg-primary transition-all"
+            style={{ width: `${info.getValue()}%` }}
+          />
+        </div>
+        <span className="text-xs tabular-nums w-8 text-right">
+          {info.getValue()}%
+        </span>
+      </div>
+    ),
+  }),
+];
+
+const data: Task[] = [
+  { title: "Design system audit", priority: "high", progress: 75 },
+  { title: "Write unit tests", priority: "medium", progress: 40 },
+  { title: "Update changelog", priority: "low", progress: 10 },
+];
+
+export function CustomCellTable() {
+  return <DataTable columns={columns} data={data} />;
+}
+```
+
+## API Reference
+
+### DataTable
+
+| Prop                   | Type                                               | Default    | Description                                                                               |
+| ---------------------- | -------------------------------------------------- | ---------- | ----------------------------------------------------------------------------------------- |
+| `columns`              | `ColumnDef<T>[]`                                   | —          | Column definitions array. **Required.**                                                   |
+| `data`                 | `T[]`                                              | —          | Array of row data objects. **Required.**                                                  |
+| `searchable`           | `boolean`                                          | `false`    | Renders a search input above the table.                                                   |
+| `searchPlaceholder`    | `string`                                           | `"Search…"` | Placeholder text for the search input.                                                   |
+| `searchKey`            | `string`                                           | —          | The column `accessorKey` to filter on when searching.                                     |
+| `pagination`           | `boolean`                                          | `false`    | Enables client-side pagination controls below the table.                                  |
+| `pageSize`             | `number`                                           | `10`       | Number of rows per page when pagination is enabled.                                       |
+| `onRowSelectionChange` | `(selection: Record<string, boolean>) => void`     | —          | Called on every selection change. Presence of this prop enables row selection checkboxes. |
+| `className`            | `string`                                           | —          | Additional CSS classes on the table wrapper element.                                      |
+
+### Table
+
+Low-level `<table>` wrapper. Accepts all standard `<table>` HTML attributes plus `className`.
+
+### TableHeader / TableBody / TableFooter
+
+Thin wrappers around `<thead>`, `<tbody>`, and `<tfoot>`. Accept standard HTML attributes plus `className`.
+
+### TableRow
+
+Wrapper around `<tr>`. Accepts standard HTML attributes plus `className`.
+
+### TableHead
+
+Wrapper around `<th>`. Accepts standard HTML attributes plus `className`.
+
+### TableCell
+
+Wrapper around `<td>`. Accepts standard HTML attributes plus `className`.
+
+### TableCaption
+
+Wrapper around `<caption>`. Accepts standard HTML attributes plus `className`.
+
+### SortableHeader
+
+| Prop     | Type        | Default | Description                                                              |
+| -------- | ----------- | ------- | ------------------------------------------------------------------------ |
+| `column` | `Column<T>` | —       | The TanStack Table `Column` object from the `header` render context.     |
+| `label`  | `string`    | —       | The visible column heading text.                                         |
+
+### createColumnHelper
+
+Re-exported from `@tanstack/react-table`. Call it with your row type to get a fully-typed column factory:
+
+```ts
+const helper = createColumnHelper<MyRowType>();
+
+// Typed accessor column
+helper.accessor("fieldName", { header: "Label" });
+
+// Display-only column (no data accessor)
+helper.display({ id: "actions", cell: () => <ActionsMenu /> });
+```
+
+## Accessibility
+
+- The table renders semantic `<table>`, `<thead>`, `<tbody>`, `<tr>`, `<th>`, and `<td>` elements, giving screen readers full structural context.
+- `<th>` elements receive `scope="col"` implicitly via the `TableHead` component, associating header labels with their data cells for screen readers.
+- Sortable column headers are rendered as `<button>` elements inside `<th>`, making them keyboard focusable and operable with `Enter` / `Space`.
+- Row selection checkboxes use the `Checkbox` component which is fully accessible (see the Checkbox docs for details).
+- The search input is a standard `<input type="text">`. Ensure `searchPlaceholder` alone is not the only accessible label — pair it with a visually hidden `<label>` or `aria-label` if needed.
+- Pagination controls use `<button>` elements with visible labels. Disabled states carry `aria-disabled`.
+- For very large datasets, consider server-side pagination to keep DOM size manageable and avoid performance degradation that can indirectly harm keyboard and screen reader usability.
 
 ## Live View
 
-Here is a live contextual rendering of the component directly from our isolated Storybook environment.
-
 <StorybookPreview src="http://localhost:6006/iframe.html?id=data-display-datatable--default&viewMode=story" />
 
-> [!TIP]
-> [Open Component in Storybook ↗](http://localhost:6006/?path=/story/data-display-datatable--default)
+[Open DataTable in Storybook →](http://localhost:6006/?path=/story/data-display-datatable--default)

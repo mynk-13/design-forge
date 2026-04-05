@@ -1,9 +1,9 @@
 ---
 title: "AlertDialog"
-description: "Documentation for the AlertDialog component."
+description: "A modal dialog that interrupts the user with important content and requires a response."
 ---
 
-The `AlertDialog` component represents a fundamental UI building block within the DesignForge token system.
+Built on [Radix UI AlertDialog](https://www.radix-ui.com/primitives/docs/components/alert-dialog), `AlertDialog` is designed for destructive or irreversible actions that require explicit user confirmation. Unlike `Dialog`, the user cannot dismiss it by clicking outside — they must choose an action.
 
 ## Installation
 
@@ -14,21 +14,217 @@ npm install @designforge/ui
 ## Usage
 
 ```tsx
-import { AlertDialog } from "@designforge/ui";
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogFooter,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from "@designforge/ui";
 
 export default function App() {
   return (
-    <AlertDialog>Example Content</AlertDialog>
+    <AlertDialog>
+      <AlertDialogTrigger>Delete account</AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+          <AlertDialogDescription>
+            This action cannot be undone. This will permanently delete your account.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction>Continue</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }
 ```
 
-### Attributes
+## Examples
 
-| Prop      | Type      | Default       | Description                                                 |
-| :-------- | :-------- | :------------ | :---------------------------------------------------------- |
-| `className` | `string`  | `undefined`   | Merges all optional utility styles directly. |
+### With destructive trigger button
 
+Use `asChild` on `AlertDialogTrigger` to render your own `Button` component as the trigger instead of the default element.
+
+```tsx
+import { Button, buttonVariants } from "@designforge/ui";
+
+<AlertDialog>
+  <AlertDialogTrigger asChild>
+    <Button variant="destructive">Delete account</Button>
+  </AlertDialogTrigger>
+  <AlertDialogContent>
+    <AlertDialogHeader>
+      <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+      <AlertDialogDescription>
+        This action cannot be undone. This will permanently delete your account
+        and remove all associated data from our servers.
+      </AlertDialogDescription>
+    </AlertDialogHeader>
+    <AlertDialogFooter>
+      <AlertDialogCancel>Cancel</AlertDialogCancel>
+      <AlertDialogAction>Delete account</AlertDialogAction>
+    </AlertDialogFooter>
+  </AlertDialogContent>
+</AlertDialog>
+```
+
+### With custom action styling
+
+Apply `buttonVariants` to `AlertDialogAction` to change its visual style without wrapping in a `Button`.
+
+```tsx
+import { buttonVariants } from "@designforge/ui";
+
+<AlertDialog>
+  <AlertDialogTrigger asChild>
+    <Button variant="destructive">Delete item</Button>
+  </AlertDialogTrigger>
+  <AlertDialogContent>
+    <AlertDialogHeader>
+      <AlertDialogTitle>Delete this item?</AlertDialogTitle>
+      <AlertDialogDescription>
+        This will permanently remove the item from your library.
+      </AlertDialogDescription>
+    </AlertDialogHeader>
+    <AlertDialogFooter>
+      <AlertDialogCancel>Keep it</AlertDialogCancel>
+      <AlertDialogAction className={buttonVariants({ variant: "destructive" })}>
+        Yes, delete
+      </AlertDialogAction>
+    </AlertDialogFooter>
+  </AlertDialogContent>
+</AlertDialog>
+```
+
+### Log out confirmation
+
+```tsx
+<AlertDialog>
+  <AlertDialogTrigger asChild>
+    <Button variant="outline">Log out</Button>
+  </AlertDialogTrigger>
+  <AlertDialogContent>
+    <AlertDialogHeader>
+      <AlertDialogTitle>Log out of your account?</AlertDialogTitle>
+      <AlertDialogDescription>
+        You will be redirected to the login page. Any unsaved changes will be lost.
+      </AlertDialogDescription>
+    </AlertDialogHeader>
+    <AlertDialogFooter>
+      <AlertDialogCancel>Stay logged in</AlertDialogCancel>
+      <AlertDialogAction>Log out</AlertDialogAction>
+    </AlertDialogFooter>
+  </AlertDialogContent>
+</AlertDialog>
+```
+
+### Controlled open state
+
+```tsx
+const [open, setOpen] = useState(false);
+
+<AlertDialog open={open} onOpenChange={setOpen}>
+  <AlertDialogTrigger asChild>
+    <Button onClick={() => setOpen(true)}>Confirm action</Button>
+  </AlertDialogTrigger>
+  <AlertDialogContent>
+    <AlertDialogHeader>
+      <AlertDialogTitle>Confirm</AlertDialogTitle>
+      <AlertDialogDescription>Are you sure you want to proceed?</AlertDialogDescription>
+    </AlertDialogHeader>
+    <AlertDialogFooter>
+      <AlertDialogCancel>Cancel</AlertDialogCancel>
+      <AlertDialogAction onClick={() => setOpen(false)}>Proceed</AlertDialogAction>
+    </AlertDialogFooter>
+  </AlertDialogContent>
+</AlertDialog>
+```
+
+### Triggered programmatically (no visible trigger)
+
+```tsx
+// Open the dialog based on an external event, e.g. a failed network request.
+<AlertDialog open={showErrorDialog} onOpenChange={setShowErrorDialog}>
+  <AlertDialogContent>
+    <AlertDialogHeader>
+      <AlertDialogTitle>Failed to save changes</AlertDialogTitle>
+      <AlertDialogDescription>
+        An unexpected error occurred. Your changes were not saved.
+        Please try again or contact support.
+      </AlertDialogDescription>
+    </AlertDialogHeader>
+    <AlertDialogFooter>
+      <AlertDialogCancel>Dismiss</AlertDialogCancel>
+      <AlertDialogAction onClick={retryMutation}>Try again</AlertDialogAction>
+    </AlertDialogFooter>
+  </AlertDialogContent>
+</AlertDialog>
+```
+
+## API Reference
+
+### `<AlertDialog>`
+
+| Prop | Type | Default | Description |
+| :--- | :--- | :------ | :---------- |
+| `open` | `boolean` | — | Controlled open state. |
+| `onOpenChange` | `(open: boolean) => void` | — | Called when the open state changes. |
+| `defaultOpen` | `boolean` | `false` | Initial open state (uncontrolled). |
+
+### `<AlertDialogTrigger>`
+
+| Prop | Type | Default | Description |
+| :--- | :--- | :------ | :---------- |
+| `asChild` | `boolean` | `false` | Merges props onto the child element rather than rendering a wrapper `<button>`. |
+
+### `<AlertDialogContent>`
+
+| Prop | Type | Default | Description |
+| :--- | :--- | :------ | :---------- |
+| `className` | `string` | — | Additional CSS classes on the dialog panel. |
+
+### `<AlertDialogHeader>` / `<AlertDialogFooter>`
+
+Layout wrappers. Both accept standard `<div>` props including `className`.
+
+### `<AlertDialogTitle>`
+
+| Prop | Type | Default | Description |
+| :--- | :--- | :------ | :---------- |
+| `className` | `string` | — | Additional CSS classes. |
+| `children` | `ReactNode` | — | Dialog heading text. |
+
+### `<AlertDialogDescription>`
+
+| Prop | Type | Default | Description |
+| :--- | :--- | :------ | :---------- |
+| `className` | `string` | — | Additional CSS classes. |
+| `children` | `ReactNode` | — | Explanatory body copy. |
+
+### `<AlertDialogAction>` / `<AlertDialogCancel>`
+
+Both render as `<button>` elements styled with `buttonVariants` — `default` for `Action` and `outline` for `Cancel`. They accept all standard HTML button props plus `className`.
+
+| Prop | Type | Default | Description |
+| :--- | :--- | :------ | :---------- |
+| `className` | `string` | — | Override or extend button styles (e.g. apply `buttonVariants({ variant: "destructive" })`). |
+| `onClick` | `React.MouseEventHandler` | — | Handler called when the button is clicked. The dialog closes automatically after the handler runs. |
+
+## Accessibility
+
+- The dialog uses `role="alertdialog"` and `aria-modal="true"`, signalling to assistive technology that the rest of the page is inert.
+- Focus is trapped inside the dialog while it is open and returns to the trigger element when it closes.
+- **Escape** key does **not** close an `AlertDialog` by default — this is intentional to prevent accidental dismissal of destructive confirmations. Override via `onOpenChange` if needed.
+- Screen readers announce `AlertDialogTitle` immediately on open via `aria-labelledby`.
+- `AlertDialogDescription` is linked via `aria-describedby`.
 
 ## Live View
 
@@ -36,5 +232,4 @@ Here is a live contextual rendering of the component directly from our isolated 
 
 <StorybookPreview src="http://localhost:6006/iframe.html?id=overlay-alertdialog--default&viewMode=story" />
 
-> [!TIP]
-> [Open Component in Storybook ↗](http://localhost:6006/?path=/story/overlay-alertdialog--default)
+> [Open in Storybook ↗](https://designforge-storybook.vercel.app/?path=/story/overlay-alertdialog--default)

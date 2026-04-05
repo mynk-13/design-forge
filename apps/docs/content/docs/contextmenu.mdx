@@ -1,40 +1,362 @@
 ---
-title: "ContextMenu"
-description: "Documentation for the ContextMenu component."
+title: ContextMenu
+description: A right-click triggered contextual menu built on Radix UI ContextMenu. Supports sub-menus, checkbox items, radio groups, separators, keyboard shortcuts, and full keyboard navigation.
 ---
-
-The `ContextMenu` component represents a fundamental UI building block within the DesignForge token system.
 
 ## Installation
 
 ```bash
-npm install @designforge/ui
+npm install @radix-ui/react-context-menu
 ```
 
 ## Usage
 
 ```tsx
-import { ContextMenu } from "@designforge/ui";
+import {
+  ContextMenu,
+  ContextMenuTrigger,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuCheckboxItem,
+  ContextMenuRadioItem,
+  ContextMenuLabel,
+  ContextMenuSeparator,
+  ContextMenuShortcut,
+  ContextMenuGroup,
+  ContextMenuPortal,
+  ContextMenuSub,
+  ContextMenuSubContent,
+  ContextMenuSubTrigger,
+  ContextMenuRadioGroup,
+} from "@/components/ui/context-menu";
+```
 
-export default function App() {
+## Examples
+
+### Basic Right-Click Menu
+
+Wrap any element in `ContextMenuTrigger` to make it the activation target. `ContextMenuContent` appears at the cursor position on right-click (or long-press on touch devices).
+
+```tsx
+import {
+  ContextMenu,
+  ContextMenuTrigger,
+  ContextMenuContent,
+  ContextMenuItem,
+} from "@/components/ui/context-menu";
+
+export function BasicContextMenu() {
   return (
-    <ContextMenu>Example Content</ContextMenu>
+    <ContextMenu>
+      <ContextMenuTrigger className="flex h-36 w-full items-center justify-center rounded-lg border border-dashed text-sm text-muted-foreground select-none">
+        Right-click here
+      </ContextMenuTrigger>
+      <ContextMenuContent className="w-48">
+        <ContextMenuItem>Open</ContextMenuItem>
+        <ContextMenuItem>Rename</ContextMenuItem>
+        <ContextMenuItem>Duplicate</ContextMenuItem>
+        <ContextMenuItem className="text-destructive">Delete</ContextMenuItem>
+      </ContextMenuContent>
+    </ContextMenu>
   );
 }
 ```
 
-### Attributes
+### With Keyboard Shortcuts
 
-| Prop      | Type      | Default       | Description                                                 |
-| :-------- | :-------- | :------------ | :---------------------------------------------------------- |
-| `className` | `string`  | `undefined`   | Merges all optional utility styles directly. |
+`ContextMenuShortcut` renders a right-aligned hint showing the keyboard shortcut for an item. It is presentational only — wire up the actual shortcut handling with a global key listener in your app.
 
+```tsx
+import {
+  ContextMenu,
+  ContextMenuTrigger,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuShortcut,
+} from "@/components/ui/context-menu";
+
+export function ContextMenuWithShortcuts() {
+  return (
+    <ContextMenu>
+      <ContextMenuTrigger className="flex h-36 w-full items-center justify-center rounded-lg border border-dashed text-sm text-muted-foreground select-none">
+        Right-click here
+      </ContextMenuTrigger>
+      <ContextMenuContent className="w-52">
+        <ContextMenuItem>
+          Cut
+          <ContextMenuShortcut>⌘X</ContextMenuShortcut>
+        </ContextMenuItem>
+        <ContextMenuItem>
+          Copy
+          <ContextMenuShortcut>⌘C</ContextMenuShortcut>
+        </ContextMenuItem>
+        <ContextMenuItem>
+          Paste
+          <ContextMenuShortcut>⌘V</ContextMenuShortcut>
+        </ContextMenuItem>
+        <ContextMenuItem>
+          Select All
+          <ContextMenuShortcut>⌘A</ContextMenuShortcut>
+        </ContextMenuItem>
+      </ContextMenuContent>
+    </ContextMenu>
+  );
+}
+```
+
+### With Sub-Menu
+
+Use `ContextMenuSub`, `ContextMenuSubTrigger`, and `ContextMenuSubContent` to nest a secondary menu inside any item. The sub-menu opens on hover or arrow-key navigation.
+
+```tsx
+import {
+  ContextMenu,
+  ContextMenuTrigger,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSub,
+  ContextMenuSubTrigger,
+  ContextMenuSubContent,
+  ContextMenuSeparator,
+} from "@/components/ui/context-menu";
+
+export function ContextMenuWithSub() {
+  return (
+    <ContextMenu>
+      <ContextMenuTrigger className="flex h-36 w-full items-center justify-center rounded-lg border border-dashed text-sm text-muted-foreground select-none">
+        Right-click here
+      </ContextMenuTrigger>
+      <ContextMenuContent className="w-52">
+        <ContextMenuItem>Open</ContextMenuItem>
+        <ContextMenuSub>
+          <ContextMenuSubTrigger>Share</ContextMenuSubTrigger>
+          <ContextMenuSubContent className="w-40">
+            <ContextMenuItem>Email link</ContextMenuItem>
+            <ContextMenuItem>Copy link</ContextMenuItem>
+            <ContextMenuSeparator />
+            <ContextMenuItem>Twitter / X</ContextMenuItem>
+            <ContextMenuItem>LinkedIn</ContextMenuItem>
+          </ContextMenuSubContent>
+        </ContextMenuSub>
+        <ContextMenuSeparator />
+        <ContextMenuItem className="text-destructive">Delete</ContextMenuItem>
+      </ContextMenuContent>
+    </ContextMenu>
+  );
+}
+```
+
+### With Checkbox and Radio Items
+
+`ContextMenuCheckboxItem` renders a checkmark when selected. `ContextMenuRadioGroup` with `ContextMenuRadioItem` implements mutually exclusive selection. Both are controlled via state.
+
+```tsx
+import { useState } from "react";
+import {
+  ContextMenu,
+  ContextMenuTrigger,
+  ContextMenuContent,
+  ContextMenuCheckboxItem,
+  ContextMenuRadioGroup,
+  ContextMenuRadioItem,
+  ContextMenuLabel,
+  ContextMenuSeparator,
+} from "@/components/ui/context-menu";
+
+export function ContextMenuWithSelections() {
+  const [showGrid, setShowGrid] = useState(true);
+  const [showRulers, setShowRulers] = useState(false);
+  const [zoom, setZoom] = useState("100");
+
+  return (
+    <ContextMenu>
+      <ContextMenuTrigger className="flex h-36 w-full items-center justify-center rounded-lg border border-dashed text-sm text-muted-foreground select-none">
+        Right-click here
+      </ContextMenuTrigger>
+      <ContextMenuContent className="w-52">
+        <ContextMenuLabel>View options</ContextMenuLabel>
+        <ContextMenuCheckboxItem
+          checked={showGrid}
+          onCheckedChange={setShowGrid}
+        >
+          Show grid
+        </ContextMenuCheckboxItem>
+        <ContextMenuCheckboxItem
+          checked={showRulers}
+          onCheckedChange={setShowRulers}
+        >
+          Show rulers
+        </ContextMenuCheckboxItem>
+        <ContextMenuSeparator />
+        <ContextMenuLabel>Zoom level</ContextMenuLabel>
+        <ContextMenuRadioGroup value={zoom} onValueChange={setZoom}>
+          <ContextMenuRadioItem value="50">50%</ContextMenuRadioItem>
+          <ContextMenuRadioItem value="100">100%</ContextMenuRadioItem>
+          <ContextMenuRadioItem value="150">150%</ContextMenuRadioItem>
+          <ContextMenuRadioItem value="200">200%</ContextMenuRadioItem>
+        </ContextMenuRadioGroup>
+      </ContextMenuContent>
+    </ContextMenu>
+  );
+}
+```
+
+### With Separators and Labels
+
+Use `ContextMenuLabel` to add non-interactive section headings and `ContextMenuSeparator` to draw visual dividers between groups of related items.
+
+```tsx
+import {
+  ContextMenu,
+  ContextMenuTrigger,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuLabel,
+  ContextMenuSeparator,
+  ContextMenuShortcut,
+  ContextMenuGroup,
+} from "@/components/ui/context-menu";
+
+export function ContextMenuWithGroups() {
+  return (
+    <ContextMenu>
+      <ContextMenuTrigger className="flex h-36 w-full items-center justify-center rounded-lg border border-dashed text-sm text-muted-foreground select-none">
+        Right-click here
+      </ContextMenuTrigger>
+      <ContextMenuContent className="w-56">
+        <ContextMenuGroup>
+          <ContextMenuLabel>File</ContextMenuLabel>
+          <ContextMenuItem>
+            New file
+            <ContextMenuShortcut>⌘N</ContextMenuShortcut>
+          </ContextMenuItem>
+          <ContextMenuItem>
+            Open…
+            <ContextMenuShortcut>⌘O</ContextMenuShortcut>
+          </ContextMenuItem>
+        </ContextMenuGroup>
+        <ContextMenuSeparator />
+        <ContextMenuGroup>
+          <ContextMenuLabel>Edit</ContextMenuLabel>
+          <ContextMenuItem>
+            Undo
+            <ContextMenuShortcut>⌘Z</ContextMenuShortcut>
+          </ContextMenuItem>
+          <ContextMenuItem>
+            Redo
+            <ContextMenuShortcut>⇧⌘Z</ContextMenuShortcut>
+          </ContextMenuItem>
+        </ContextMenuGroup>
+        <ContextMenuSeparator />
+        <ContextMenuItem className="text-destructive">
+          Move to trash
+          <ContextMenuShortcut>⌫</ContextMenuShortcut>
+        </ContextMenuItem>
+      </ContextMenuContent>
+    </ContextMenu>
+  );
+}
+```
+
+## API Reference
+
+### ContextMenu
+
+Root component. Manages open state and provides context to all children.
+
+| Prop       | Type        | Default | Description                                                         |
+| ---------- | ----------- | ------- | ------------------------------------------------------------------- |
+| `children` | `ReactNode` | —       | Must contain `ContextMenuTrigger` and `ContextMenuContent`.         |
+
+### ContextMenuTrigger
+
+| Prop        | Type      | Default | Description                                                           |
+| ----------- | --------- | ------- | --------------------------------------------------------------------- |
+| `asChild`   | `boolean` | `false` | Merges props onto the child element instead of a wrapping `<span>`.   |
+| `className` | `string`  | —       | Additional CSS classes.                                               |
+
+### ContextMenuContent
+
+| Prop         | Type                                | Default    | Description                                       |
+| ------------ | ----------------------------------- | ---------- | ------------------------------------------------- |
+| `className`  | `string`                            | —          | Additional CSS classes applied to the menu panel. |
+| `sideOffset` | `number`                            | `4`        | Distance in px from the trigger point.            |
+| `align`      | `"start" \| "center" \| "end"`      | `"center"` | Alignment relative to the trigger.                |
+
+### ContextMenuItem
+
+| Prop        | Type                      | Default | Description                                               |
+| ----------- | ------------------------- | ------- | --------------------------------------------------------- |
+| `inset`     | `boolean`                 | `false` | Adds left padding to align with items that have icons.    |
+| `className` | `string`                  | —       | Additional CSS classes.                                   |
+| `onSelect`  | `(event: Event) => void`  | —       | Called when the item is selected.                         |
+| `disabled`  | `boolean`                 | `false` | Prevents selection and applies disabled styling.          |
+
+### ContextMenuCheckboxItem
+
+| Prop              | Type                         | Default | Description                                    |
+| ----------------- | ---------------------------- | ------- | ---------------------------------------------- |
+| `checked`         | `boolean \| "indeterminate"` | —       | Controlled checked state.                      |
+| `onCheckedChange` | `(checked: boolean) => void` | —       | Called when the checked state changes.         |
+| `disabled`        | `boolean`                    | `false` | Prevents interaction.                          |
+| `className`       | `string`                     | —       | Additional CSS classes.                        |
+
+### ContextMenuRadioGroup
+
+| Prop            | Type                      | Default | Description                                   |
+| --------------- | ------------------------- | ------- | --------------------------------------------- |
+| `value`         | `string`                  | —       | The currently selected radio value.           |
+| `onValueChange` | `(value: string) => void` | —       | Called when the selected value changes.       |
+
+### ContextMenuRadioItem
+
+| Prop        | Type      | Default | Description                                    |
+| ----------- | --------- | ------- | ---------------------------------------------- |
+| `value`     | `string`  | —       | The value this item represents. **Required.**  |
+| `disabled`  | `boolean` | `false` | Prevents selection.                            |
+| `className` | `string`  | —       | Additional CSS classes.                        |
+
+### ContextMenuLabel
+
+| Prop        | Type      | Default | Description                                                      |
+| ----------- | --------- | ------- | ---------------------------------------------------------------- |
+| `inset`     | `boolean` | `false` | Adds left padding to align with inset menu items.                |
+| `className` | `string`  | —       | Additional CSS classes.                                          |
+
+### ContextMenuSeparator
+
+| Prop        | Type     | Default | Description             |
+| ----------- | -------- | ------- | ----------------------- |
+| `className` | `string` | —       | Additional CSS classes. |
+
+### ContextMenuShortcut
+
+Presentational `<span>` for displaying keyboard shortcut hints. Accepts all standard `<span>` HTML attributes.
+
+### ContextMenuSub / ContextMenuSubTrigger / ContextMenuSubContent
+
+Compose these three primitives to build nested menus. `ContextMenuSubTrigger` accepts `inset: boolean`. `ContextMenuSubContent` accepts the same props as `ContextMenuContent`.
+
+### ContextMenuPortal
+
+Renders its children in a portal appended to `document.body`. Wraps `ContextMenuContent` automatically.
+
+### ContextMenuGroup
+
+Semantic grouping wrapper. Accepts all standard `<div>` HTML attributes.
+
+## Accessibility
+
+- The context menu follows the [ARIA Menu pattern](https://www.w3.org/WAI/ARIA/apg/patterns/menu/). The trigger has `aria-haspopup="menu"` and `aria-expanded` managed by Radix.
+- The menu is opened by the browser's native context menu gesture (right-click, `Shift+F10`, or the `Menu` key). Radix intercepts and replaces this event.
+- Full keyboard navigation is built in: `ArrowUp` / `ArrowDown` move between items, `ArrowRight` opens a sub-menu, `ArrowLeft` closes it, `Enter` / `Space` selects an item, and `Escape` closes the menu.
+- `ContextMenuLabel` renders as a non-interactive element (`role="none"`); screen readers read its text as group context.
+- `ContextMenuShortcut` is hidden from the accessibility tree (`aria-hidden`). The shortcut is a visual affordance only — ensure every action is reachable without it.
+- Items disabled with the `disabled` prop receive `aria-disabled="true"` and are skipped during keyboard navigation.
+- The menu is rendered inside a `ContextMenuPortal` to avoid z-index and overflow clipping issues.
 
 ## Live View
 
-Here is a live contextual rendering of the component directly from our isolated Storybook environment.
-
 <StorybookPreview src="http://localhost:6006/iframe.html?id=overlay-contextmenu--default&viewMode=story" />
 
-> [!TIP]
-> [Open Component in Storybook ↗](http://localhost:6006/?path=/story/overlay-contextmenu--default)
+[Open ContextMenu in Storybook →](http://localhost:6006/?path=/story/overlay-contextmenu--default)

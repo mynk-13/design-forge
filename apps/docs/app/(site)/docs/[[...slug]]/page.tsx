@@ -42,14 +42,15 @@ export async function generateMetadata({ params }: DocPageProps) {
 
 import * as UI from "@designforge/ui";
 import { StorybookPreview } from "../../../../components/StorybookPreview";
+import { CopyCodeBlock } from "../../../../components/CopyCodeBlock";
 
 const rehypePrettyCodeOptions: Options = {
   // Dual theme: github-light in light mode, github-dark-dimmed in dark mode
+  // keepBackground: true (default) — inline style wins over prose background-color
   theme: {
     dark: "github-dark-dimmed",
     light: "github-light",
   },
-  keepBackground: false,
 };
 
 const components = {
@@ -58,6 +59,8 @@ const components = {
   h3: ({ children, ...props }: any) => <h3 className="mt-8 scroll-m-20 text-2xl font-semibold tracking-tight" {...props}>{children}</h3>,
   p: (props: any) => <p className="leading-7 [&:not(:first-child)]:mt-6" {...props} />,
   ul: (props: any) => <ul className="my-6 ml-6 list-disc [&>li]:mt-2" {...props} />,
+  // pre blocks: wrapped with copy button; rehype-pretty-code handles highlighting
+  pre: (props: any) => <CopyCodeBlock {...props} />,
   // Inline code only — pre>code blocks are handled by rehype-pretty-code
   code: ({ className, ...props }: any) =>
     className ? (

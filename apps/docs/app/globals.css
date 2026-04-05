@@ -11,6 +11,13 @@
   @apply my-6;
 }
 
+/* Override @tailwindcss/typography dark pre-background so our theme inline
+   styles (set by rehype-pretty-code keepBackground:true) are always visible. */
+.prose [data-rehype-pretty-code-figure] pre,
+.prose-invert [data-rehype-pretty-code-figure] pre {
+  background-color: revert !important;
+}
+
 [data-rehype-pretty-code-figure] pre {
   @apply overflow-x-auto rounded-lg border px-0 py-4 text-sm;
 }
@@ -30,16 +37,20 @@
 }
 
 /* Dual-theme: hide light theme in dark mode, hide dark theme in light mode */
-[data-rehype-pretty-code-figure] [data-theme="light"] {
+[data-rehype-pretty-code-figure] pre[data-theme="light"],
+[data-rehype-pretty-code-figure] code[data-theme="light"] {
   @apply block;
 }
-[data-rehype-pretty-code-figure] [data-theme="dark"] {
+[data-rehype-pretty-code-figure] pre[data-theme="dark"],
+[data-rehype-pretty-code-figure] code[data-theme="dark"] {
   @apply hidden;
 }
-.dark [data-rehype-pretty-code-figure] [data-theme="light"] {
+.dark [data-rehype-pretty-code-figure] pre[data-theme="light"],
+.dark [data-rehype-pretty-code-figure] code[data-theme="light"] {
   @apply hidden;
 }
-.dark [data-rehype-pretty-code-figure] [data-theme="dark"] {
+.dark [data-rehype-pretty-code-figure] pre[data-theme="dark"],
+.dark [data-rehype-pretty-code-figure] code[data-theme="dark"] {
   @apply block;
 }
 
@@ -49,4 +60,9 @@
 }
 [data-rehype-pretty-code-title] + [data-rehype-pretty-code-figure] pre {
   @apply rounded-t-none;
+}
+
+/* Copy button wrapper — remove prose margin duplication since CopyCodeBlock adds it */
+[data-copy-code-block] [data-rehype-pretty-code-figure] {
+  @apply my-0;
 }

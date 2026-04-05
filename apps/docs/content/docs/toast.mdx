@@ -1,9 +1,7 @@
 ---
-title: "Toast"
-description: "Documentation for the Toast component."
+title: Toast
+description: Succinct, non-blocking notifications that appear in the bottom-right corner of the viewport. Built on Radix UI Toast with swipe-to-dismiss, action buttons, and variant support.
 ---
-
-The `Toast` component represents a fundamental UI building block within the DesignForge token system.
 
 ## Installation
 
@@ -14,27 +12,456 @@ npm install @designforge/ui
 ## Usage
 
 ```tsx
-import { Toast } from "@designforge/ui";
+import {
+  ToastProvider,
+  ToastViewport,
+  Toast,
+  ToastTitle,
+  ToastDescription,
+  ToastClose,
+  ToastAction,
+} from "@designforge/ui";
 
 export default function App() {
   return (
-    <Toast>Example Content</Toast>
+    <ToastProvider>
+      {/* Your app content */}
+
+      <Toast open={true}>
+        <ToastTitle>Saved</ToastTitle>
+        <ToastDescription>Your changes have been saved.</ToastDescription>
+        <ToastClose />
+      </Toast>
+
+      <ToastViewport />
+    </ToastProvider>
   );
 }
 ```
 
-### Attributes
+> **Note:** In most applications you will manage toast state through a `useToast` hook or a global store rather than wiring `open` directly. See the [Hook Integration Pattern](#hook--store-integration) example below.
 
-| Prop      | Type      | Default       | Description                                                 |
-| :-------- | :-------- | :------------ | :---------------------------------------------------------- |
-| `className` | `string`  | `undefined`   | Merges all optional utility styles directly. |
+## Examples
 
+### Basic Toast
+
+A minimal toast with a title. The `ToastViewport` renders the fixed container in the bottom-right corner.
+
+```tsx
+import { useState } from "react";
+import {
+  ToastProvider,
+  ToastViewport,
+  Toast,
+  ToastTitle,
+  ToastClose,
+} from "@designforge/ui";
+import { Button } from "@designforge/ui";
+
+export default function BasicToast() {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <ToastProvider>
+      <Button onClick={() => setOpen(true)}>Show Toast</Button>
+
+      <Toast open={open} onOpenChange={setOpen}>
+        <ToastTitle>Profile updated</ToastTitle>
+        <ToastClose />
+      </Toast>
+
+      <ToastViewport />
+    </ToastProvider>
+  );
+}
+```
+
+### Destructive Toast
+
+Use `variant="destructive"` to signal an error or a dangerous outcome. The toast renders with a red background.
+
+```tsx
+import { useState } from "react";
+import {
+  ToastProvider,
+  ToastViewport,
+  Toast,
+  ToastTitle,
+  ToastDescription,
+  ToastClose,
+} from "@designforge/ui";
+import { Button } from "@designforge/ui";
+
+export default function DestructiveToast() {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <ToastProvider>
+      <Button variant="destructive" onClick={() => setOpen(true)}>
+        Delete Item
+      </Button>
+
+      <Toast open={open} onOpenChange={setOpen} variant="destructive">
+        <ToastTitle>Deletion failed</ToastTitle>
+        <ToastDescription>
+          We could not delete the item. Please try again.
+        </ToastDescription>
+        <ToastClose />
+      </Toast>
+
+      <ToastViewport />
+    </ToastProvider>
+  );
+}
+```
+
+### With Action Button
+
+`ToastAction` renders a secondary action the user can take directly from the notification. Pass `altText` to describe the action for screen readers.
+
+```tsx
+import { useState } from "react";
+import {
+  ToastProvider,
+  ToastViewport,
+  Toast,
+  ToastTitle,
+  ToastDescription,
+  ToastAction,
+  ToastClose,
+} from "@designforge/ui";
+import { Button } from "@designforge/ui";
+
+export default function ToastWithAction() {
+  const [open, setOpen] = useState(false);
+
+  const handleUndo = () => {
+    console.log("Undo triggered");
+    setOpen(false);
+  };
+
+  return (
+    <ToastProvider>
+      <Button onClick={() => setOpen(true)}>Archive Message</Button>
+
+      <Toast open={open} onOpenChange={setOpen}>
+        <div className="flex-1">
+          <ToastTitle>Message archived</ToastTitle>
+          <ToastDescription>The message was moved to your archive.</ToastDescription>
+        </div>
+        <ToastAction altText="Undo archive" onClick={handleUndo}>
+          Undo
+        </ToastAction>
+        <ToastClose />
+      </Toast>
+
+      <ToastViewport />
+    </ToastProvider>
+  );
+}
+```
+
+### With Description
+
+Include `ToastDescription` to provide additional context alongside the title.
+
+```tsx
+import { useState } from "react";
+import {
+  ToastProvider,
+  ToastViewport,
+  Toast,
+  ToastTitle,
+  ToastDescription,
+  ToastClose,
+} from "@designforge/ui";
+import { Button } from "@designforge/ui";
+
+export default function ToastWithDescription() {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <ToastProvider>
+      <Button onClick={() => setOpen(true)}>Submit Form</Button>
+
+      <Toast open={open} onOpenChange={setOpen}>
+        <ToastTitle>Submission received</ToastTitle>
+        <ToastDescription>
+          We'll review your application and respond within 3 business days.
+        </ToastDescription>
+        <ToastClose />
+      </Toast>
+
+      <ToastViewport />
+    </ToastProvider>
+  );
+}
+```
+
+### Auto-Dismiss Timing
+
+Control how long a toast stays visible with the `duration` prop (milliseconds). Set `duration={Infinity}` for a persistent toast that only closes via user interaction.
+
+```tsx
+import { useState } from "react";
+import {
+  ToastProvider,
+  ToastViewport,
+  Toast,
+  ToastTitle,
+  ToastDescription,
+  ToastClose,
+} from "@designforge/ui";
+import { Button } from "@designforge/ui";
+
+export default function TimingToast() {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <ToastProvider>
+      <Button onClick={() => setOpen(true)}>Show (10 s)</Button>
+
+      {/* Stays visible for 10 seconds */}
+      <Toast open={open} onOpenChange={setOpen} duration={10000}>
+        <ToastTitle>Processing export</ToastTitle>
+        <ToastDescription>
+          Your file is being prepared. This may take a moment.
+        </ToastDescription>
+        <ToastClose />
+      </Toast>
+
+      <ToastViewport />
+    </ToastProvider>
+  );
+}
+```
+
+### Hook / Store Integration
+
+The recommended pattern for real applications is to maintain a toast queue in a small store and expose a `useToast` hook. This lets any component trigger a notification without prop drilling.
+
+```tsx
+// lib/toast-store.ts
+import { create } from "zustand";
+
+type ToastItem = {
+  id: string;
+  title: string;
+  description?: string;
+  variant?: "default" | "destructive";
+  duration?: number;
+};
+
+type ToastStore = {
+  toasts: ToastItem[];
+  add: (toast: Omit<ToastItem, "id">) => void;
+  remove: (id: string) => void;
+};
+
+export const useToastStore = create<ToastStore>((set) => ({
+  toasts: [],
+  add: (toast) =>
+    set((state) => ({
+      toasts: [...state.toasts, { ...toast, id: crypto.randomUUID() }],
+    })),
+  remove: (id) =>
+    set((state) => ({
+      toasts: state.toasts.filter((t) => t.id !== id),
+    })),
+}));
+
+// Hook for convenience
+export function useToast() {
+  const add = useToastStore((s) => s.add);
+  return { toast: add };
+}
+```
+
+```tsx
+// components/Toaster.tsx — place once near your app root
+import {
+  ToastProvider,
+  ToastViewport,
+  Toast,
+  ToastTitle,
+  ToastDescription,
+  ToastClose,
+} from "@designforge/ui";
+import { useToastStore } from "@/lib/toast-store";
+
+export function Toaster() {
+  const { toasts, remove } = useToastStore();
+
+  return (
+    <ToastProvider>
+      {toasts.map((t) => (
+        <Toast
+          key={t.id}
+          open
+          onOpenChange={(open) => !open && remove(t.id)}
+          variant={t.variant}
+          duration={t.duration}
+        >
+          <ToastTitle>{t.title}</ToastTitle>
+          {t.description && <ToastDescription>{t.description}</ToastDescription>}
+          <ToastClose />
+        </Toast>
+      ))}
+      <ToastViewport />
+    </ToastProvider>
+  );
+}
+```
+
+```tsx
+// Any page or component
+import { useToast } from "@/lib/toast-store";
+import { Button } from "@designforge/ui";
+
+export default function SaveButton() {
+  const { toast } = useToast();
+
+  return (
+    <Button
+      onClick={() =>
+        toast({ title: "Saved", description: "Your changes have been saved." })
+      }
+    >
+      Save
+    </Button>
+  );
+}
+```
+
+### Multiple Toasts
+
+`ToastProvider` stacks multiple open toasts automatically. Each toast is independent; closing one does not affect others.
+
+```tsx
+import { useState } from "react";
+import {
+  ToastProvider,
+  ToastViewport,
+  Toast,
+  ToastTitle,
+  ToastClose,
+} from "@designforge/ui";
+import { Button } from "@designforge/ui";
+
+type ToastItem = { id: number; title: string; variant?: "default" | "destructive" };
+
+export default function MultipleToasts() {
+  const [toasts, setToasts] = useState<ToastItem[]>([]);
+  let counter = 0;
+
+  const addToast = (variant?: "destructive") => {
+    counter += 1;
+    setToasts((prev) => [
+      ...prev,
+      { id: Date.now(), title: `Notification ${counter}`, variant },
+    ]);
+  };
+
+  const remove = (id: number) =>
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+
+  return (
+    <ToastProvider>
+      <div className="flex gap-2">
+        <Button onClick={() => addToast()}>Add Toast</Button>
+        <Button variant="destructive" onClick={() => addToast("destructive")}>
+          Add Error Toast
+        </Button>
+      </div>
+
+      {toasts.map((t) => (
+        <Toast key={t.id} open onOpenChange={(open) => !open && remove(t.id)} variant={t.variant}>
+          <ToastTitle>{t.title}</ToastTitle>
+          <ToastClose />
+        </Toast>
+      ))}
+
+      <ToastViewport />
+    </ToastProvider>
+  );
+}
+```
+
+## API Reference
+
+### ToastProvider
+
+Wraps the application (or a subtree) to provide toast context. Place this once at or near the root.
+
+| Prop       | Type     | Default     | Description                                                         |
+| ---------- | -------- | ----------- | ------------------------------------------------------------------- |
+| `duration` | `number` | `5000`      | Default auto-dismiss duration (ms) for all toasts in this provider. |
+| `label`    | `string` | `"Notification"` | Accessible label for the toast region.                         |
+
+### ToastViewport
+
+The fixed-position container that renders all active toasts. Must be a descendant of `ToastProvider`.
+
+| Prop        | Type     | Default | Description                                          |
+| ----------- | -------- | ------- | ---------------------------------------------------- |
+| `className` | `string` | —       | Additional class names for the viewport container.   |
+
+### Toast
+
+The individual notification element.
+
+| Prop           | Type                          | Default   | Description                                                      |
+| -------------- | ----------------------------- | --------- | ---------------------------------------------------------------- |
+| `variant`      | `"default" \| "destructive"`  | `"default"` | Visual style of the toast.                                     |
+| `open`         | `boolean`                     | —         | Controlled open state.                                           |
+| `onOpenChange` | `(open: boolean) => void`     | —         | Callback when the toast opens or closes (including auto-dismiss).|
+| `duration`     | `number`                      | `5000`    | Override the provider's default duration for this toast.         |
+| `className`    | `string`                      | —         | Additional class names for the toast element.                    |
+
+### ToastTitle
+
+The primary heading of the toast. Renders as a `<div>` with bold styling.
+
+| Prop        | Type     | Default | Description                        |
+| ----------- | -------- | ------- | ---------------------------------- |
+| `className` | `string` | —       | Additional class names.            |
+
+### ToastDescription
+
+Secondary descriptive text beneath the title.
+
+| Prop        | Type     | Default | Description                        |
+| ----------- | -------- | ------- | ---------------------------------- |
+| `className` | `string` | —       | Additional class names.            |
+
+### ToastAction
+
+An interactive button rendered inside the toast for a follow-up action.
+
+| Prop        | Type     | Default | Description                                                            |
+| ----------- | -------- | ------- | ---------------------------------------------------------------------- |
+| `altText`   | `string` | —       | **Required.** Screen reader description of what the action button does.|
+| `className` | `string` | —       | Additional class names.                                                |
+
+### ToastClose
+
+A close button (X icon) that dismisses the toast.
+
+| Prop        | Type     | Default | Description             |
+| ----------- | -------- | ------- | ----------------------- |
+| `className` | `string` | —       | Additional class names. |
+
+## Accessibility
+
+- Built on **Radix UI Toast**, which implements the [ARIA Live Region pattern](https://www.w3.org/WAI/ARIA/apg/patterns/alert/).
+- The viewport uses `role="region"` with an accessible label so screen readers identify the notification area.
+- New toasts are announced automatically via an ARIA live region without moving keyboard focus.
+- `ToastAction` requires `altText` — a plain-language description used as the accessible label when the action button text alone may be ambiguous.
+- Toasts can be dismissed by swiping (on touch devices), pressing the `ToastClose` button, or via the `Escape` key.
+- Auto-dismiss timers pause when the user hovers or focuses within a toast, giving them time to read and act.
 
 ## Live View
 
-Here is a live contextual rendering of the component directly from our isolated Storybook environment.
-
 <StorybookPreview src="http://localhost:6006/iframe.html?id=feedback-toast--default&viewMode=story" />
 
-> [!TIP]
-> [Open Component in Storybook ↗](http://localhost:6006/?path=/story/feedback-toast--default)
+[Open in Storybook ↗](https://designforge-storybook.vercel.app/?path=/story/feedback-toast--default)

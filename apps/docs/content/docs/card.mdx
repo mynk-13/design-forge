@@ -1,9 +1,9 @@
 ---
 title: "Card"
-description: "Documentation for the Card component."
+description: "Composed surface container with header, content, and footer sub-components."
 ---
 
-The `Card` component represents a fundamental UI building block within the DesignForge token system.
+`Card` is a bordered, rounded surface component for grouping related content. It ships as a composition of six sub-components — `Card`, `CardHeader`, `CardTitle`, `CardDescription`, `CardContent`, and `CardFooter` — that can be used together or individually depending on the layout you need.
 
 ## Installation
 
@@ -14,21 +14,440 @@ npm install @designforge/ui
 ## Usage
 
 ```tsx
-import { Card } from "@designforge/ui";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from "@designforge/ui";
 
 export default function App() {
   return (
-    <Card>Example Content</Card>
+    <Card>
+      <CardHeader>
+        <CardTitle>Card title</CardTitle>
+        <CardDescription>Card description goes here.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <p>Main content of the card.</p>
+      </CardContent>
+      <CardFooter>
+        <p className="text-sm text-muted-foreground">Footer note</p>
+      </CardFooter>
+    </Card>
   );
 }
 ```
 
-### Attributes
+## Examples
 
-| Prop      | Type      | Default       | Description                                                 |
-| :-------- | :-------- | :------------ | :---------------------------------------------------------- |
-| `className` | `string`  | `undefined`   | Merges all optional utility styles directly. |
+### Default project card
 
+A typical card layout with title, description, body text, and action buttons in the footer.
+
+```tsx
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from "@designforge/ui";
+import { Button } from "@designforge/ui";
+
+export default function ProjectCard() {
+  return (
+    <Card className="w-96">
+      <CardHeader>
+        <CardTitle>Project Alpha</CardTitle>
+        <CardDescription>
+          A new design system built with React 19 and TypeScript.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <p className="text-sm">
+          The project has reached Phase 9 with 33 components shipped and fully tested.
+        </p>
+      </CardContent>
+      <CardFooter className="gap-2">
+        <Button size="sm">View project</Button>
+        <Button size="sm" variant="outline">
+          Share
+        </Button>
+      </CardFooter>
+    </Card>
+  );
+}
+```
+
+### Product card with badge
+
+Combine `Card` with `Badge` to display a product or package entry with a status label.
+
+```tsx
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@designforge/ui";
+import { Badge } from "@designforge/ui";
+
+export default function ProductCard() {
+  return (
+    <Card className="w-80">
+      <CardHeader>
+        <div className="flex justify-between items-start">
+          <CardTitle>@designforge/ui</CardTitle>
+          <Badge variant="success">Stable</Badge>
+        </div>
+        <CardDescription>React component library</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <p className="text-sm text-muted-foreground">
+          33 accessible components with CVA variants and zero axe-core violations.
+        </p>
+      </CardContent>
+    </Card>
+  );
+}
+```
+
+### Settings card
+
+A card pattern for settings panels — a title and description in the header, form controls in the content, and a save action in the footer.
+
+```tsx
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from "@designforge/ui";
+import { Button } from "@designforge/ui";
+import { Label } from "@designforge/ui";
+import { Input } from "@designforge/ui";
+import { Switch } from "@designforge/ui";
+
+export default function SettingsCard() {
+  return (
+    <Card className="w-full max-w-md">
+      <CardHeader>
+        <CardTitle>Notification settings</CardTitle>
+        <CardDescription>
+          Choose how and when you receive notifications.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-4">
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="email">Email address</Label>
+          <Input id="email" type="email" placeholder="you@example.com" />
+        </div>
+        <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-0.5">
+            <span className="text-sm font-medium">Marketing emails</span>
+            <span className="text-xs text-muted-foreground">
+              Receive updates about new features.
+            </span>
+          </div>
+          <Switch />
+        </div>
+        <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-0.5">
+            <span className="text-sm font-medium">Security alerts</span>
+            <span className="text-xs text-muted-foreground">
+              Be notified of unusual account activity.
+            </span>
+          </div>
+          <Switch defaultChecked />
+        </div>
+      </CardContent>
+      <CardFooter className="justify-end gap-2">
+        <Button variant="outline">Cancel</Button>
+        <Button>Save settings</Button>
+      </CardFooter>
+    </Card>
+  );
+}
+```
+
+### Login form card
+
+Cards are a natural container for authentication forms.
+
+```tsx
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from "@designforge/ui";
+import { Button } from "@designforge/ui";
+import { Input } from "@designforge/ui";
+import { Label } from "@designforge/ui";
+
+export default function LoginCard() {
+  return (
+    <Card className="w-full max-w-sm mx-auto">
+      <CardHeader className="text-center">
+        <CardTitle>Sign in</CardTitle>
+        <CardDescription>
+          Enter your credentials to access your account.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-4">
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="login-email">Email</Label>
+          <Input id="login-email" type="email" placeholder="you@example.com" />
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <div className="flex items-center justify-between">
+            <Label htmlFor="login-password">Password</Label>
+            <a href="/forgot-password" className="text-xs text-muted-foreground hover:underline">
+              Forgot password?
+            </a>
+          </div>
+          <Input id="login-password" type="password" placeholder="••••••••" />
+        </div>
+      </CardContent>
+      <CardFooter className="flex-col gap-3">
+        <Button className="w-full">Sign in</Button>
+        <p className="text-xs text-muted-foreground text-center">
+          Don't have an account?{" "}
+          <a href="/signup" className="underline underline-offset-2">
+            Sign up
+          </a>
+        </p>
+      </CardFooter>
+    </Card>
+  );
+}
+```
+
+### User profile card
+
+Combine `Card` with `Avatar` to build a social profile or team member display.
+
+```tsx
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from "@designforge/ui";
+import { Button } from "@designforge/ui";
+import { Avatar, AvatarFallback } from "@designforge/ui";
+
+export default function UserProfileCard() {
+  return (
+    <Card className="w-72">
+      <CardHeader>
+        <div className="flex gap-4 items-center">
+          <Avatar size="lg">
+            <AvatarFallback>MK</AvatarFallback>
+          </Avatar>
+          <div>
+            <CardTitle>Mayank Kumar</CardTitle>
+            <CardDescription>Senior Frontend Engineer</CardDescription>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <p className="text-sm">
+          Building DesignForge — an open-source React design system with AI-powered generation.
+        </p>
+      </CardContent>
+      <CardFooter className="gap-2">
+        <Button size="sm" variant="outline" className="flex-1">
+          Message
+        </Button>
+        <Button size="sm" className="flex-1">
+          Follow
+        </Button>
+      </CardFooter>
+    </Card>
+  );
+}
+```
+
+### Stat cards grid
+
+Render a grid of minimal stat cards for dashboard summaries.
+
+```tsx
+import { Card, CardHeader, CardDescription, CardContent } from "@designforge/ui";
+import { Badge } from "@designforge/ui";
+
+const stats = [
+  { title: "Total Components", value: "33", change: "+5 this phase", variant: "success" as const },
+  { title: "Test Coverage", value: "94%", change: "+2% this week", variant: "success" as const },
+  { title: "Bundle Size", value: "68 KB", change: "Under 100 KB limit", variant: "default" as const },
+  { title: "Open Issues", value: "3", change: "-2 since yesterday", variant: "secondary" as const },
+];
+
+export default function StatCards() {
+  return (
+    <div className="grid grid-cols-2 gap-4">
+      {stats.map(({ title, value, change, variant }) => (
+        <Card key={title}>
+          <CardHeader className="pb-2">
+            <CardDescription>{title}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-bold">{value}</p>
+            <p className="mt-1">
+              <Badge variant={variant} className="text-[0.625rem]">
+                {change}
+              </Badge>
+            </p>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+}
+```
+
+### Minimal card — content only
+
+All sub-components are optional. A card with only `CardContent` is perfectly valid for simple callout blocks.
+
+```tsx
+import { Card, CardContent } from "@designforge/ui";
+
+export default function MinimalCard() {
+  return (
+    <Card className="w-72">
+      <CardContent className="pt-6">
+        <p className="text-sm">
+          A minimal card with no header or footer — just content.
+        </p>
+      </CardContent>
+    </Card>
+  );
+}
+```
+
+### Card with progress indicators
+
+Embed other DesignForge components freely inside `CardContent`.
+
+```tsx
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@designforge/ui";
+import { Progress } from "@designforge/ui";
+
+const phases = [
+  { label: "Components", value: 100 },
+  { label: "Documentation", value: 100 },
+  { label: "Storybook", value: 80 },
+  { label: "Testing", value: 45 },
+];
+
+export default function CardWithProgress() {
+  return (
+    <Card className="w-96">
+      <CardHeader>
+        <CardTitle>DesignForge Phases</CardTitle>
+        <CardDescription>Build progress — 9 of 12 phases complete</CardDescription>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-3">
+        {phases.map(({ label, value }) => (
+          <div key={label}>
+            <div className="flex justify-between text-sm mb-1.5">
+              <span>{label}</span>
+              <span className="text-muted-foreground">{value}%</span>
+            </div>
+            <Progress value={value} size="sm" />
+          </div>
+        ))}
+      </CardContent>
+    </Card>
+  );
+}
+```
+
+## API Reference
+
+### `<Card>`
+
+The root container element. Renders a `<div>` with a border, rounded corners, card background color, and a small drop shadow.
+
+| Prop | Type | Default | Description |
+| :--- | :--- | :------ | :---------- |
+| `ref` | `Ref<HTMLDivElement>` | — | Forwarded ref to the underlying `<div>`. |
+| `className` | `string` | — | Additional CSS classes merged with default styles. Use for width, custom backgrounds, etc. |
+| `children` | `ReactNode` | — | Typically one or more `CardHeader`, `CardContent`, and/or `CardFooter` sub-components. |
+
+### `<CardHeader>`
+
+A flex column container (`flex flex-col space-y-1.5 p-6`) for the card's title and description region. Renders as a `<div>`.
+
+| Prop | Type | Default | Description |
+| :--- | :--- | :------ | :---------- |
+| `className` | `string` | — | Additional CSS classes. Override spacing or direction as needed. |
+| `children` | `ReactNode` | — | Typically `CardTitle` and/or `CardDescription`. |
+
+### `<CardTitle>`
+
+Renders an `<h3>` with `text-2xl font-semibold leading-none tracking-tight`. Use inside `CardHeader`.
+
+| Prop | Type | Default | Description |
+| :--- | :--- | :------ | :---------- |
+| `className` | `string` | — | Additional CSS classes. Reduce font size with `text-lg` or `text-base` for compact cards. |
+| `children` | `ReactNode` | — | The card's heading text. |
+
+### `<CardDescription>`
+
+Renders a `<p>` with `text-sm text-muted-foreground`. Use inside `CardHeader` beneath `CardTitle`.
+
+| Prop | Type | Default | Description |
+| :--- | :--- | :------ | :---------- |
+| `className` | `string` | — | Additional CSS classes. |
+| `children` | `ReactNode` | — | Supporting description text. |
+
+### `<CardContent>`
+
+The main content area. Renders a `<div>` with `p-6 pt-0` — full padding on all sides except the top (since `CardHeader` provides top padding).
+
+| Prop | Type | Default | Description |
+| :--- | :--- | :------ | :---------- |
+| `className` | `string` | — | Additional CSS classes. Use `pt-6` when `CardContent` is the first child (no `CardHeader`). |
+| `children` | `ReactNode` | — | Any content: text, form fields, lists, charts, other DesignForge components. |
+
+### `<CardFooter>`
+
+A flex row container (`flex items-center p-6 pt-0`) for action buttons or supplemental metadata. Renders as a `<div>`.
+
+| Prop | Type | Default | Description |
+| :--- | :--- | :------ | :---------- |
+| `className` | `string` | — | Additional CSS classes. Add `justify-end` to right-align buttons, or `gap-2` for spacing. |
+| `children` | `ReactNode` | — | Typically `Button` elements or other inline controls. |
+
+All sub-components accept and forward any additional HTML `div` / `heading` / `paragraph` attributes as appropriate.
+
+## Accessibility
+
+- `Card` renders as a plain `<div>` with no implicit ARIA role. If the card represents a discrete item in a list (e.g., a grid of product cards), consider wrapping the list in a `<ul>` and each card in a `<li>`.
+- `CardTitle` renders as an `<h3>`. Ensure heading levels in your page hierarchy are sequential — if the surrounding section uses `<h2>`, `<h3>` is correct; adjust with `className` (`text-lg` etc.) rather than changing the tag for visual sizing.
+- When a card contains an image and a call-to-action button, use `aria-labelledby` on the card pointing to the `CardTitle` id if you want the card announced as a grouped unit by screen readers.
+- Avoid placing only non-descriptive labels like "Click here" inside `CardFooter` buttons — the button label should be self-explanatory out of context (e.g., "View Project Alpha" rather than "View more").
+- Interactive cards (the entire card is clickable) should render as a `<button>` or `<a>` element, not a `<div>` with an `onClick` handler, to ensure keyboard focusability and correct ARIA semantics.
 
 ## Live View
 
@@ -36,5 +455,4 @@ Here is a live contextual rendering of the component directly from our isolated 
 
 <StorybookPreview src="http://localhost:6006/iframe.html?id=data-display-card--default&viewMode=story" />
 
-> [!TIP]
-> [Open Component in Storybook ↗](http://localhost:6006/?path=/story/data-display-card--default)
+> [Open in Storybook ↗](https://designforge-storybook.vercel.app/?path=/story/data-display-card--default)

@@ -1,9 +1,9 @@
 ---
 title: "Banner"
-description: "Documentation for the Banner component."
+description: "Full-width notification banner for site-wide announcements, alerts, and system messages."
 ---
 
-The `Banner` component represents a fundamental UI building block within the DesignForge token system.
+`Banner` is a full-width notification strip that sits at the top of a page or section. It supports five semantic variants, an optional dismiss button, an optional left icon, and — when a `storageKey` is provided — persists the dismissed state to `localStorage` so users are not shown the same banner twice.
 
 ## Installation
 
@@ -18,17 +18,207 @@ import { Banner } from "@designforge/ui";
 
 export default function App() {
   return (
-    <Banner>Example Content</Banner>
+    <Banner>
+      DesignForge v1.0 is now available — 33 components, AI generator, and full dark mode.
+    </Banner>
   );
 }
 ```
 
-### Attributes
+## Examples
 
-| Prop      | Type      | Default       | Description                                                 |
-| :-------- | :-------- | :------------ | :---------------------------------------------------------- |
-| `className` | `string`  | `undefined`   | Merges all optional utility styles directly. |
+### All variants
 
+Each variant maps to a distinct semantic intent. Use `default` for general announcements, `info` for informational notices, `warning` for cautions, `destructive` for critical errors, and `success` for confirmations.
+
+```tsx
+import { Banner } from "@designforge/ui";
+import { Info, Megaphone, ShieldAlert, CheckCircle2 } from "lucide-react";
+
+export default function AllVariants() {
+  return (
+    <div className="flex flex-col gap-2">
+      <Banner variant="default" icon={<Megaphone className="h-4 w-4" />}>
+        DesignForge v1.0 is now available — 33 components, AI generator, and full dark mode.
+      </Banner>
+      <Banner variant="info" icon={<Info className="h-4 w-4" />}>
+        Scheduled maintenance on Sunday 2–4 AM UTC. Services may be briefly unavailable.
+      </Banner>
+      <Banner variant="warning">
+        Your free tier quota resets in 3 days. Upgrade for unlimited usage.
+      </Banner>
+      <Banner variant="destructive" icon={<ShieldAlert className="h-4 w-4" />}>
+        Critical security update required. Please update to v1.0.1 immediately.
+      </Banner>
+      <Banner variant="success" icon={<CheckCircle2 className="h-4 w-4" />}>
+        All systems operational. No incidents reported.
+      </Banner>
+    </div>
+  );
+}
+```
+
+### Non-dismissible
+
+Set `dismissible={false}` to remove the close button entirely. Useful for mandatory notices that users must acknowledge through another action.
+
+```tsx
+import { Banner } from "@designforge/ui";
+
+export default function NonDismissible() {
+  return (
+    <Banner dismissible={false} variant="warning">
+      You are viewing a preview environment. Data may be reset at any time.
+    </Banner>
+  );
+}
+```
+
+### With a call-to-action link
+
+Embed an anchor or any React node inside `children` to include inline CTAs.
+
+```tsx
+import { Banner } from "@designforge/ui";
+import { Zap } from "lucide-react";
+
+export default function WithCTA() {
+  return (
+    <Banner variant="info" icon={<Zap className="h-4 w-4" />}>
+      <span>
+        New AI generator features available.{" "}
+        <a
+          href="/docs/generator"
+          className="font-semibold underline underline-offset-2"
+        >
+          Learn more →
+        </a>
+      </span>
+    </Banner>
+  );
+}
+```
+
+### With long / rich content
+
+The banner's content area is `flex-1` so it wraps naturally at any viewport width. Inline `<code>` elements and other markup work inside `children`.
+
+```tsx
+import { Banner } from "@designforge/ui";
+
+export default function WithLongContent() {
+  return (
+    <Banner variant="warning">
+      We are deprecating the legacy{" "}
+      <code className="font-mono text-[0.8125rem]">@designforge/legacy</code> package.
+      All users must migrate to{" "}
+      <code className="font-mono text-[0.8125rem]">@designforge/ui</code> before
+      December 31, 2026. See the migration guide for step-by-step instructions.
+    </Banner>
+  );
+}
+```
+
+### Persist dismiss state with `storageKey`
+
+Pass a unique `storageKey` string and the component will write `banner-dismissed-<storageKey>` to `localStorage` on dismiss. Users who have already dismissed the banner will never see it re-render.
+
+```tsx
+import { Banner } from "@designforge/ui";
+import { Info } from "lucide-react";
+
+export default function PersistentBanner() {
+  return (
+    <Banner
+      variant="info"
+      storageKey="v1-release-announcement"
+      icon={<Info className="h-4 w-4" />}
+    >
+      DesignForge v1.0 is here! Check out the release notes.
+    </Banner>
+  );
+}
+```
+
+> Once dismissed, reload the page and the banner stays hidden. Clear `localStorage.removeItem("banner-dismissed-v1-release-announcement")` from DevTools to reset it.
+
+### Success confirmation banner
+
+Use `success` after a user completes a meaningful action like a form submission or a deployment.
+
+```tsx
+import { Banner } from "@designforge/ui";
+import { CheckCircle2 } from "lucide-react";
+
+export default function SuccessBanner() {
+  return (
+    <Banner
+      variant="success"
+      dismissible={true}
+      icon={<CheckCircle2 className="h-4 w-4" />}
+    >
+      Your changes have been saved successfully.
+    </Banner>
+  );
+}
+```
+
+### Controlled visibility
+
+Manage visibility externally when you need to re-show the banner programmatically (e.g., after a failed API call).
+
+```tsx
+import { useState } from "react";
+import { Banner } from "@designforge/ui";
+import { Button } from "@designforge/ui";
+import { ShieldAlert } from "lucide-react";
+
+export default function ControlledBanner() {
+  const [show, setShow] = useState(false);
+
+  return (
+    <div className="flex flex-col gap-4">
+      <Button variant="destructive" onClick={() => setShow(true)}>
+        Trigger error
+      </Button>
+      {show && (
+        <Banner
+          variant="destructive"
+          icon={<ShieldAlert className="h-4 w-4" />}
+          onKeyDown={(e) => e.key === "Escape" && setShow(false)}
+        >
+          Something went wrong. Please try again.
+        </Banner>
+      )}
+    </div>
+  );
+}
+```
+
+## API Reference
+
+### `<Banner>`
+
+Renders a `<div role="banner">` element. Accepts all standard HTML `div` attributes in addition to the props below.
+
+| Prop | Type | Default | Description |
+| :--- | :--- | :------ | :---------- |
+| `variant` | `"default" \| "info" \| "warning" \| "destructive" \| "success"` | `"default"` | Controls the background color and text color of the banner. |
+| `dismissible` | `boolean` | `true` | When `true`, renders a close button on the right. Set to `false` to make the banner permanent. |
+| `storageKey` | `string` | — | A unique string identifier. When provided, the dismissed state is persisted in `localStorage` under the key `banner-dismissed-<storageKey>`. The banner will not render on subsequent page loads if the user has already dismissed it. |
+| `icon` | `ReactNode` | — | An optional icon element rendered on the left side of the banner, before the content. Wrapped in `aria-hidden="true"` automatically. |
+| `className` | `string` | — | Additional CSS classes merged with default styles via `cn()`. |
+| `children` | `ReactNode` | — | Banner content — text, links, `<code>` elements, or any React nodes. |
+
+All other props (`id`, `style`, `aria-*`, `data-*`, event handlers, etc.) are forwarded to the root `<div>` element.
+
+## Accessibility
+
+- The root element renders with `role="banner"`, which maps to the HTML landmark for page-level branding and announcements. Only one `role="banner"` landmark should exist on a page — if you use `Banner` inside a modal or card, consider wrapping it in a `<div role="status">` instead.
+- The dismiss button includes `aria-label="Dismiss banner"` so screen reader users understand its purpose.
+- The icon element is wrapped with `aria-hidden="true"` to prevent it from being announced separately — the label text already conveys the meaning.
+- Banner text should be descriptive enough to be understood without color context. Do not rely solely on the variant color to communicate the urgency level.
+- For critical alerts (e.g., `destructive`), consider wrapping the content in an `<div role="alert">` or using `aria-live="assertive"` to ensure immediate announcement by screen readers when the banner appears dynamically.
 
 ## Live View
 
@@ -36,5 +226,4 @@ Here is a live contextual rendering of the component directly from our isolated 
 
 <StorybookPreview src="http://localhost:6006/iframe.html?id=feedback-banner--all-variants&viewMode=story" />
 
-> [!TIP]
-> [Open Component in Storybook ↗](http://localhost:6006/?path=/story/feedback-banner--all-variants)
+> [Open in Storybook ↗](https://designforge-storybook.vercel.app/?path=/story/feedback-banner--all-variants)
