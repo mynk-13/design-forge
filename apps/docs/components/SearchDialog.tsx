@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { SearchIcon } from "lucide-react";
-import { Button } from "@designforge/ui";
 
 interface SearchEntry {
   slug: string;
@@ -12,7 +11,8 @@ interface SearchEntry {
   href: string;
 }
 
-export function SearchButton() {
+/** Compact version renders an inline trigger button suited for the sidebar. */
+export function SearchButton({ compact }: { compact?: boolean }) {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -26,21 +26,39 @@ export function SearchButton() {
     return () => document.removeEventListener("keydown", down);
   }, []);
 
+  if (compact) {
+    return (
+      <>
+        <button
+          onClick={() => setOpen(true)}
+          aria-label="Search documentation"
+          className="flex w-full items-center gap-2 rounded-lg border border-[#E2E8F0] dark:border-[#2E2E2E] bg-white dark:bg-[#1A1A1A] px-3 py-2 text-sm text-[#8D8D8D] dark:text-[#6B6B6B] hover:border-[#C0C0C0] dark:hover:border-[#3E3E3E] transition-colors shadow-sm"
+        >
+          <SearchIcon className="h-3.5 w-3.5 shrink-0" />
+          <span className="flex-1 text-left">Search...</span>
+          <kbd className="hidden sm:flex items-center rounded border border-[#E2E8F0] dark:border-[#2E2E2E] bg-[#F9FAFB] dark:bg-[#252525] px-1.5 py-0.5 font-mono text-[10px] text-[#8D8D8D] dark:text-[#6B6B6B]">
+            /
+          </kbd>
+        </button>
+        {open && <SearchDialog onClose={() => setOpen(false)} />}
+      </>
+    );
+  }
+
+  // Original header search button (still used in mobile header if needed)
   return (
     <>
-      <Button
-        variant="outline"
-        className="relative h-8 w-full justify-start rounded-md text-sm text-muted-foreground sm:pr-12 md:w-40 lg:w-56"
+      <button
         onClick={() => setOpen(true)}
         aria-label="Search documentation"
+        className="flex items-center gap-2 rounded-lg border border-[#E2E8F0] dark:border-[#2E2E2E] bg-white dark:bg-[#1A1A1A] px-3 py-1.5 text-sm text-[#8D8D8D] dark:text-[#6B6B6B] hover:border-[#C0C0C0] dark:hover:border-[#3E3E3E] transition-colors"
       >
-        <SearchIcon className="mr-2 h-3.5 w-3.5" />
-        <span className="hidden lg:inline-flex">Search docs...</span>
-        <span className="inline-flex lg:hidden">Search...</span>
-        <kbd className="pointer-events-none absolute right-1.5 top-1.5 hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex">
+        <SearchIcon className="h-3.5 w-3.5" />
+        <span>Search docs...</span>
+        <kbd className="hidden sm:flex items-center rounded border border-[#E2E8F0] dark:border-[#2E2E2E] bg-[#F9FAFB] dark:bg-[#252525] px-1.5 py-0.5 font-mono text-[10px]">
           <span className="text-xs">⌘</span>K
         </kbd>
-      </Button>
+      </button>
       {open && <SearchDialog onClose={() => setOpen(false)} />}
     </>
   );
@@ -53,7 +71,6 @@ function SearchDialog({ onClose }: { onClose: () => void }) {
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Focus input on mount (replaces autoFocus which fails jsx-a11y)
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
@@ -112,28 +129,28 @@ function SearchDialog({ onClose }: { onClose: () => void }) {
     >
       {/* Backdrop */}
       <button
-        className="absolute inset-0 bg-background/80 backdrop-blur-sm w-full cursor-default"
+        className="absolute inset-0 bg-black/40 backdrop-blur-sm w-full cursor-default"
         onClick={onClose}
         aria-label="Close search"
         tabIndex={-1}
       />
 
       {/* Panel */}
-      <div className="relative z-10 w-full max-w-lg mx-4 rounded-xl border bg-popover shadow-2xl overflow-hidden">
+      <div className="relative z-10 w-full max-w-lg mx-4 rounded-xl border border-[#E2E8F0] dark:border-[#2E2E2E] bg-white dark:bg-[#1A1A1A] shadow-2xl overflow-hidden">
         {/* Input */}
-        <div className="flex items-center gap-3 border-b px-4 py-3">
-          <SearchIcon className="h-4 w-4 shrink-0 text-muted-foreground" />
+        <div className="flex items-center gap-3 border-b border-[#E2E8F0] dark:border-[#2E2E2E] px-4 py-3">
+          <SearchIcon className="h-4 w-4 shrink-0 text-[#8D8D8D]" />
           <input
             ref={inputRef}
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search documentation..."
-            className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+            className="flex-1 bg-transparent text-sm outline-none placeholder:text-[#8D8D8D] text-[#11181C] dark:text-[#EDEDED]"
             aria-label="Search query"
           />
           <kbd
-            className="hidden sm:flex items-center gap-1 rounded border bg-muted px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground"
+            className="hidden sm:flex items-center gap-1 rounded border border-[#E2E8F0] dark:border-[#2E2E2E] bg-[#F9FAFB] dark:bg-[#252525] px-1.5 py-0.5 font-mono text-[10px] text-[#8D8D8D]"
             aria-label="Press Escape to close"
           >
             ESC
@@ -143,24 +160,24 @@ function SearchDialog({ onClose }: { onClose: () => void }) {
         {/* Results */}
         <ul className="max-h-72 overflow-y-auto p-2" role="listbox">
           {results.length === 0 ? (
-            <li className="py-6 text-center text-sm text-muted-foreground">
+            <li className="py-6 text-center text-sm text-[#8D8D8D]">
               No results for &ldquo;{query}&rdquo;
             </li>
           ) : (
             results.map((entry, i) => (
               <li key={entry.slug} role="option" aria-selected={i === selected}>
                 <button
-                  className={`w-full text-left rounded-md px-3 py-2 text-sm transition-colors ${
+                  className={`w-full text-left rounded-lg px-3 py-2 text-sm transition-colors ${
                     i === selected
-                      ? "bg-accent text-accent-foreground"
-                      : "text-foreground hover:bg-accent/50"
+                      ? "bg-[#F0F7FF] dark:bg-[#0D2236] text-[#006ADC] dark:text-[#52A9FF]"
+                      : "text-[#11181C] dark:text-[#EDEDED] hover:bg-[#F9FAFB] dark:hover:bg-[#252525]"
                   }`}
                   onClick={() => navigate(entry.href)}
                   onMouseEnter={() => setSelected(i)}
                 >
                   <div className="font-medium">{entry.title}</div>
                   {entry.description && (
-                    <div className="mt-0.5 text-xs text-muted-foreground line-clamp-1">
+                    <div className="mt-0.5 text-xs text-[#60646C] dark:text-[#8D8D8D] line-clamp-1">
                       {entry.description}
                     </div>
                   )}
@@ -171,10 +188,10 @@ function SearchDialog({ onClose }: { onClose: () => void }) {
         </ul>
 
         {/* Footer */}
-        <div className="flex items-center gap-4 border-t px-4 py-2 text-xs text-muted-foreground">
-          <span className="flex items-center gap-1"><kbd className="rounded border bg-muted px-1">↑↓</kbd> navigate</span>
-          <span className="flex items-center gap-1"><kbd className="rounded border bg-muted px-1">↵</kbd> select</span>
-          <span className="flex items-center gap-1"><kbd className="rounded border bg-muted px-1">esc</kbd> close</span>
+        <div className="flex items-center gap-4 border-t border-[#E2E8F0] dark:border-[#2E2E2E] px-4 py-2 text-xs text-[#8D8D8D]">
+          <span className="flex items-center gap-1"><kbd className="rounded border border-[#E2E8F0] dark:border-[#2E2E2E] bg-[#F9FAFB] dark:bg-[#252525] px-1">↑↓</kbd> navigate</span>
+          <span className="flex items-center gap-1"><kbd className="rounded border border-[#E2E8F0] dark:border-[#2E2E2E] bg-[#F9FAFB] dark:bg-[#252525] px-1">↵</kbd> select</span>
+          <span className="flex items-center gap-1"><kbd className="rounded border border-[#E2E8F0] dark:border-[#2E2E2E] bg-[#F9FAFB] dark:bg-[#252525] px-1">esc</kbd> close</span>
         </div>
       </div>
     </div>

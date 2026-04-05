@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { SearchButton } from "./SearchDialog";
 
 const COMPONENTS = [
   "Accordion", "Alert", "AlertDialog", "AspectRatio", "Avatar", "Badge", 
@@ -12,74 +13,71 @@ const COMPONENTS = [
   "Tabs", "Textarea", "Toast", "Tooltip"
 ];
 
-export function DocsSidebar() {
+function SidebarLink({ href, label }: { href: string; label: string }) {
   const pathname = usePathname();
-
+  const isActive = pathname === href;
   return (
-    <div className="h-full overflow-y-auto py-6 pr-6 lg:py-8">
-      <div className="w-full">
-        <div className="pb-4">
-          <h4 className="mb-1 rounded-md px-2 py-1 text-sm font-semibold">Getting Started</h4>
-          <div className="grid grid-flow-row auto-rows-max text-sm gap-1">
-            <Link
-              href="/docs"
-              className={`flex w-full items-center rounded-md border border-transparent px-2 py-1 ${
-                pathname === "/docs" ? "bg-muted font-medium text-foreground" : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-              }`}
-            >
-              Introduction
-            </Link>
-            <Link
-              href="/docs/installation"
-              className={`flex w-full items-center rounded-md border border-transparent px-2 py-1 ${
-                pathname === "/docs/installation" ? "bg-muted font-medium text-foreground" : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-              }`}
-            >
-              Installation
-            </Link>
-          </div>
+    <Link
+      href={href}
+      className={`flex w-full items-center rounded-full px-3 py-1.5 text-sm transition-colors ${
+        isActive
+          ? "bg-[#006ADC] text-white font-medium dark:bg-[#0588F0] dark:text-white"
+          : "text-[#60646C] hover:text-[#11181C] dark:text-[#8D8D8D] dark:hover:text-[#EDEDED]"
+      }`}
+    >
+      {label}
+    </Link>
+  );
+}
+
+export function DocsSidebar() {
+  return (
+    <div className="flex flex-col gap-1">
+      {/* Search inside sidebar */}
+      <div className="mb-5">
+        <SearchButton compact />
+      </div>
+
+      {/* Getting Started */}
+      <div className="mb-5">
+        <p className="mb-1.5 px-3 text-xs font-bold uppercase tracking-wider text-[#11181C] dark:text-[#EDEDED]">
+          Getting Started
+        </p>
+        <div className="flex flex-col gap-0.5">
+          <SidebarLink href="/docs" label="Introduction" />
+          <SidebarLink href="/docs/installation" label="Installation" />
         </div>
-        <div className="pb-4">
-          <h4 className="mb-1 rounded-md px-2 py-1 text-sm font-semibold">Components</h4>
-          <div className="grid grid-flow-row auto-rows-max text-sm gap-1">
-            {COMPONENTS.sort().map((component) => {
-              const slug = component.toLowerCase();
-              const href = `/docs/${slug}`;
-              const isActive = pathname === href;
-              return (
-                <Link
-                  key={slug}
-                  href={href}
-                  className={`flex w-full items-center rounded-md border border-transparent px-2 py-1 ${
-                    isActive ? "bg-muted font-medium text-foreground" : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-                  }`}
-                >
-                  {component}
-                </Link>
-              );
-            })}
-          </div>
+      </div>
+
+      {/* Components */}
+      <div className="mb-5">
+        <p className="mb-1.5 px-3 text-xs font-bold uppercase tracking-wider text-[#11181C] dark:text-[#EDEDED]">
+          Components
+        </p>
+        <div className="flex flex-col gap-0.5">
+          {COMPONENTS.sort().map((component) => (
+            <SidebarLink
+              key={component}
+              href={`/docs/${component.toLowerCase()}`}
+              label={component}
+            />
+          ))}
         </div>
-        <div className="pb-4">
-          <h4 className="mb-1 rounded-md px-2 py-1 text-sm font-semibold">Ecosystem Tools</h4>
-          <div className="grid grid-flow-row auto-rows-max text-sm gap-1">
-            {["Generator", "Playground", "Storybook"].map((tool) => {
-              const slug = tool.toLowerCase();
-              const href = `/docs/${slug}`;
-              const isActive = pathname === href;
-              return (
-                <Link
-                  key={slug}
-                  href={href}
-                  className={`flex w-full items-center rounded-md border border-transparent px-2 py-1 ${
-                    isActive ? "bg-muted font-medium text-foreground" : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-                  }`}
-                >
-                  {tool}
-                </Link>
-              );
-            })}
-          </div>
+      </div>
+
+      {/* Ecosystem Tools */}
+      <div className="mb-5">
+        <p className="mb-1.5 px-3 text-xs font-bold uppercase tracking-wider text-[#11181C] dark:text-[#EDEDED]">
+          Ecosystem Tools
+        </p>
+        <div className="flex flex-col gap-0.5">
+          {["Generator", "Playground", "Storybook"].map((tool) => (
+            <SidebarLink
+              key={tool}
+              href={`/docs/${tool.toLowerCase()}`}
+              label={tool}
+            />
+          ))}
         </div>
       </div>
     </div>

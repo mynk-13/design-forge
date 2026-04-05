@@ -7,6 +7,7 @@
 
 .dark {
   --df-primary: 245 58% 65%;
+  --df-primary-foreground: 0 0% 100%;
   --df-secondary: 245 20% 20%;
   --df-secondary-foreground: 245 30% 80%;
   --df-background: 222 47% 11%;
@@ -15,14 +16,20 @@
   --df-card-foreground: 210 40% 98%;
   --df-popover: 222 47% 14%;
   --df-popover-foreground: 210 40% 98%;
-  --df-muted: 217 33% 17%;
+  --df-muted: 217 33% 20%;
   --df-muted-foreground: 215 20% 65%;
   --df-accent: 245 20% 20%;
   --df-accent-foreground: 245 30% 80%;
   --df-destructive: 0 72% 51%;
+  --df-destructive-foreground: 0 0% 100%;
   --df-success: 142 69% 58%;
-  --df-border: 217 33% 17%;
-  --df-input: 217 33% 17%;
+  --df-success-foreground: 0 0% 100%;
+  --df-warning: 38 92% 60%;
+  --df-warning-foreground: 0 0% 100%;
+  --df-info: 199 89% 62%;
+  --df-info-foreground: 0 0% 100%;
+  --df-border: 217 33% 27%;
+  --df-input: 217 33% 27%;
   --df-ring: 245 58% 65%;
 }
 
@@ -30,6 +37,7 @@
 @media (prefers-color-scheme: dark) {
   :root:not(.light) {
     --df-primary: 245 58% 65%;
+    --df-primary-foreground: 0 0% 100%;
     --df-secondary: 245 20% 20%;
     --df-secondary-foreground: 245 30% 80%;
     --df-background: 222 47% 11%;
@@ -38,14 +46,20 @@
     --df-card-foreground: 210 40% 98%;
     --df-popover: 222 47% 14%;
     --df-popover-foreground: 210 40% 98%;
-    --df-muted: 217 33% 17%;
+    --df-muted: 217 33% 20%;
     --df-muted-foreground: 215 20% 65%;
     --df-accent: 245 20% 20%;
     --df-accent-foreground: 245 30% 80%;
     --df-destructive: 0 72% 51%;
+    --df-destructive-foreground: 0 0% 100%;
     --df-success: 142 69% 58%;
-    --df-border: 217 33% 17%;
-    --df-input: 217 33% 17%;
+    --df-success-foreground: 0 0% 100%;
+    --df-warning: 38 92% 60%;
+    --df-warning-foreground: 0 0% 100%;
+    --df-info: 199 89% 62%;
+    --df-info-foreground: 0 0% 100%;
+    --df-border: 217 33% 27%;
+    --df-input: 217 33% 27%;
     --df-ring: 245 58% 65%;
   }
 }

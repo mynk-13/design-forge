@@ -4,3 +4,55 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ── Storybook Docs page dark mode ───────────────────────────────────────────
+   Storybook's docs view injects its own light-mode backgrounds on several
+   wrapper elements. These rules override them when .dark is on <html>.       */
+
+/* Docs page root & wrapper */
+.dark #storybook-docs,
+.dark .sbdocs-wrapper,
+.dark .sbdocs-content {
+  background-color: hsl(222 47% 11%) !important;
+  color: hsl(210 40% 98%) !important;
+}
+
+/* Story canvas within docs (each story preview block) */
+.dark .docs-story,
+.dark .story-block,
+.dark [class*="story-block"],
+.dark .docblock-preview {
+  background-color: hsl(222 47% 14%) !important;
+  border-color: hsl(217 33% 27%) !important;
+}
+
+/* Args/controls table */
+.dark .docblock-argstable,
+.dark .docblock-argstable-head,
+.dark .docblock-argstable-body,
+.dark .docblock-argstable tbody tr,
+.dark [class*="docblock-argstable"] {
+  background-color: hsl(222 47% 11%) !important;
+  color: hsl(210 40% 98%) !important;
+  border-color: hsl(217 33% 27%) !important;
+}
+.dark .docblock-argstable tbody tr:nth-child(even),
+.dark [class*="docblock-argstable"] tr:nth-child(even) {
+  background-color: hsl(222 47% 14%) !important;
+}
+.dark .docblock-argstable td,
+.dark .docblock-argstable th {
+  border-color: hsl(217 33% 27%) !important;
+  color: hsl(210 40% 98%) !important;
+}
+
+/* "Show code" source block */
+.dark .docblock-source {
+  background-color: hsl(222 47% 8%) !important;
+  border-color: hsl(217 33% 27%) !important;
+}
+
+/* Storybook toolbar bar in preview */
+.dark .os-scrollbar-track {
+  background: hsl(222 47% 11%) !important;
+}

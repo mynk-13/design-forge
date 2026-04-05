@@ -1,14 +1,42 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import { useTheme } from "next-themes";
 
-const STORYBOOK_BASE =
-  process.env.NEXT_PUBLIC_STORYBOOK_URL?.replace(/\/$/, "") ?? "http://localhost:6006";
+// In local development this is http://localhost:6006 (local Storybook server).
+// In production set NEXT_PUBLIC_STORYBOOK_URL on the hosting platform; if it is
+// not set the docs site falls back to the deployed Storybook so live previews
+// work without a local server.
+const IS_DEV = process.env.NODE_ENV === "development";
+const STORYBOOK_BASE = process.env.NEXT_PUBLIC_STORYBOOK_URL?.replace(/\/$/, "")
+  ?? (IS_DEV ? "http://localhost:6006" : "https://designforge-storybook.vercel.app");
 
-/** Rewrite localhost URLs to the deployed Storybook base in production. */
+/** Rewrite localhost URLs to the correct Storybook base for the current env. */
 function resolveStorybookSrc(src: string): string {
   return src.replace(/^https?:\/\/localhost:\d+/, STORYBOOK_BASE);
+}
+
+/**
+ * Append ?theme=<light|dark> and ?globals=theme:<light|dark> to the src so
+ * that preview.ts can apply the correct class BEFORE the first React render —
+ * eliminating the postMessage timing race that caused white backgrounds on
+ * navigation and return.
+ *
+ * Both params are set: ?theme= is read by the bootstrap block in preview.ts,
+ * ?globals= is consumed by Storybook's globalTypes system so the toolbar
+ * reflects the current selection when the iframe is opened standalone.
+ */
+function buildThemedSrc(src: string, theme: string): string {
+  try {
+    const url = new URL(src);
+    url.searchParams.set("theme", theme);
+    // Storybook globals format: key:value — the colon is preserved by
+    // URLSearchParams.get() when Storybook reads it, so this is safe.
+    url.searchParams.set("globals", `theme:${theme}`);
+    return url.toString();
+  } catch {
+    return src;
+  }
 }
 
 // ── Initial height estimates ──────────────────────────────────────────────────
@@ -65,10 +93,10 @@ interface StorybookPreviewProps {
  *
  * How it works:
  *  1. Renders with a reasonable initial height estimate immediately (no 0-height flash).
- *  2. When the Storybook iframe loads, sends it a REQUEST_HEIGHT message.
- *  3. Storybook's preview.ts responds with the real document.scrollHeight.
- *  4. This component resizes the iframe to fit the story content exactly.
- *  5. MutationObserver in preview.ts also re-fires on dialog opens, dropdowns, etc.
+ *  2. Theme is encoded in the iframe URL (?theme= & ?globals=) so preview.ts
+ *     applies the correct .dark class BEFORE the first story render.
+ *  3. postMessage THEME_CHANGE handles real-time toggle (no navigation needed).
+ *  4. MutationObserver in preview.ts also re-fires on dialog opens, dropdowns, etc.
  */
 export function StorybookPreview({
   src,
@@ -79,6 +107,15 @@ export function StorybookPreview({
   const [height, setHeight] = useState(() => getInitialHeight(resolvedSrc));
   const [errored, setErrored] = useState(false);
   const { resolvedTheme } = useTheme();
+
+  // Build a stable themed src. Including resolvedTheme in deps causes the
+  // iframe to reload when the user toggles dark/light — acceptable because
+  // the URL-encoded theme means the correct class is on <html> instantly,
+  // with no postMessage race. The height estimate is preserved across reloads.
+  const themedSrc = useMemo(
+    () => buildThemedSrc(resolvedSrc, resolvedTheme ?? "light"),
+    [resolvedSrc, resolvedTheme]
+  );
 
   useEffect(() => {
     // Listen for height reports from the Storybook preview iframe
@@ -119,7 +156,10 @@ export function StorybookPreview({
     };
   }, []);
 
-  // Sync docs site theme to the Storybook iframe
+  // Real-time theme sync via postMessage — covers the case where the user
+  // toggles dark/light mode and the iframe src hasn't changed (same component).
+  // When themedSrc changes (navigation or theme toggle), the iframe reloads and
+  // the URL-encoded theme handles it; postMessage is a belt-and-suspenders backup.
   useEffect(() => {
     const theme = resolvedTheme ?? "light";
     const sendTheme = () => {
@@ -149,7 +189,7 @@ export function StorybookPreview({
     <div className="not-prose my-6">
       <iframe
         ref={iframeRef}
-        src={resolvedSrc}
+        src={themedSrc}
         title={title}
         className="w-full rounded-lg border bg-background shadow-sm"
         style={{ height: `${height}px`, display: "block" }}
