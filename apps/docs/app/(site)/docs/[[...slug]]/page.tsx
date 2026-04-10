@@ -108,6 +108,16 @@ const components = {
     ),
   iframe: (props: any) => <StorybookPreview {...props} />,
   StorybookPreview: (props: any) => <StorybookPreview {...props} />,
+  a: ({ href, ...props }: any) => {
+    const storybookBase =
+      process.env.NEXT_PUBLIC_STORYBOOK_URL?.replace(/\/$/, "") ??
+      "https://designforge-storybook.vercel.app";
+    const resolvedHref =
+      typeof href === "string"
+        ? href.replace(/^https?:\/\/localhost:\d+/, storybookBase)
+        : href;
+    return <a href={resolvedHref} {...props} />;
+  },
   ...UI,
 };
 

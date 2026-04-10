@@ -17,6 +17,8 @@ export default defineConfig({
         "src/**/*.test.{ts,tsx}",
         "src/**/*.stories.{ts,tsx}",
         "src/test-setup.ts",
+        "src/index.ts",
+        "src/**/*.d.ts",
       ],
     },
   },

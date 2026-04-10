@@ -1,0 +1,35 @@
+{
+  "ci": {
+    "collect": {
+      "url": [
+        "http://localhost:3000",
+        "http://localhost:3000/docs/button",
+        "http://localhost:3000/docs/dialog",
+        "http://localhost:3000/docs/data-table"
+      ],
+      "startServerCommand": "pnpm --filter docs start",
+      "startServerReadyPattern": "started server",
+      "numberOfRuns": 2
+    },
+    "assert": {
+      "preset": "lighthouse:no-pwa",
+      "assertions": {
+        "categories:performance": ["warn", { "minScore": 0.95 }],
+        "categories:accessibility": ["error", { "minScore": 1.0 }],
+        "categories:best-practices": ["warn", { "minScore": 0.9 }],
+        "categories:seo": ["warn", { "minScore": 0.9 }]
+      },
+      "filterAuditResults": [
+        {
+          "id": "categories:performance",
+          "path": "/playground",
+          "operator": ">=",
+          "value": 0.8
+        }
+      ]
+    },
+    "upload": {
+      "target": "temporary-public-storage"
+    }
+  }
+}

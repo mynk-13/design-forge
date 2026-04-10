@@ -11,8 +11,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  ci:
-    name: Lint · Type-check · Build
+  lint-typecheck:
+    name: Lint · Type-check
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -20,7 +20,6 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        # Version read from packageManager field in root package.json
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -37,5 +36,172 @@ jobs:
       - name: Type-check
         run: pnpm turbo run type-check
 
-      - name: Build
+  unit-tests:
+    name: Unit Tests · Coverage
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build packages
+        run: pnpm turbo run build --filter=@designforge/ui --filter=@designforge/hooks --filter=@designforge/themes
+
+      - name: Run unit tests with coverage
+        run: |
+          cd packages/ui && pnpm test:coverage
+          cd ../../packages/hooks && pnpm test:coverage
+
+      - name: Upload coverage reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-reports
+          path: |
+            packages/ui/coverage/
+            packages/hooks/coverage/
+          retention-days: 7
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build all packages and apps
         run: pnpm turbo run build
+
+      - name: Cache docs build
+        uses: actions/cache/save@v4
+        with:
+          path: apps/docs/.next
+          key: docs-build-${{ github.sha }}
+
+  bundle-size:
+    name: Bundle Size Check
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build @designforge/ui
+        run: pnpm turbo run build --filter=@designforge/ui
+
+      - name: Check bundle size
+        id: bundle
+        run: |
+          UI_SIZE=$(gzip -c packages/ui/dist/index.js | wc -c)
+          UI_SIZE_KB=$((UI_SIZE / 1024))
+          echo "ui_size_kb=${UI_SIZE_KB}" >> $GITHUB_OUTPUT
+          echo "## Bundle Size Report" >> $GITHUB_STEP_SUMMARY
+          echo "| Package | Gzipped |" >> $GITHUB_STEP_SUMMARY
+          echo "|---------|---------|" >> $GITHUB_STEP_SUMMARY
+          echo "| @designforge/ui | ${UI_SIZE_KB} KB |" >> $GITHUB_STEP_SUMMARY
+          if [ $UI_SIZE_KB -gt 100 ]; then
+            echo "❌ @designforge/ui exceeds 100 KB gzipped limit (${UI_SIZE_KB} KB)" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          else
+            echo "✅ @designforge/ui is within budget (${UI_SIZE_KB} KB / 100 KB)" >> $GITHUB_STEP_SUMMARY
+          fi
+
+  e2e-tests:
+    name: E2E Tests
+    needs: build
+    runs-on: ubuntu-latest
+    env:
+      PLAYWRIGHT_TEST_BASE_URL: ${{ secrets.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:3000' }}
+      NEXT_PUBLIC_STORYBOOK_URL: ${{ secrets.NEXT_PUBLIC_STORYBOOK_URL || '' }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Restore docs build cache
+        uses: actions/cache/restore@v4
+        with:
+          path: apps/docs/.next
+          key: docs-build-${{ github.sha }}
+
+      - name: Build packages (if cache miss)
+        run: pnpm turbo run build --filter=@designforge/ui --filter=@designforge/themes --filter=@designforge/hooks --filter=@designforge/icons --filter=@designforge/ai
+
+      - name: Build docs app (if cache miss)
+        run: pnpm turbo run build --filter=docs
+
+      - name: Install Playwright browsers
+        run: npx playwright install chromium --with-deps
+
+      - name: Start docs server and run E2E tests
+        run: |
+          pnpm --filter docs start &
+          SERVER_PID=$!
+          npx wait-on http://localhost:3000 --timeout 60000
+          PLAYWRIGHT_TEST_BASE_URL=http://localhost:3000 npx playwright test --project=chromium
+          kill $SERVER_PID
+
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
+      - name: Upload visual regression snapshots
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-snapshots
+          path: e2e/snapshots/
+          retention-days: 30

@@ -38,7 +38,7 @@ export default function MarketingPage() {
               Playground
             </Button>
           </Link>
-          <a href="http://localhost:6006" target="_blank" rel="noreferrer">
+          <a href={process.env.NEXT_PUBLIC_STORYBOOK_URL ?? "https://designforge-storybook.vercel.app"} target="_blank" rel="noreferrer">
             <Button size="lg" variant="ghost" className="h-12 px-8 gap-2 w-full sm:w-auto border border-dashed">
               <SparklesIcon className="h-4 w-4 text-[#ff4785]" />
               Storybook
