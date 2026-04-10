@@ -1,3 +1,4 @@
+import React from "react";
 import { notFound } from "next/navigation";
 import { getDocBySlug, getAllDocs } from "../../../../lib/docs";
 import { MDXRemote } from "next-mdx-remote/rsc";
@@ -108,7 +109,7 @@ const components = {
     ),
   iframe: (props: any) => <StorybookPreview {...props} />,
   StorybookPreview: (props: any) => <StorybookPreview {...props} />,
-  a: ({ href, ...props }: any) => {
+  a: ({ href, children, ...props }: { href?: string; children?: React.ReactNode; [key: string]: unknown }) => {
     const storybookBase =
       process.env.NEXT_PUBLIC_STORYBOOK_URL?.replace(/\/$/, "") ??
       "https://designforge-storybook.vercel.app";
@@ -116,7 +117,7 @@ const components = {
       typeof href === "string"
         ? href.replace(/^https?:\/\/localhost:\d+/, storybookBase)
         : href;
-    return <a href={resolvedHref} {...props} />;
+    return <a href={resolvedHref} {...props}>{children}</a>;
   },
   ...UI,
 };
