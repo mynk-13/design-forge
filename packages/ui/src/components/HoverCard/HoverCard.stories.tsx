@@ -146,7 +146,7 @@ export const Positions: Story = {
         <HoverCard key={side}>
           <HoverCardTrigger asChild>
             <a
-              href="#"
+              href="/docs"
               style={{
                 fontWeight: 500,
                 color: "hsl(var(--df-primary))",

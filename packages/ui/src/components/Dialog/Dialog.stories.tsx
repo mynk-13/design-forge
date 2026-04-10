@@ -86,9 +86,9 @@ export const WithForm: Story = {
           <Input label="Project name" placeholder="My awesome project" />
           <Input label="Repository URL" placeholder="https://github.com/…" type="url" />
           <div style={{ display: "flex", flexDirection: "column", gap: "0.375rem" }}>
-            <label style={{ fontSize: "0.875rem", fontWeight: 500 }}>Visibility</label>
+            <label htmlFor="visibility-select" style={{ fontSize: "0.875rem", fontWeight: 500 }}>Visibility</label>
             <Select defaultValue="private">
-              <SelectTrigger>
+              <SelectTrigger id="visibility-select">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>

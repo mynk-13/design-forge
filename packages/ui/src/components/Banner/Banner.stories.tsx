@@ -68,7 +68,7 @@ export const WithCTA: Story = {
       <span>
         New AI generator features available.{" "}
         <a
-          href="#"
+          href="/docs"
           style={{
             fontWeight: 600,
             textDecoration: "underline",
