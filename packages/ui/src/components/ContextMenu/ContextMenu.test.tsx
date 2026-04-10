@@ -43,7 +43,7 @@ describe("ContextMenu", () => {
 
   it("renders ContextMenuLabel", () => {
     const { container } = render(
-      <ContextMenu open>
+      <ContextMenu modal={false}>
         <ContextMenuTrigger><div>Area</div></ContextMenuTrigger>
         <ContextMenuContent>
           <ContextMenuLabel>Section Label</ContextMenuLabel>
@@ -56,7 +56,7 @@ describe("ContextMenu", () => {
 
   it("renders ContextMenuSeparator", () => {
     const { container } = render(
-      <ContextMenu open>
+      <ContextMenu modal={false}>
         <ContextMenuTrigger><div>Area</div></ContextMenuTrigger>
         <ContextMenuContent>
           <ContextMenuItem>Cut</ContextMenuItem>
@@ -78,7 +78,7 @@ describe("ContextMenu", () => {
 
   it("renders ContextMenuGroup", () => {
     const { container } = render(
-      <ContextMenu open>
+      <ContextMenu modal={false}>
         <ContextMenuTrigger><div>Area</div></ContextMenuTrigger>
         <ContextMenuContent>
           <ContextMenuGroup>
@@ -93,7 +93,7 @@ describe("ContextMenu", () => {
 
   it("renders ContextMenuCheckboxItem", () => {
     const { container } = render(
-      <ContextMenu open>
+      <ContextMenu modal={false}>
         <ContextMenuTrigger><div>Area</div></ContextMenuTrigger>
         <ContextMenuContent>
           <ContextMenuCheckboxItem checked>Show toolbar</ContextMenuCheckboxItem>
@@ -105,7 +105,7 @@ describe("ContextMenu", () => {
 
   it("renders ContextMenuRadioGroup with ContextMenuRadioItem", () => {
     const { container } = render(
-      <ContextMenu open>
+      <ContextMenu modal={false}>
         <ContextMenuTrigger><div>Area</div></ContextMenuTrigger>
         <ContextMenuContent>
           <ContextMenuRadioGroup value="pedro">
@@ -120,7 +120,7 @@ describe("ContextMenu", () => {
 
   it("renders ContextMenuSub with SubTrigger and SubContent", () => {
     const { container } = render(
-      <ContextMenu open>
+      <ContextMenu modal={false}>
         <ContextMenuTrigger><div>Area</div></ContextMenuTrigger>
         <ContextMenuContent>
           <ContextMenuSub>
@@ -137,7 +137,7 @@ describe("ContextMenu", () => {
 
   it("renders ContextMenuSubTrigger with inset", () => {
     const { container } = render(
-      <ContextMenu open>
+      <ContextMenu modal={false}>
         <ContextMenuTrigger><div>Area</div></ContextMenuTrigger>
         <ContextMenuContent>
           <ContextMenuSub>
@@ -154,7 +154,7 @@ describe("ContextMenu", () => {
 
   it("renders ContextMenuItem with inset", () => {
     const { container } = render(
-      <ContextMenu open>
+      <ContextMenu modal={false}>
         <ContextMenuTrigger><div>Area</div></ContextMenuTrigger>
         <ContextMenuContent>
           <ContextMenuItem inset>Inset item</ContextMenuItem>
