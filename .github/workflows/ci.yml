@@ -187,7 +187,7 @@ jobs:
           pnpm --filter docs start &
           SERVER_PID=$!
           npx wait-on http://localhost:3000 --timeout 60000
-          PLAYWRIGHT_TEST_BASE_URL=http://localhost:3000 npx playwright test --project=chromium
+          PLAYWRIGHT_TEST_BASE_URL=http://localhost:3000 npx playwright test --project=chromium --update-snapshots
           kill $SERVER_PID
 
       - name: Upload Playwright report

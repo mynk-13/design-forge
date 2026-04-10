@@ -58,7 +58,7 @@ export function DocsSidebar() {
           {COMPONENTS.sort().map((component) => (
             <SidebarLink
               key={component}
-              href={`/docs/${component.toLowerCase()}`}
+              href={`/docs/${component === "DataTable" ? "data-table" : component.toLowerCase()}`}
               label={component}
             />
           ))}

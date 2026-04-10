@@ -75,7 +75,7 @@ if (typeof window !== "undefined") {
 // Reads globals.theme (driven by the toolbar toggle or the ?globals= URL param
 // that StorybookPreview.tsx appends to every iframe src) and keeps the <html>
 // class in sync across story switches — no JSX / .tsx rename needed.
-const withTheme: Decorator = (Story, context) => {
+const WithTheme: Decorator = (Story, context) => {
   const isDark = (context.globals?.theme ?? "light") === "dark";
   useEffect(() => {
     applyTheme(isDark);
@@ -101,7 +101,7 @@ const preview: Preview = {
       },
     },
   },
-  decorators: [withTheme],
+  decorators: [WithTheme],
   parameters: {
     controls: {
       matchers: {

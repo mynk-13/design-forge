@@ -7,8 +7,6 @@
         "http://localhost:3000/docs/dialog",
         "http://localhost:3000/docs/data-table"
       ],
-      "startServerCommand": "pnpm --filter docs start",
-      "startServerReadyPattern": "started server",
       "numberOfRuns": 2
     },
     "assert": {

@@ -106,7 +106,7 @@ export function MobileSidebar() {
                   {COMPONENTS.sort().map((component) => (
                     <MobileNavLink
                       key={component}
-                      href={`/docs/${component.toLowerCase()}`}
+                      href={`/docs/${component === "DataTable" ? "data-table" : component.toLowerCase()}`}
                       label={component}
                       onClick={close}
                     />

@@ -138,7 +138,7 @@ export function PlaygroundClient() {
             }}>
             <ShareIcon className="h-4 w-4" /> Share URL
           </Button>
-          <Button variant="ghost" size="icon" className="h-8 w-8 cursor-pointer" onClick={() => store.setTheme(store.theme === "dark" ? "light" : "dark")}>
+          <Button variant="ghost" size="icon" className="h-8 w-8 cursor-pointer" aria-label={store.theme === "dark" ? "Switch to light mode" : "Switch to dark mode"} onClick={() => store.setTheme(store.theme === "dark" ? "light" : "dark")}>
             {store.theme === "dark" ? <SunIcon className="h-4 w-4" /> : <MoonIcon className="h-4 w-4" />}
           </Button>
         </div>
@@ -187,7 +187,7 @@ export function PlaygroundClient() {
                 <span className="text-sm font-medium">Console ({store.consoleEntries.length})</span>
               </div>
               <div className="flex items-center gap-1">
-                 <Button variant="ghost" size="icon" className="h-6 w-6 z-10" onClick={(e) => { e.stopPropagation(); store.clearConsole(); }}>
+                 <Button variant="ghost" size="icon" className="h-6 w-6 z-10" aria-label="Clear console" onClick={(e) => { e.stopPropagation(); store.clearConsole(); }}>
                    <TrashIcon className="h-3 w-3" />
                  </Button>
               </div>
