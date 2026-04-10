@@ -25,6 +25,7 @@ export default [
       "**/.turbo/**",
       "**/coverage/**",
       "**/next-env.d.ts",
+      "apps/docs/public/vendor/**",
     ],
   },
 ];

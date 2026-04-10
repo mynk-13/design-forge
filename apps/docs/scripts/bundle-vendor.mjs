@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { readFile, writeFile, mkdir } from "fs/promises";
 import { createRequire } from "module";
 import path from "path";

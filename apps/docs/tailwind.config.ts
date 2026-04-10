@@ -1,4 +1,5 @@
 import { tailwindPlugin } from "@designforge/themes";
+import typography from "@tailwindcss/typography";
 import type { Config } from "tailwindcss";
 
 const config: Config = {
@@ -15,7 +16,7 @@ const config: Config = {
       // by the @designforge/themes tailwindPlugin below.
     },
   },
-  plugins: [tailwindPlugin, require("@tailwindcss/typography")],
+  plugins: [tailwindPlugin, typography],
 };
 
 export default config;
