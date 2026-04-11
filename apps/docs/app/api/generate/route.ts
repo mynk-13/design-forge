@@ -10,6 +10,7 @@ import {
 } from "@designforge/ai";
 import { streamText } from "ai";
 import { type NextRequest, NextResponse } from "next/server";
+import { corsHeaders, handlePreflight } from "../../../lib/cors";
 
 export const runtime = "edge";
 
@@ -68,15 +69,38 @@ interface GenerateRequest {
   messages?: Array<{ role: "user" | "assistant"; content: string }>;
 }
 
+const VALID_ROLES = new Set(["user", "assistant"]);
+const MAX_BODY_BYTES = 50_000; // 50 KB hard cap before JSON.parse
+const MAX_MESSAGES = 40; // 20 conversation pairs
+const MAX_MESSAGE_CONTENT = 4_000; // per-message character cap
+
+// ─── CORS preflight ───────────────────────────────────────────────────────────
+export function OPTIONS(req: NextRequest) {
+  return handlePreflight(req, "POST, OPTIONS") ?? new Response(null, { status: 204 });
+}
+
 // ─── Route handler ────────────────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
-  // 1. Extract IP for rate limiting
+  const cors = corsHeaders("POST, OPTIONS");
+
+  // 1. Reject oversized bodies before JSON.parse (prevents memory exhaustion)
+  const contentLength = Number(req.headers.get("content-length") ?? "0");
+  if (contentLength > MAX_BODY_BYTES) {
+    return NextResponse.json(
+      { error: "PAYLOAD_TOO_LARGE", message: "Request body exceeds 50 KB limit." },
+      { status: 413, headers: cors },
+    );
+  }
+
+  // 2. Extract IP for rate limiting
+  // Take the last (rightmost) x-forwarded-for entry to avoid spoofed prepended IPs.
+  const forwardedFor = req.headers.get("x-forwarded-for");
   const ip =
-    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+    (forwardedFor ? forwardedFor.split(",").at(-1)?.trim() : undefined) ??
     req.headers.get("x-real-ip") ??
     "unknown";
 
-  // 2. Rate limit check
+  // 3. Rate limit check
   const { allowed, remaining, resetAt } = checkRateLimit(ip);
   const rlHeaders = {
     "X-RateLimit-Limit": String(RATE_LIMIT_MAX),
@@ -87,18 +111,18 @@ export async function POST(req: NextRequest) {
   if (!allowed) {
     return NextResponse.json(
       { error: "RATE_LIMIT_EXCEEDED", message: "Too many requests. Try again later." },
-      { status: 429, headers: rlHeaders },
+      { status: 429, headers: { ...rlHeaders, ...cors } },
     );
   }
 
-  // 3. Parse + validate body
+  // 4. Parse + validate body
   let body: GenerateRequest;
   try {
     body = (await req.json()) as GenerateRequest;
   } catch {
     return NextResponse.json(
       { error: "INVALID_REQUEST", message: "Request body must be valid JSON." },
-      { status: 400, headers: rlHeaders },
+      { status: 400, headers: { ...rlHeaders, ...cors } },
     );
   }
 
@@ -106,7 +130,7 @@ export async function POST(req: NextRequest) {
   if (!prompt) {
     return NextResponse.json(
       { error: "EMPTY_PROMPT", message: "Prompt cannot be empty." },
-      { status: 400, headers: rlHeaders },
+      { status: 400, headers: { ...rlHeaders, ...cors } },
     );
   }
   if (prompt.length > MAX_PROMPT_LENGTH) {
@@ -115,18 +139,61 @@ export async function POST(req: NextRequest) {
         error: "PROMPT_TOO_LONG",
         message: `Prompt must be ${MAX_PROMPT_LENGTH} characters or fewer.`,
       },
-      { status: 400, headers: rlHeaders },
+      { status: 400, headers: { ...rlHeaders, ...cors } },
     );
   }
 
-  // 4. Build system prompt
+  // Validate messages array — runtime check prevents prompt injection via spoofed roles
+  if (body.messages !== undefined) {
+    if (!Array.isArray(body.messages)) {
+      return NextResponse.json(
+        { error: "INVALID_REQUEST", message: "messages must be an array." },
+        { status: 400, headers: { ...rlHeaders, ...cors } },
+      );
+    }
+    if (body.messages.length > MAX_MESSAGES) {
+      return NextResponse.json(
+        { error: "INVALID_REQUEST", message: `messages array exceeds ${MAX_MESSAGES} entry limit.` },
+        { status: 400, headers: { ...rlHeaders, ...cors } },
+      );
+    }
+    for (const msg of body.messages) {
+      if (typeof msg !== "object" || msg === null || Array.isArray(msg)) {
+        return NextResponse.json(
+          { error: "INVALID_REQUEST", message: "Each message must be an object." },
+          { status: 400, headers: { ...rlHeaders, ...cors } },
+        );
+      }
+      if (!VALID_ROLES.has((msg as Record<string, unknown>).role as string)) {
+        return NextResponse.json(
+          { error: "INVALID_REQUEST", message: 'Message role must be "user" or "assistant".' },
+          { status: 400, headers: { ...rlHeaders, ...cors } },
+        );
+      }
+      const content = (msg as Record<string, unknown>).content;
+      if (typeof content !== "string") {
+        return NextResponse.json(
+          { error: "INVALID_REQUEST", message: "Message content must be a string." },
+          { status: 400, headers: { ...rlHeaders, ...cors } },
+        );
+      }
+      if (content.length > MAX_MESSAGE_CONTENT) {
+        return NextResponse.json(
+          { error: "INVALID_REQUEST", message: `Message content exceeds ${MAX_MESSAGE_CONTENT} character limit.` },
+          { status: 400, headers: { ...rlHeaders, ...cors } },
+        );
+      }
+    }
+  }
+
+  // 5. Build system prompt
   const pb = new PromptBuilder();
   const systemPrompt = pb.build();
 
-  // 5. Assemble conversation history (max 10 pairs — FIFO truncation, FR-AI-012)
+  // 6. Assemble conversation history (max 10 pairs — FIFO truncation, FR-AI-012)
   const history = (body.messages ?? []).slice(-20); // 10 pairs × 2
 
-  // 6. Attempt provider chain with 30s timeout (ADR-003)
+  // 7. Attempt provider chain with 30s timeout (ADR-003)
   const providers = [
     process.env["AI_PROVIDER_PRIMARY"] ?? "anthropic",
     process.env["AI_PROVIDER_FALLBACK"] ?? "openai",
@@ -157,12 +224,13 @@ export async function POST(req: NextRequest) {
         onFinish: () => clearTimeout(timeout),
       });
 
-      // Return streaming SSE response with rate-limit headers
+      // Return streaming SSE response — debug headers only in development
+      const isDev = process.env.NODE_ENV !== "production";
       return result.toTextStreamResponse({
         headers: {
           ...rlHeaders,
-          "X-Provider": provider,
-          "X-Prompt-Version": pb.getVersion(),
+          ...cors,
+          ...(isDev && { "X-Provider": provider, "X-Prompt-Version": pb.getVersion() }),
         },
       });
     } catch (err) {
@@ -175,7 +243,7 @@ export async function POST(req: NextRequest) {
         // Non-retryable error (e.g. auth) — fail fast
         return NextResponse.json(
           { error: "GENERATION_FAILED", message: "Generation failed." },
-          { status: 500, headers: rlHeaders },
+          { status: 500, headers: { ...rlHeaders, ...cors } },
         );
       }
       // Continue to next provider
@@ -185,6 +253,6 @@ export async function POST(req: NextRequest) {
   // All providers failed or no keys configured
   return NextResponse.json(
     { error: "GENERATION_FAILED", message: "All providers failed. Please try again." },
-    { status: 500, headers: rlHeaders },
+    { status: 500, headers: { ...rlHeaders, ...cors } },
   );
 }

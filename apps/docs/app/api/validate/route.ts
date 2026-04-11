@@ -1,7 +1,10 @@
 import { type NextRequest, NextResponse } from "next/server";
+import { corsHeaders, handlePreflight } from "../../../lib/cors";
 
 // Node.js runtime — ESLint requires Node APIs (fs, path) (ADR, LLD §17.3)
 export const runtime = "nodejs";
+
+const MAX_VALIDATE_BODY_BYTES = 100_000; // 100 KB — code payloads can be larger than prompts
 
 interface ValidateRequest {
   code: string;
@@ -21,14 +24,28 @@ interface ValidateResponse {
   summary: string;
 }
 
+export function OPTIONS(req: NextRequest) {
+  return handlePreflight(req, "POST, OPTIONS") ?? new Response(null, { status: 204 });
+}
+
 export async function POST(req: NextRequest): Promise<NextResponse<ValidateResponse>> {
+  const cors = corsHeaders("POST, OPTIONS");
+
+  const contentLength = Number(req.headers.get("content-length") ?? "0");
+  if (contentLength > MAX_VALIDATE_BODY_BYTES) {
+    return NextResponse.json(
+      { errors: [], warnings: [], summary: "Request body exceeds 100 KB limit." },
+      { status: 413, headers: cors },
+    );
+  }
+
   let body: ValidateRequest;
   try {
     body = (await req.json()) as ValidateRequest;
   } catch {
     return NextResponse.json(
       { errors: [], warnings: [], summary: "Invalid request body." },
-      { status: 400 },
+      { status: 400, headers: cors },
     );
   }
 
@@ -36,7 +53,7 @@ export async function POST(req: NextRequest): Promise<NextResponse<ValidateRespo
   if (!code) {
     return NextResponse.json(
       { errors: [], warnings: [], summary: "No code provided." },
-      { status: 400 },
+      { status: 400, headers: cors },
     );
   }
 
@@ -95,12 +112,12 @@ export async function POST(req: NextRequest): Promise<NextResponse<ValidateRespo
         ? "No ESLint issues found."
         : `${errors.length} error(s), ${warnings.length} warning(s).`;
 
-    return NextResponse.json({ errors, warnings, summary });
+    return NextResponse.json({ errors, warnings, summary }, { headers: cors });
   } catch (err) {
     const message = err instanceof Error ? err.message : "ESLint validation failed.";
     return NextResponse.json(
       { errors: [], warnings: [], summary: `Validation error: ${message}` },
-      { status: 500 },
+      { status: 500, headers: cors },
     );
   }
 }
