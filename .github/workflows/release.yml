@@ -1,0 +1,114 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+permissions:
+  contents: write
+  pull-requests: write
+  id-token: write # Required for npm provenance (SLSA Level 2)
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build publishable packages
+        run: pnpm turbo run build --filter=@designforge/ui --filter=@designforge/themes --filter=@designforge/hooks --filter=@designforge/icons --filter=@designforge/ai
+
+      - name: Create Release PR or Publish to npm
+        id: changesets
+        uses: changesets/action@v1
+        with:
+          publish: pnpm release
+          title: "chore: version packages"
+          commit: "chore: version packages"
+          createGithubReleases: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Trigger Vercel Docs production redeploy
+        if: steps.changesets.outputs.published == 'true'
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_DOCS }}
+        run: |
+          if [ -z "$VERCEL_TOKEN" ]; then
+            echo "VERCEL_TOKEN not configured — skipping docs redeploy"
+            exit 0
+          fi
+          DEPLOY_UID=$(curl -s \
+            "https://api.vercel.com/v6/deployments?projectId=${VERCEL_PROJECT_ID}&teamId=${VERCEL_ORG_ID}&target=production&limit=1&state=READY" \
+            -H "Authorization: Bearer ${VERCEL_TOKEN}" | \
+            python3 -c "import sys,json; d=json.load(sys.stdin).get('deployments',[]); print(d[0]['uid'] if d else '')" 2>/dev/null)
+          if [ -n "$DEPLOY_UID" ]; then
+            curl -s -X POST "https://api.vercel.com/v13/deployments" \
+              -H "Authorization: Bearer ${VERCEL_TOKEN}" \
+              -H "Content-Type: application/json" \
+              -d "{\"deploymentId\":\"${DEPLOY_UID}\",\"target\":\"production\",\"teamId\":\"${VERCEL_ORG_ID}\"}"
+            echo "Docs redeployment triggered (${DEPLOY_UID})"
+          else
+            echo "No existing production deployment found — skipping"
+          fi
+
+      - name: Trigger Vercel Storybook production redeploy
+        if: steps.changesets.outputs.published == 'true'
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_STORYBOOK }}
+        run: |
+          if [ -z "$VERCEL_TOKEN" ]; then
+            echo "VERCEL_TOKEN not configured — skipping storybook redeploy"
+            exit 0
+          fi
+          DEPLOY_UID=$(curl -s \
+            "https://api.vercel.com/v6/deployments?projectId=${VERCEL_PROJECT_ID}&teamId=${VERCEL_ORG_ID}&target=production&limit=1&state=READY" \
+            -H "Authorization: Bearer ${VERCEL_TOKEN}" | \
+            python3 -c "import sys,json; d=json.load(sys.stdin).get('deployments',[]); print(d[0]['uid'] if d else '')" 2>/dev/null)
+          if [ -n "$DEPLOY_UID" ]; then
+            curl -s -X POST "https://api.vercel.com/v13/deployments" \
+              -H "Authorization: Bearer ${VERCEL_TOKEN}" \
+              -H "Content-Type: application/json" \
+              -d "{\"deploymentId\":\"${DEPLOY_UID}\",\"target\":\"production\",\"teamId\":\"${VERCEL_ORG_ID}\"}"
+            echo "Storybook redeployment triggered (${DEPLOY_UID})"
+          else
+            echo "No existing production deployment found — skipping"
+          fi
+
+      - name: Publish summary
+        if: steps.changesets.outputs.published == 'true'
+        run: |
+          echo "## Published Packages" >> $GITHUB_STEP_SUMMARY
+          echo '${{ steps.changesets.outputs.publishedPackages }}' | \
+            python3 -c "
+          import sys, json
+          pkgs = json.load(sys.stdin)
+          for p in pkgs:
+              print(f'| {p[\"name\"]} | {p[\"version\"]} |')
+          " >> $GITHUB_STEP_SUMMARY || true
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "_Published with npm provenance (SLSA Level 2)_" >> $GITHUB_STEP_SUMMARY

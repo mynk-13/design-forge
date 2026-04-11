@@ -46,9 +46,79 @@ jobs:
         run: npx wait-on http://localhost:3000 --timeout 60000
 
       - name: Run Lighthouse CI
+        id: lhci
         run: lhci autorun
+        continue-on-error: true
         env:
           LHCI_GITHUB_APP_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check for score regression and alert
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          LHCI_EXIT_CODE: ${{ steps.lhci.outcome }}
+        run: |
+          # Parse lhci results and check for regressions below alert threshold (target - 5 points)
+          RESULTS_DIR=".lighthouseci"
+          ALERT_THRESHOLD=85  # 90 target - 5 point drop = alert at 85
+
+          if [ ! -d "$RESULTS_DIR" ]; then
+            echo "No Lighthouse results found, skipping regression check"
+            exit 0
+          fi
+
+          RESULT_FILE=$(ls "$RESULTS_DIR"/*.json 2>/dev/null | head -1)
+          if [ -z "$RESULT_FILE" ]; then
+            echo "No JSON results found in $RESULTS_DIR"
+            exit 0
+          fi
+
+          REGRESSION=$(python3 - <<'PYEOF'
+          import json, os, glob, sys
+
+          results_dir = ".lighthouseci"
+          threshold = 85  # 90% target - 5 point drop
+
+          json_files = glob.glob(f"{results_dir}/lhr-*.json")
+          if not json_files:
+              print("NONE")
+              sys.exit(0)
+
+          issues = []
+          for fpath in json_files:
+              with open(fpath) as f:
+                  lhr = json.load(f)
+              url = lhr.get("finalUrl", lhr.get("requestedUrl", "unknown"))
+              cats = lhr.get("categories", {})
+              for cat_id, cat in cats.items():
+                  score = round((cat.get("score") or 0) * 100)
+                  if score < threshold:
+                      issues.append(f"- **{cat.get('title','?')}** scored **{score}** on `{url}` (threshold: {threshold})")
+
+          if issues:
+              print("REGRESSION\n" + "\n".join(issues))
+          else:
+              print("NONE")
+          PYEOF
+          )
+
+          if echo "$REGRESSION" | grep -q "^REGRESSION"; then
+            ISSUE_BODY=$(echo "$REGRESSION" | tail -n +2)
+            EXISTING=$(gh issue list --label "lighthouse" --state open --json number --jq '.[0].number' 2>/dev/null)
+            if [ -n "$EXISTING" ]; then
+              gh issue comment "$EXISTING" \
+                --body "$(printf '## Lighthouse Score Regression (re-detected)\n\nThe following scores dropped more than 5 points below the 90%% target on **%s**:\n\n%s\n\nRun: %s' "$(date -u '+%Y-%m-%d')" "$ISSUE_BODY" "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID")"
+              echo "Commented on existing issue #$EXISTING"
+            else
+              gh issue create \
+                --title "Lighthouse score regression detected ($(date -u '+%Y-%m-%d'))" \
+                --label "lighthouse" \
+                --body "$(printf '## Lighthouse Score Regression\n\nThe following scores dropped more than 5 points below the 90%% target:\n\n%s\n\n**Run:** %s\n\n_This issue was automatically created by the Lighthouse CI workflow._' "$ISSUE_BODY" "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID")"
+              echo "Created new regression issue"
+            fi
+          else
+            echo "No score regressions detected"
+          fi
 
       - name: Upload Lighthouse results
         uses: actions/upload-artifact@v4
@@ -57,3 +127,9 @@ jobs:
           name: lighthouse-results
           path: .lighthouseci/
           retention-days: 30
+
+      - name: Fail if Lighthouse assertions failed
+        if: steps.lhci.outcome == 'failure'
+        run: |
+          echo "Lighthouse CI reported failures — see uploaded results for details"
+          exit 1
