@@ -1,13 +1,13 @@
 import { anthropic } from "@ai-sdk/anthropic";
 import { google } from "@ai-sdk/google";
 import { openai } from "@ai-sdk/openai";
+import { PromptBuilder } from "@designforge/ai";
 import {
   GENERATION_TIMEOUT_MS,
   MAX_PROMPT_LENGTH,
-  PromptBuilder,
   RATE_LIMIT_MAX,
   RATE_LIMIT_WINDOW_MS,
-} from "@designforge/ai";
+} from "../../../lib/ai-config";
 import { streamText } from "ai";
 import { type NextRequest, NextResponse } from "next/server";
 import { corsHeaders, handlePreflight } from "../../../lib/cors";
