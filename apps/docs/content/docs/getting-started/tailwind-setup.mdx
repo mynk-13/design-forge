@@ -1,0 +1,177 @@
+---
+title: "Tailwind Setup"
+description: "Complete guide to configuring Tailwind CSS v3 with the DesignForge plugin, content paths, and dark mode."
+---
+
+DesignForge is built on **Tailwind CSS v3** and ships a plugin that maps all `--df-*` design tokens to Tailwind utility classes. This page covers everything you need to configure Tailwind correctly.
+
+## Requirements
+
+- Tailwind CSS `^3.4.0`
+- `@designforge/themes` installed
+
+## Install
+
+```bash
+npm install @designforge/ui @designforge/themes
+```
+
+## Basic Configuration
+
+The minimum viable `tailwind.config.ts`:
+
+```ts title="tailwind.config.ts"
+import type { Config } from "tailwindcss";
+import { tailwindPlugin } from "@designforge/themes";
+
+const config: Config = {
+  content: [
+    "./app/**/*.{ts,tsx}",
+    "./components/**/*.{ts,tsx}",
+    "./node_modules/@designforge/ui/dist/**/*.js",
+  ],
+  darkMode: "class",
+  plugins: [tailwindPlugin],
+};
+
+export default config;
+```
+
+The three key changes from a default Tailwind config:
+
+1. **`content` array** — includes the DesignForge `dist/` output so Tailwind can scan class names used inside the components and not purge them.
+2. **`darkMode: "class"`** — DesignForge dark mode is toggled by adding the `.dark` class to `<html>`. This must be `"class"`, not `"media"`.
+3. **`plugins: [tailwindPlugin]`** — registers all `--df-*` token utilities.
+
+## Content Paths
+
+If your project deviates from the standard Next.js layout, adjust the `content` array accordingly. The critical entry is always the DesignForge dist path:
+
+```ts
+"./node_modules/@designforge/ui/dist/**/*.js"
+```
+
+Without this, Tailwind will purge class names that appear only inside the component library, causing missing styles in production.
+
+### Monorepo Setup
+
+If you are consuming DesignForge inside a Turborepo workspace, point to the package source relative to your workspace root:
+
+```ts
+content: [
+  "./apps/my-app/app/**/*.{ts,tsx}",
+  "./apps/my-app/components/**/*.{ts,tsx}",
+  // Scan the workspace package source directly
+  "../../packages/ui/src/**/*.{ts,tsx}",
+],
+```
+
+## Import the Global Stylesheet
+
+The stylesheet must be imported once at your app root. It injects all CSS custom properties for both themes:
+
+```tsx title="app/layout.tsx"
+import "@designforge/themes/styles.css";
+```
+
+This import must come before any Tailwind imports so that `--df-*` variables are defined before the utility classes reference them.
+
+## Dark Mode Wiring
+
+DesignForge uses the `.dark` class strategy. To connect it to the user's OS preference or a toggle, install `next-themes`:
+
+```bash
+npm install next-themes
+```
+
+Wrap your app in a `ThemeProvider`:
+
+```tsx title="app/providers.tsx"
+"use client";
+
+import { ThemeProvider } from "next-themes";
+
+export function Providers({ children }: { children: React.ReactNode }) {
+  return (
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+      {children}
+    </ThemeProvider>
+  );
+}
+```
+
+```tsx title="app/layout.tsx"
+import "@designforge/themes/styles.css";
+import { Providers } from "./providers";
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <body>
+        <Providers>{children}</Providers>
+      </body>
+    </html>
+  );
+}
+```
+
+`suppressHydrationWarning` is required on `<html>` because `next-themes` adds the `.dark` class server-side and React would otherwise warn about a hydration mismatch.
+
+## Utilities Registered by the Plugin
+
+The plugin maps every `--df-*` token to a standard Tailwind utility. Below is a representative selection:
+
+### Colour Utilities
+
+| CSS Variable | Utilities |
+|---|---|
+| `--df-background` | `bg-background`, `text-background` |
+| `--df-foreground` | `text-foreground`, `bg-foreground` |
+| `--df-primary` | `bg-primary`, `text-primary` |
+| `--df-primary-foreground` | `text-primary-foreground` |
+| `--df-secondary` | `bg-secondary`, `text-secondary` |
+| `--df-muted` | `bg-muted` |
+| `--df-muted-foreground` | `text-muted-foreground` |
+| `--df-accent` | `bg-accent`, `text-accent` |
+| `--df-destructive` | `bg-destructive`, `text-destructive` |
+| `--df-border` | `border-border` |
+| `--df-ring` | `ring-ring` |
+| `--df-card` | `bg-card` |
+| `--df-popover` | `bg-popover` |
+
+### Animation Utilities
+
+| CSS Variable | Utility | Value |
+|---|---|---|
+| `--df-duration-fast` | `duration-fast` | 150ms |
+| `--df-duration-normal` | `duration-normal` | 250ms |
+| `--df-duration-slow` | `duration-slow` | 400ms |
+| `--df-ease-smooth` | `ease-smooth` | cubic-bezier(0.4, 0, 0.2, 1) |
+| `--df-ease-spring` | `ease-spring` | cubic-bezier(0.34, 1.56, 0.64, 1) |
+
+### Shadow Utilities
+
+`shadow-sm` · `shadow-md` · `shadow-lg` · `shadow-xl` · `shadow-2xl` · `shadow-inner` · `shadow-overlay` — all mapped from `--df-shadow-*` tokens.
+
+### Border Radius Utilities
+
+`rounded-sm` · `rounded-md` · `rounded-lg` · `rounded-xl` · `rounded-2xl` · `rounded-full` — all mapped from `--df-radius-*` tokens.
+
+## Verifying the Setup
+
+Add a quick smoke test to your page:
+
+```tsx
+<div className="bg-primary text-primary-foreground rounded-md px-4 py-2 inline-block">
+  DesignForge token working
+</div>
+```
+
+If the background renders in the brand blue, the plugin is active and tokens are resolving correctly.
+
+---
+
+## What's Next
+
+- **[Theming](/docs/getting-started/theming)** — Override CSS variables to customise the colour scheme.
+- **[Components](/docs/button)** — Start building with the component library.

@@ -1,0 +1,216 @@
+---
+title: "Theming"
+description: "Customise DesignForge's colour scheme, dark mode, and design tokens using CSS custom properties."
+---
+
+DesignForge uses **CSS custom properties** (`--df-*`) as its single source of truth for all visual tokens — colours, spacing, radii, shadows, and animation. Customising the theme is a matter of overriding these variables in your own CSS.
+
+## How the Token System Works
+
+When you import `@designforge/themes/styles.css`, it injects two layers of custom properties:
+
+- **`:root`** — light theme defaults
+- **`.dark`** — dark theme overrides (activated by adding `class="dark"` to `<html>`)
+
+All component styles reference these variables. Changing the variable value changes every component that uses it — no component-level overrides needed.
+
+## Overriding the Default Theme
+
+Create a CSS file in your project (e.g. `app/theme.css`) and override any `--df-*` variable:
+
+```css title="app/theme.css"
+:root {
+  /* Brand primary — change to your own hue */
+  --df-primary: 262 83% 58%;           /* purple */
+  --df-primary-foreground: 0 0% 100%;
+
+  /* Adjust the base border radius */
+  --df-radius-md: 0.5rem;
+  --df-radius-lg: 0.75rem;
+}
+
+.dark {
+  --df-primary: 263 90% 70%;
+  --df-primary-foreground: 0 0% 100%;
+}
+```
+
+Import this file after the DesignForge stylesheet in your root layout:
+
+```tsx title="app/layout.tsx"
+import "@designforge/themes/styles.css";
+import "./theme.css";           // your overrides come second
+```
+
+Because the cascade applies last-wins, your overrides take precedence over the defaults.
+
+## Colour Token Format
+
+All colour tokens use **HSL channel values** (hue, saturation, lightness) — no `hsl()` wrapper. This allows Tailwind's opacity modifier syntax (`bg-primary/50`) to work correctly:
+
+```css
+/* Correct — channel values only */
+--df-primary: 221 83% 53%;
+
+/* Incorrect — Tailwind opacity modifiers won't work */
+--df-primary: hsl(221, 83%, 53%);
+```
+
+## Full Token Reference
+
+### Colour Tokens
+
+| Token | Default (light) | Description |
+|---|---|---|
+| `--df-background` | `0 0% 100%` | Page background |
+| `--df-foreground` | `222 47% 11%` | Default text |
+| `--df-primary` | `221 83% 53%` | Brand primary colour |
+| `--df-primary-foreground` | `210 40% 98%` | Text on primary |
+| `--df-secondary` | `210 40% 96%` | Secondary surface |
+| `--df-secondary-foreground` | `222 47% 11%` | Text on secondary |
+| `--df-muted` | `210 40% 96%` | Muted background |
+| `--df-muted-foreground` | `215 16% 47%` | Muted / placeholder text |
+| `--df-accent` | `210 40% 96%` | Hover / accent highlight |
+| `--df-accent-foreground` | `222 47% 11%` | Text on accent |
+| `--df-destructive` | `0 84% 60%` | Error / danger |
+| `--df-destructive-foreground` | `210 40% 98%` | Text on destructive |
+| `--df-border` | `214 32% 91%` | Default border |
+| `--df-input` | `214 32% 91%` | Form input border |
+| `--df-ring` | `221 83% 53%` | Focus ring |
+| `--df-card` | `0 0% 100%` | Card surface |
+| `--df-card-foreground` | `222 47% 11%` | Text on card |
+| `--df-popover` | `0 0% 100%` | Popover / dropdown surface |
+| `--df-popover-foreground` | `222 47% 11%` | Text on popover |
+
+### Border Radius Tokens
+
+| Token | Default |
+|---|---|
+| `--df-radius-none` | `0` |
+| `--df-radius-sm` | `0.125rem` |
+| `--df-radius-md` | `0.375rem` |
+| `--df-radius-lg` | `0.5rem` |
+| `--df-radius-xl` | `0.75rem` |
+| `--df-radius-2xl` | `1rem` |
+| `--df-radius-3xl` | `1.5rem` |
+| `--df-radius-full` | `9999px` |
+
+### Shadow Tokens
+
+| Token | Utility |
+|---|---|
+| `--df-shadow-sm` | `shadow-sm` |
+| `--df-shadow-md` | `shadow-md` |
+| `--df-shadow-lg` | `shadow-lg` |
+| `--df-shadow-xl` | `shadow-xl` |
+| `--df-shadow-2xl` | `shadow-2xl` |
+| `--df-shadow-inner` | `shadow-inner` |
+| `--df-shadow-overlay` | `shadow-overlay` |
+
+### Animation Tokens
+
+| Token | Utility | Default |
+|---|---|---|
+| `--df-duration-instant` | `duration-instant` | `50ms` |
+| `--df-duration-fast` | `duration-fast` | `150ms` |
+| `--df-duration-normal` | `duration-normal` | `250ms` |
+| `--df-duration-slow` | `duration-slow` | `400ms` |
+| `--df-duration-slower` | `duration-slower` | `700ms` |
+| `--df-ease-linear` | `ease-linear` | `linear` |
+| `--df-ease-smooth` | `ease-smooth` | `cubic-bezier(0.4, 0, 0.2, 1)` |
+| `--df-ease-in` | `ease-in` | `cubic-bezier(0.4, 0, 1, 1)` |
+| `--df-ease-out` | `ease-out` | `cubic-bezier(0, 0, 0.2, 1)` |
+| `--df-ease-spring` | `ease-spring` | `cubic-bezier(0.34, 1.56, 0.64, 1)` |
+
+## Dark Mode
+
+DesignForge dark mode is toggled by the `.dark` class on `<html>`. The recommended way to manage this in a Next.js app is `next-themes`:
+
+```bash
+npm install next-themes
+```
+
+```tsx title="app/providers.tsx"
+"use client";
+
+import { ThemeProvider } from "next-themes";
+
+export function Providers({ children }: { children: React.ReactNode }) {
+  return (
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+      {children}
+    </ThemeProvider>
+  );
+}
+```
+
+```tsx title="app/layout.tsx"
+import "@designforge/themes/styles.css";
+import { Providers } from "./providers";
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <body>
+        <Providers>{children}</Providers>
+      </body>
+    </html>
+  );
+}
+```
+
+To build a toggle button, use the `useTheme` hook from `next-themes`:
+
+```tsx
+"use client";
+
+import { useTheme } from "next-themes";
+import { Button } from "@designforge/ui";
+import { Sun, Moon } from "@designforge/icons";
+
+export function ThemeToggle() {
+  const { theme, setTheme } = useTheme();
+
+  return (
+    <Button
+      variant="ghost"
+      size="icon"
+      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+      aria-label="Toggle theme"
+    >
+      {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
+    </Button>
+  );
+}
+```
+
+## Creating a Custom Theme
+
+For a fully branded theme, override all primary colour tokens. Here is an example green theme:
+
+```css title="app/theme.css"
+:root {
+  --df-primary: 142 76% 36%;
+  --df-primary-foreground: 0 0% 100%;
+  --df-ring: 142 76% 36%;
+  --df-accent: 142 76% 95%;
+  --df-accent-foreground: 142 76% 20%;
+}
+
+.dark {
+  --df-primary: 142 70% 50%;
+  --df-primary-foreground: 0 0% 5%;
+  --df-ring: 142 70% 50%;
+  --df-accent: 142 30% 15%;
+  --df-accent-foreground: 142 70% 80%;
+}
+```
+
+Only override the tokens you need — all others fall back to DesignForge defaults automatically.
+
+---
+
+## What's Next
+
+- **[Tailwind Setup](/docs/getting-started/tailwind-setup)** — Plugin configuration and content paths.
+- **[Components](/docs/button)** — Build UIs with the component library.

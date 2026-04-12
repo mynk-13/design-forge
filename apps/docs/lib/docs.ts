@@ -16,9 +16,24 @@ export type Doc = {
   content: string;
 };
 
+function getMdxFiles(dir: string, base = ""): string[] {
+  if (!fs.existsSync(dir)) return [];
+  const entries = fs.readdirSync(dir, { withFileTypes: true });
+  const files: string[] = [];
+  for (const entry of entries) {
+    const relative = base ? `${base}/${entry.name}` : entry.name;
+    if (entry.isDirectory()) {
+      files.push(...getMdxFiles(path.join(dir, entry.name), relative));
+    } else if (entry.name.endsWith(".mdx")) {
+      files.push(relative);
+    }
+  }
+  return files;
+}
+
 export function getAllDocs(): Pick<Doc, "slug" | "meta">[] {
   if (!fs.existsSync(DOCS_DIR)) return [];
-  const files = fs.readdirSync(DOCS_DIR).filter((file) => file.endsWith(".mdx"));
+  const files = getMdxFiles(DOCS_DIR);
 
   return files.map((file) => {
     const slug = file.replace(/\.mdx$/, "");

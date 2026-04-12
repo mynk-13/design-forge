@@ -1,0 +1,110 @@
+---
+title: "Quick Start"
+description: "Get a DesignForge component rendering in your Next.js app in under five minutes."
+---
+
+This guide takes you from zero to a working DesignForge setup in a fresh Next.js 15 project. If you already have an existing app, skip to Step 2.
+
+## Step 1 — Create a Next.js App
+
+```bash
+npx create-next-app@latest my-app --typescript --tailwind --app
+cd my-app
+```
+
+## Step 2 — Install DesignForge
+
+Install the component library and the theme package. The icons package is optional but recommended.
+
+```bash
+npm install @designforge/ui @designforge/themes @designforge/icons
+```
+
+## Step 3 — Configure Tailwind
+
+Open `tailwind.config.ts` and register the DesignForge plugin. It injects all `--df-*` CSS custom properties and maps them to Tailwind utility classes.
+
+```ts title="tailwind.config.ts"
+import type { Config } from "tailwindcss";
+import { tailwindPlugin } from "@designforge/themes";
+
+const config: Config = {
+  content: [
+    "./app/**/*.{ts,tsx}",
+    "./components/**/*.{ts,tsx}",
+    // Include DesignForge dist so Tailwind picks up class names used internally
+    "./node_modules/@designforge/ui/dist/**/*.js",
+  ],
+  darkMode: "class",
+  plugins: [tailwindPlugin],
+};
+
+export default config;
+```
+
+## Step 4 — Import the Global Stylesheet
+
+Add the DesignForge stylesheet to your root layout. It provides the base CSS custom properties for both light and dark themes.
+
+```tsx title="app/layout.tsx"
+import "@designforge/themes/styles.css";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "My App",
+};
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="en">
+      <body>{children}</body>
+    </html>
+  );
+}
+```
+
+## Step 5 — Use a Component
+
+Import and render any component from `@designforge/ui`:
+
+```tsx title="app/page.tsx"
+import { Button, Card, Badge } from "@designforge/ui";
+
+export default function Page() {
+  return (
+    <main className="flex min-h-screen items-center justify-center p-8">
+      <Card className="max-w-sm w-full p-6 flex flex-col gap-4">
+        <div className="flex items-center justify-between">
+          <h1 className="text-xl font-semibold">Welcome</h1>
+          <Badge variant="success">Live</Badge>
+        </div>
+        <p className="text-muted-foreground text-sm">
+          DesignForge is up and running.
+        </p>
+        <Button>Get started</Button>
+      </Card>
+    </main>
+  );
+}
+```
+
+## Step 6 — Run the Dev Server
+
+```bash
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000). You should see a card with a button.
+
+---
+
+## What's Next
+
+- **[Tailwind Setup](/docs/getting-started/tailwind-setup)** — Full plugin configuration, content paths, and dark mode wiring.
+- **[Theming](/docs/getting-started/theming)** — Override CSS variables to create a custom colour scheme.
+- **[Components](/docs/button)** — Browse the full component library.
+- **[AI Generator](/docs/generator)** — Generate component code from a text prompt.

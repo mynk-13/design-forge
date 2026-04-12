@@ -46,6 +46,9 @@ export function DocsSidebar() {
         <div className="flex flex-col gap-0.5">
           <SidebarLink href="/docs" label="Introduction" />
           <SidebarLink href="/docs/installation" label="Installation" />
+          <SidebarLink href="/docs/getting-started/quick-start" label="Quick Start" />
+          <SidebarLink href="/docs/getting-started/tailwind-setup" label="Tailwind Setup" />
+          <SidebarLink href="/docs/getting-started/theming" label="Theming" />
         </div>
       </div>
 
