@@ -1,6 +1,6 @@
 # DesignForge
 
-**A portfolio-grade, open-source React component design system.**
+**An open-source React component design system built for production.**
 33 accessible components · AI-powered code generator · Monaco playground · Full dark mode · Fully typed.
 
 <div align="center">
@@ -80,7 +80,7 @@ export default function Example() {
 }
 ```
 
-For full setup instructions see the [Quick Start guide](https://designforge-docs.vercel.app/docs/getting-started/quick-start).
+For full setup instructions see the [Installation guide](https://designforge-docs.vercel.app/docs/installation).
 
 ## Component Library
 
