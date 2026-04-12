@@ -27,19 +27,19 @@ export default function MarketingPage() {
             </Button>
           </Link>
           <Link href="/generator">
-            <Button size="lg" variant="outline" className="h-12 px-8 gap-2 w-full sm:w-auto bg-background">
+            <Button size="lg" variant="outline" className="h-12 px-8 gap-2 w-full sm:w-auto bg-background text-foreground">
               <SparklesIcon className="h-4 w-4" />
               Launch AI Generator
             </Button>
           </Link>
           <Link href="/playground">
-            <Button size="lg" variant="outline" className="h-12 px-8 gap-2 w-full sm:w-auto">
+            <Button size="lg" variant="outline" className="h-12 px-8 gap-2 w-full sm:w-auto text-foreground">
               <PlayIcon className="h-4 w-4" />
               Playground
             </Button>
           </Link>
           <a href={process.env.NEXT_PUBLIC_STORYBOOK_URL ?? "https://designforge-storybook.vercel.app"} target="_blank" rel="noreferrer">
-            <Button size="lg" variant="ghost" className="h-12 px-8 gap-2 w-full sm:w-auto border border-dashed">
+            <Button size="lg" variant="ghost" className="h-12 px-8 gap-2 w-full sm:w-auto border border-dashed text-foreground">
               <SparklesIcon className="h-4 w-4 text-[#ff4785]" />
               Storybook
             </Button>
