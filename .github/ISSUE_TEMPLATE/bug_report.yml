@@ -1,0 +1,105 @@
+name: Bug Report
+description: Report a reproducible bug in DesignForge
+title: "bug: "
+labels: ["bug", "needs-triage"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for taking the time to report a bug. Please fill in as much detail as possible so the issue can be reproduced and fixed quickly.
+
+        > **Security vulnerability?** Do not open a public issue. Follow the [Security Policy](../SECURITY.md) instead.
+
+  - type: dropdown
+    id: package
+    attributes:
+      label: Affected Package
+      description: Which package or app does this bug affect?
+      multiple: true
+      options:
+        - "@designforge/ui"
+        - "@designforge/themes"
+        - "@designforge/hooks"
+        - "@designforge/icons"
+        - "@designforge/ai"
+        - "docs site (designforge-docs.vercel.app)"
+        - "storybook (designforge-storybook.vercel.app)"
+        - "other / unsure"
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Package Version
+      description: Run `pnpm list @designforge/<package>` and paste the version here.
+      placeholder: "e.g. 1.0.0"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: A clear and concise description of what the bug is.
+      placeholder: "When I do X, Y happens instead of Z."
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal Reproduction
+      description: |
+        Provide a minimal code snippet or a link to a CodeSandbox / StackBlitz that reproduces the issue.
+        Issues without a reproduction may be closed.
+      placeholder: |
+        ```tsx
+        import { Button } from "@designforge/ui";
+
+        export default function Example() {
+          return <Button variant="destructive">Delete</Button>;
+        }
+        ```
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behaviour
+      description: What did you expect to happen?
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behaviour
+      description: What actually happened? Include any error messages or console output.
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Fill in your environment details.
+      value: |
+        - OS:
+        - Browser (if applicable):
+        - Node.js version:
+        - React version:
+        - Next.js version (if applicable):
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Any other context — screenshots, stack traces, related issues — goes here.
+    validations:
+      required: false
