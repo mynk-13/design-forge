@@ -80,7 +80,7 @@ export default function Example() {
 }
 ```
 
-For full setup instructions see the [Installation guide](https://designforge-docs.vercel.app/docs/installation).
+For full setup instructions see the [Quick Start guide](https://designforge-docs.vercel.app/docs/getting-started/quick-start).
 
 ## Component Library
 
