@@ -27,18 +27,22 @@ export function SiteHeader() {
           >
             Docs
           </Link>
-          <Link
+          <a
             href="/generator"
+            target="_blank"
+            rel="noreferrer"
             className="transition-colors hover:text-[#11181C] dark:hover:text-[#EDEDED]"
           >
             AI Generator
-          </Link>
-          <Link
+          </a>
+          <a
             href="/playground"
+            target="_blank"
+            rel="noreferrer"
             className="transition-colors hover:text-[#11181C] dark:hover:text-[#EDEDED]"
           >
             Playground
-          </Link>
+          </a>
           <a
             href={storybookUrl}
             target="_blank"
