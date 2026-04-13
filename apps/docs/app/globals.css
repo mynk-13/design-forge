@@ -118,6 +118,18 @@
 .docs-content a:hover {
   text-decoration-color: currentColor;
 }
+/* Button-style links inside not-prose blocks must not inherit the docs link colour */
+.docs-content .not-prose a {
+  color: inherit;
+  text-decoration: none;
+  text-decoration-color: transparent;
+}
+.dark .docs-content .not-prose a {
+  color: inherit;
+}
+.docs-content .not-prose a:hover {
+  text-decoration-color: transparent;
+}
 
 .docs-content strong {
   color: #11181C;
