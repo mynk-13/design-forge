@@ -466,6 +466,13 @@ const EXAMPLE_PROMPTS = [
 // These make the editor treat all @designforge imports as valid with proper
 // component types, eliminating TS2307 "Cannot find module" squiggles.
 const DESIGNFORGE_TYPE_STUBS = `
+declare module "react/jsx-runtime" {
+  import type * as React from "react";
+  export const jsx: any;
+  export const jsxs: any;
+  export const Fragment: any;
+}
+
 declare module "react" {
   export = React;
   export as namespace React;

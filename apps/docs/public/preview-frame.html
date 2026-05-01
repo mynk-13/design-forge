@@ -136,11 +136,12 @@
           SelectValue:mk('span','pointer-events-none'),
           SelectContent:mk('div','relative z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0'),
           SelectItem:mk('div','relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-2 pr-8 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50'),
-          Popover: ({ children, ...p }) => {
-            const [open, setOpen] = R.useState(false);
-            const toggle = () => setOpen(v => !v);
+          Popover: ({ children, open: openProp, onOpenChange, ...p }) => {
+            const [internalOpen, setInternalOpen] = R.useState(false);
+            const isOpen = openProp !== undefined ? openProp : internalOpen;
+            const toggle = () => { const next = !isOpen; setInternalOpen(next); onOpenChange?.(next); };
             return h('div', { className: 'relative inline-block', ...p },
-              R.Children.map(children, c => c && R.cloneElement(c, { _popOpen: open, _popToggle: toggle })));
+              R.Children.map(children, c => c && R.cloneElement(c, { _popOpen: isOpen, _popToggle: toggle })));
           },
           PopoverTrigger: ({ children, asChild, _popOpen, _popToggle, className, ...p }) => {
             const handler = { onClick: _popToggle, 'aria-expanded': _popOpen };
@@ -148,7 +149,7 @@
               return R.cloneElement(children, { ...handler, onClick: e => { children.props.onClick?.(e); _popToggle?.(); } });
             return h('button', { type:'button', className, ...p, ...handler }, children);
           },
-          PopoverContent: ({ children, _popOpen, className, ...p }) =>
+          PopoverContent: ({ children, _popOpen, _popToggle, className, ...p }) =>
             _popOpen ? h('div', { className: ['absolute top-full mt-1 z-50 w-72 rounded-md border bg-popover p-4 text-popover-foreground shadow-md outline-none', className].filter(Boolean).join(' '), ...p }, children) : null,
           Dialog: ({ children, open: openProp, onOpenChange, defaultOpen = false, ...p }) => {
             const [open, setOpen] = R.useState(defaultOpen);
