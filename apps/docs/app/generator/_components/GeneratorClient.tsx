@@ -32,6 +32,7 @@ interface ChatMessage {
   id: string;
   role: "user" | "assistant";
   content: string;
+  done?: boolean;
 }
 
 export function GeneratorClient() {
@@ -110,6 +111,11 @@ export function GeneratorClient() {
           ),
         );
       }
+
+      // Mark the assistant message as done before extracting code
+      setMessages((prev) =>
+        prev.map((m) => (m.id === assistantId ? { ...m, done: true } : m)),
+      );
 
       // Extract code block from the completed response
       const match = accumulated.match(/```(?:tsx?|typescript)\r?\n([\s\S]*?)```/i);
@@ -280,7 +286,7 @@ export function GeneratorClient() {
                   }`}
                 >
                   {m.role === "assistant"
-                    ? m.content
+                    ? m.done
                       ? "Component generated ✓"
                       : <span className="flex items-center gap-1"><Loader2Icon size={10} className="animate-spin" /> Generating…</span>
                     : m.content}
@@ -451,9 +457,9 @@ export function GeneratorClient() {
 }
 
 const EXAMPLE_PROMPTS = [
-  "A search bar with debounced input, loading spinner, and clear button",
-  "A pricing card with tier name, price, feature list, and CTA button",
-  "A notification bell with unread count badge and dropdown list",
+  "A search bar with a debounced input, animated loading spinner while typing, and a clear (×) button — all state hardcoded inside the component",
+  "A 'Pro' pricing card showing $29/month, a hardcoded 5-item feature checklist with check icons, a 'Most Popular' badge, and a full-width CTA button",
+  "A notification bell button with a red badge showing 3 unread; clicking it toggles a dropdown listing 3 hardcoded notifications each with a title, description, and timestamp",
 ];
 
 // ── @designforge/* type stubs injected into Monaco's TypeScript service ───────

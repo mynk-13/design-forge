@@ -36,7 +36,10 @@ export function ValidationBadge({ code }: Props) {
       body: JSON.stringify({ code }),
       signal: controller.signal,
     })
-      .then((r) => r.json() as Promise<{ errors: { message: string }[]; warnings: { message: string }[]; summary: string }>)
+      .then((r) => {
+        if (!r.ok) throw new Error(`Validation service error (${r.status})`);
+        return r.json() as Promise<{ errors: { message: string }[]; warnings: { message: string }[]; summary: string }>;
+      })
       .then((data) => {
         clearTimeout(timer);
         const eslintResult = pipeline.eslintResult(

@@ -57,6 +57,7 @@ a single, fully self-contained React component using the DesignForge component l
 - Do NOT add \`"use client"\` — the generator sandbox handles that.
 - Do NOT use \`React.forwardRef\` — use React 19 ref-as-prop pattern.
 - The default export must be a named function (not an arrow function assigned to const).
+- The component MUST render correctly when called with **zero props**. Define all sample data (arrays, strings, numbers, counts) as \`const\` values inside the function body — never as required props. The preview sandbox renders \`<YourComponent />\` with no props passed.
 `.trim();
   }
 
