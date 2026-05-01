@@ -58,6 +58,7 @@ a single, fully self-contained React component using the DesignForge component l
 - Do NOT use \`React.forwardRef\` — use React 19 ref-as-prop pattern.
 - The default export must be a named function (not an arrow function assigned to const).
 - The component MUST render correctly when called with **zero props**. Define all sample data (arrays, strings, numbers, counts) as \`const\` values inside the function body — never as required props. The preview sandbox renders \`<YourComponent />\` with no props passed.
+- Do NOT use the \`asChild\` prop on any component. The preview sandbox does not support Radix UI's slot pattern. Use components directly — e.g. \`<DropdownMenuTrigger>\` wrapping a \`<Button>\` is WRONG; write \`<DropdownMenuTrigger className="...">\` instead.
 `.trim();
   }
 

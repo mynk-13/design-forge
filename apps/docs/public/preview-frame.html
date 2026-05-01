@@ -136,20 +136,67 @@
           SelectValue:mk('span','pointer-events-none'),
           SelectContent:mk('div','relative z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0'),
           SelectItem:mk('div','relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-2 pr-8 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50'),
-          Popover:mk('div','relative inline-block'),
-          PopoverTrigger: Button,
-          PopoverContent:mk('div','z-50 w-72 rounded-md border bg-popover p-4 text-popover-foreground shadow-md outline-none'),
-          Dialog:mk('div',''),
-          DialogTrigger: Button,
-          DialogContent:mk('div','fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 sm:rounded-lg'),
+          Popover: ({ children, ...p }) => {
+            const [open, setOpen] = R.useState(false);
+            const toggle = () => setOpen(v => !v);
+            return h('div', { className: 'relative inline-block', ...p },
+              R.Children.map(children, c => c && R.cloneElement(c, { _popOpen: open, _popToggle: toggle })));
+          },
+          PopoverTrigger: ({ children, asChild, _popOpen, _popToggle, className, ...p }) => {
+            const handler = { onClick: _popToggle, 'aria-expanded': _popOpen };
+            if (asChild && R.isValidElement(children))
+              return R.cloneElement(children, { ...handler, onClick: e => { children.props.onClick?.(e); _popToggle?.(); } });
+            return h('button', { type:'button', className, ...p, ...handler }, children);
+          },
+          PopoverContent: ({ children, _popOpen, className, ...p }) =>
+            _popOpen ? h('div', { className: ['absolute top-full mt-1 z-50 w-72 rounded-md border bg-popover p-4 text-popover-foreground shadow-md outline-none', className].filter(Boolean).join(' '), ...p }, children) : null,
+          Dialog: ({ children, open: openProp, onOpenChange, defaultOpen = false, ...p }) => {
+            const [open, setOpen] = R.useState(defaultOpen);
+            const isOpen = openProp !== undefined ? openProp : open;
+            const close = () => { setOpen(false); onOpenChange?.(false); };
+            const doOpen = () => { setOpen(true); onOpenChange?.(true); };
+            return h('div', p,
+              R.Children.map(children, c => c && R.cloneElement(c, { _dlgOpen: isOpen, _dlgOpen2: doOpen, _dlgClose: close })));
+          },
+          DialogTrigger: ({ children, asChild, _dlgOpen2, ...p }) => {
+            const handler = { onClick: _dlgOpen2 };
+            if (asChild && R.isValidElement(children))
+              return R.cloneElement(children, { onClick: e => { children.props.onClick?.(e); _dlgOpen2?.(); } });
+            return h('button', { type:'button', ...p, ...handler }, children);
+          },
+          DialogContent: ({ children, _dlgOpen, _dlgClose, className, ...p }) =>
+            _dlgOpen ? h('div', { className: 'fixed inset-0 z-50 flex items-center justify-center bg-black/50' },
+              h('div', { className: ['relative grid w-full max-w-lg gap-4 border bg-background p-6 shadow-lg rounded-lg', className].filter(Boolean).join(' '), ...p }, children)) : null,
           DialogHeader:mk('div','flex flex-col space-y-1.5 text-center sm:text-left'),
           DialogTitle:mk('h2','text-lg font-semibold leading-none tracking-tight'),
           DialogDescription:mk('p','text-sm text-muted-foreground'),
           DialogFooter:mk('div','flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2'),
-          DropdownMenu:mk('div','relative inline-block'),
-          DropdownMenuTrigger: Button,
-          DropdownMenuContent:mk('div','z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md'),
-          DropdownMenuItem:mk('div','relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground'),
+          DialogClose: ({ children, _dlgClose, asChild, ...p }) => {
+            if (asChild && R.isValidElement(children))
+              return R.cloneElement(children, { onClick: e => { children.props.onClick?.(e); _dlgClose?.(); } });
+            return h('button', { type:'button', ...p, onClick: _dlgClose }, children);
+          },
+          DropdownMenu: ({ children, ...p }) => {
+            const [open, setOpen] = R.useState(false);
+            const toggle = () => setOpen(v => !v);
+            const close = () => setOpen(false);
+            return h('div', { className: 'relative inline-block', ...p },
+              R.Children.map(children, c => c && R.cloneElement(c, { _ddOpen: open, _ddToggle: toggle, _ddClose: close })));
+          },
+          DropdownMenuTrigger: ({ children, asChild, _ddOpen, _ddToggle, className, ...p }) => {
+            const handler = { onClick: _ddToggle, 'aria-expanded': _ddOpen, 'aria-haspopup': 'menu' };
+            if (asChild && R.isValidElement(children))
+              return R.cloneElement(children, { ...handler, onClick: e => { children.props.onClick?.(e); _ddToggle?.(); } });
+            return h('button', { type:'button', className, ...p, ...handler }, children);
+          },
+          DropdownMenuContent: ({ children, _ddOpen, _ddClose, className, align = 'start', ...p }) => {
+            if (!_ddOpen) return null;
+            const alignClass = align === 'end' ? 'right-0' : align === 'center' ? 'left-1/2 -translate-x-1/2' : 'left-0';
+            return h('div', { role:'menu', className: ['absolute top-full mt-1 z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md', alignClass, className].filter(Boolean).join(' '), ...p }, children);
+          },
+          DropdownMenuItem: ({ children, onClick, _ddClose, className, ...p }) =>
+            h('div', { role:'menuitem', tabIndex: -1, onClick: e => { onClick?.(e); _ddClose?.(); },
+              className: ['relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground', className].filter(Boolean).join(' '), ...p }, children),
           DropdownMenuLabel:mk('div','px-2 py-1.5 text-sm font-semibold'),
           DropdownMenuSeparator: Separator,
           Accordion:mk('div','w-full'),

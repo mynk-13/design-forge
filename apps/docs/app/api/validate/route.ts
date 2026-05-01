@@ -58,14 +58,27 @@ export async function POST(req: NextRequest): Promise<NextResponse<ValidateRespo
   }
 
   try {
-    // Dynamically import ESLint (Node.js-only — can't be imported at module level on Edge)
-    const { ESLint } = await import("eslint");
+    // Dynamically import ESLint + TypeScript parser (Node.js-only — can't run on Edge)
+    const [{ ESLint }, tseslint] = await Promise.all([
+      import("eslint"),
+      import("typescript-eslint"),
+    ]);
 
     const eslint = new ESLint({
       overrideConfigFile: true,
       overrideConfig: [
         {
           files: ["**/*.{ts,tsx}"],
+          languageOptions: {
+            // typescript-eslint parser handles TSX + modern ECMAScript
+            parser: tseslint.parser as any,
+            parserOptions: {
+              ecmaFeatures: { jsx: true },
+              ecmaVersion: 2022,
+              project: false, // skip project-wide type checking — we only lint a string
+            },
+            sourceType: "module",
+          },
           rules: {
             // Core quality rules — plugin-specific rules (react-hooks, jsx-a11y)
             // are enforced by the system prompt instead.
