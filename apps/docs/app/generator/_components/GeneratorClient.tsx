@@ -416,6 +416,7 @@ export function GeneratorClient() {
               height="100%"
               language="typescript"
               theme="vs-dark"
+              path="file:///GeneratedComponent.tsx"
               value={code}
               onChange={(v) => setCode(v ?? "")}
               beforeMount={handleEditorBeforeMount}
