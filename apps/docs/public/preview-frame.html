@@ -39,8 +39,8 @@
 
   <style>
     *, *::before, *::after { box-sizing: border-box; }
-    body { margin: 0; padding: 20px; font-family: Inter, system-ui, sans-serif; background: white; }
-    #root { width: 100%; }
+    body { margin: 0; padding: 40px 32px; font-family: Inter, system-ui, sans-serif; background: hsl(0 0% 98%); min-height: 100vh; }
+    #root { display: flex; justify-content: center; align-items: flex-start; width: 100%; }
     #error-panel {
       display: none; background: #fef2f2; border: 1px solid #fecaca;
       border-radius: 8px; padding: 12px 16px; color: #b91c1c;
@@ -192,7 +192,7 @@
             const [internalOpen, setInternalOpen] = R.useState(false);
             const isOpen = openProp !== undefined ? openProp : internalOpen;
             const toggle = () => { const next = !isOpen; setInternalOpen(next); onOpenChange?.(next); };
-            return h('div', { className: 'relative inline-block', ...p },
+            return h('div', { className: 'relative', style: { display: 'inline-block' }, ...p },
               R.Children.map(children, c => c && R.cloneElement(c, { _popOpen: isOpen, _popToggle: toggle })));
           },
           PopoverTrigger: ({ children, asChild, _popOpen, _popToggle, className, ...p }) => {
